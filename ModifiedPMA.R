@@ -189,13 +189,13 @@ myUpdateW <- function(xlist, i, K, sumabsthis, ws, type="standard", ws.final,
   
   tots0 <- sapply(1:length(CCcoef), function(x){
     pairx <- pair_CC[ , x]
+    Xi <- xlist[[i]]
     
     if(pairx[1] != i & pairx[[2]] != i){
-      y <- 0
+      y <- rep(0, ncol(Xi))
     }else{
       if(pairx[1] == i){j <- pairx[2]}
       if(pairx[2] == i){j <- pairx[1]}
-      Xi <- xlist[[i]]
       Xj <- xlist[[j]]
       
       # diagmat is the diagonal correlation matrix calculated using previous 
