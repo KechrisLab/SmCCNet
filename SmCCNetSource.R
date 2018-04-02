@@ -8,7 +8,6 @@
 ################################################################################
 
 library(pbapply)
-library(Matrix)
 library(igraph)
 
 
@@ -113,13 +112,13 @@ computeEdgeWeightMatrix <- function(W){
   #   averaged. 
   
   if(is.null(dim(W))){
-    Abar <- Matrix(abs(W) %o% abs(W), sparse = TRUE)
+    Abar <- abs(W) %o% abs(W)
   }else{
     b <- nrow(W)
-    Abar <- Matrix(0, nrow = b, ncol = b)
+    Abar <- matrix(0, nrow = b, ncol = b)
     for(ind in 1:ncol(W)){
       w <- abs(W[ , ind])
-      A <- Matrix(w %o% w, sparse = TRUE)
+      A <- w %o% w
       Abar <- Abar + A
     }
   }
