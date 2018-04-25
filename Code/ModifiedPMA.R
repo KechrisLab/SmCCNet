@@ -9,6 +9,7 @@
 # Note: The phenotype input is assumed to be continuous. 
 #
 ################################################################################
+
 library(PMA)
 
 myMultiCCA <- function(xlist, penalty=NULL, ws=NULL, niter=25, 
