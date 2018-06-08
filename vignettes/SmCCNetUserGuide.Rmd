@@ -1,0 +1,471 @@
+---
+title: "Reconstructing phenotype-specific multi-omics networks with SmCCNet"
+shorttitle: "SmCCNet"
+author:
+- name: W.Jenny Shi
+  affiliation: 
+  - &id University of Colorado Denver|Anschutz Medical Campus
+  email: wjennyshi@gmail.com
+- name: Laura Saba
+  affiliation: *id
+- name: Katerina Kechris
+  affiliation: *id
+date: "June 4, 2018"
+# package: SmCCNet
+abstract: >
+    Sparse multiple canonical correlation network analysis (SmCCNet) is a machine learning technique for integrating multiple omics data on the same subjects, along with a quantitative phenotype of interest, and reconstructing multi-omics networks that are specific to the phenotype. While the current version integrates two omics data types in addition to a phenotype, the framework can be easily generalized to more than two omics data types and multiple quantitative phenotypes. In this document, we illustrate a standard workflow of SmCCNet with a synthetic miRNA, mRNA expression dataset.
+vignette: >
+    %\VignetteIndexEntry{Reconstructing phenotype-specific multi-omics networks with SmCCNet}
+    %\VignetteKeywords{Multi-omics Integration}
+    %\VignettePackage{SmCCNet}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{UTF-8}  
+# # bibliography: references.bib
+# references:
+# - id: shi2018unsupervised
+#   title: Unsupervised  discovery of phenotype specific multi-omics networks
+#   author:
+#   - family: Shi
+#     given: W. Jenny
+#   - family: Zhuang
+#     given: Yonghua
+#   - family: Russell
+#     given: Pamela H.
+#   - family: Hobbs
+#     given: Brian D.
+#   - family: Parker
+#     given: Margaret M.
+#   - family: Castaldi
+#     given: Peter J.
+#   - family: Rudra
+#     given: Pratyaydipta
+#   - family: Vestal
+#     given: Brian
+#   - family: Hersh
+#     given: Craig P.
+#   - family: Saba
+#     given: Laura M.
+#   - family: Kechris
+#     given: Katerina
+#   container-title: Submitted
+#   # volume: 11
+#   # URL: 'http://dx.doi.org/10.1038/nmat3283'
+#   # DOI: 10.1038/nmat3283
+#   # issue: 4
+#   # publisher: Nature Publishing Group
+#   # page: 261-263
+#   # type: article-journal
+#   issued:
+#     year: Submitted
+#     # month: 3
+output: BiocStyle::pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+# SmCCNet overview
+**Note:** if you use SmCCNet in published research, please cite:
+
+> Shi, W.J., Y. Zhuang, P.H. Russell, B.D. Hobbs, M.M. Parker,P.J. Castaldi, P. Rudra, B. Vestal, C.P. Hersh, L.M. Saba, and K. Kechris, “Unsupervised Discovery of PhenotypeSpecific Multi-Omics Networks.” (*Submitted*)
+
+
+
+## Workflow
+
+SmCCNet is a canonical correlation based integration method that reconstructs phenotype-specific multi-omics networks (Shi et al., *submitted*). The algorithm is based on sparse multiple canonical analysis (SmCCA) for two omics data $X_1, X_2$ and a quantitative phenotype $Y$ measured on the same subjects. SmCCA finds the canonical weights $w_1, w_2$ that maximize the (weighted or unweighted) sum of pairwise canonical correlations between $X_1, X_2$ and $Y$, under some constraints (Equation \@ref(eq:smcca2)). In SmCCNet, the sparsity constraint functions $P_s(\cdot), s = 1,2$, are the least absolute shrinkage and selection operators (LASSO). The weighted version corresponds to $a,b,c$ not all equal; the unweighted version corresponds to $a=b=c=1$.
+\begin{eqnarray}
+\begin{split} 
+\label{eq:smcca2}
+& (w_1, w_2)\!  =\! \arg\max_{\tilde w_1, \tilde w_2} \!\left(\!a\tilde w_1^TX_1^TX_2\tilde w_2\! +\! b \tilde w_1^TX_1^TY \!+\! c  \tilde w_2^TX_2^TY\!\right),\\
+&  \hspace{.2in}\text{subject to } \lVert\tilde w_s\rVert^2 = 1, P_s(\tilde w_s) \leq c_s, s = 1,2.			
+\end{split}
+\end{eqnarray}
+
+The sparsity penalties $c_1, c_2$ influence how many features will be included in each subnetwork. With pre-selected sparsity penalties, the SmCCNet algorithm creates a network similarity matrix based on SmCCA canonical weights from repeated subsampled omics data and the phenotype, and then finds multi-omics modules that are relevant to the phenotype. The subsampling scheme analyzes a subset of omics features at a time and enables simultaneous identification of multiple subnetworks with different connection strength. Forming final similarity matrix by aggregating results from subsamples also improves network robustness. The general workflow (Figure \@ref(fig:flowchart)) involves three steps:
+
+- Step I: Determine SmCCA sparsity penalties $c_1, c_2$. The user can select the penalties for omics feature selection based on the study purpose and/or prior knowledge. Alternatively, one can pick sparsity penalties based on a K-fold cross validation (CV) procedure that minimizes the total prediction error (Figure \@ref(fig:CVflow)). The K-fold CV procedure ensures selected penalties to be generalizable to similar independent data sets and prevents over-fitting. 
+- Step II: Randomly subsample omics features without replacement, apply SmCCA with chosen penalties and compute a feature relationship matrix for each subset. Repeat the process many times and define the similarity matrix to be the average of all feature relationship matrices. 
+- Step III: Apply a hierarchical tree cutting to the similarity matrix to find the multi-omics networks. This step simultaneously identifies multiple subnetworks.
+
+
+
+
+
+
+```{r flowchart, fig.cap = "SmCCNet workflow overview. X1 and X2 are two omics data types for the same set of n subjects. Y indicates a quantitative phenotype measure for those n subjects.", echo = FALSE}
+knitr::include_graphics("SmCCNetWorkflow.pdf")
+```
+
+
+
+## SmCCNet package
+
+The SmCCNet package has the following dependencies: 
+
+```{r, echo = FALSE, results = "hide", warning = FALSE}
+suppressPackageStartupMessages({
+    library(PMA)
+    library(pbapply)
+    library(Matrix)
+    library(igraph)
+})
+```
+```{r}
+library(PMA)
+library(pbapply)
+library(Matrix)
+library(igraph)
+```
+
+The SmCCNet package consists of two R scripts:
+```{r source}
+source("../R/ModifiedPMA.R")
+source("../R/SmCCNetSource.R")
+```
+
+
+The current version of the SmCCNet package includes four (external) functions: 
+
+- **getRobustPseudoWeights()**: Compute aggregated (SmCCA) canonical weights. 
+- **getAbar()**: Calculate similarity matrix based on canonical weights.
+- **getMultiOmicsModules()**: Perform hierarchical tree cutting on the similarity matrix and extract clades with multi-omics features.
+- **plotMultiOmicsNetwork()**: Plot (trimmed or full) multi-omics subnetworks. 
+
+More details on above functions can be found in a separate package description document.
+
+
+
+# SmCCNet workflow with a synthetic dataset
+
+## Synthetic dataset
+
+For the illustration we consider a synthetic data set with 500 genes $(X_1)$ and 100 miRNAs $(X_2)$ expression levels measured for 358 subjects, along with a quantitative phenotype $(Y)$.
+
+```{r toy data}
+load("../data/ExampleData.Rdata")
+head(X1[ , 1:6])
+head(X2[ , 1:6])
+head(Y)
+```
+
+Denote the number of features in $X_1 \& X_2$ as $p_1 \& p_2$ respectively, and the number of subjects as $n$.
+```{r p1p2, eval = FALSE}
+p1 <- ncol(X1)
+p2 <- ncol(X2)
+n <- nrow(X1)
+Y.scaled <- scale(Y, center = TRUE, scale = TRUE)
+AbarLabel <- c(colnames(cbind(X1, X2)))
+```
+
+Although SmCCNet does not require normality, it calculates the Pearson correlation between linear combinations of omics features and the phenotype, which assumes finite variances and finite covariance. It is necessary to include a transformation if the data are skewed. The algorithm also requires standardization (center and scale) of the data. 
+<!-- If you are working with high-throughput sequencing (RNASeq) data, we recommend to first address heteroscedasticity. -->
+ 
+
+
+## Step I: Determine optimal sparsity penalties through CV (optional)
+
+To find the optimal sparsity penalties $c_1, c_2$, we apply a K-fold CV on the synthetic data (Figure \@ref(fig:CVflow)). Note that under LASSO constraints, $1\leq c_1\leq\sqrt{p_1s_1}, 1\leq c_2\leq\sqrt{p_2s_2}$, where $p_1,p_2$ denote the number of features in omics data $X_1, X_2$ respectively, and $s_1, s_2$ are the proportions of $X_1, X_2$ features to be sampled every time. The sparse penalties $c_1, c_2$ can be re-parametrized as $0<l_1, l_2\leq1$, such that $c_1 = \max\{1, l_1\sqrt{p_1s_1}\}, c_2 = \max\{1, l_2\sqrt{p_2s_2}\}$. Large penalty values correspond to more features in each subnetwork, while small penalties correspond to fewer features. Here is the list of parameters need to be specified:
+
+- $K$: Number of folds in CV.
+- $CCcoef:$ Optional coefficients, $(a, b, c)$ in Equation \@ref(eq:smcca2), for the weighted SmCCA. If CCcoef = NULL (default), then $a=b=c=1$, and the objective function is the unweighted total sum of all pairwise canonical correlations. 
+- $s_1, s_2$: Proportions of feature subsampling from $X_1, X_2$.
+- $numSubsamp$: Number of subsamples.
+- $P_1P_2$: A penalty option matrix for $X_1, X_2$. Each row of $P_1P_2$ is a pair of penalty options $(l_1, l_2)$.
+
+
+```{r CVflow, fig.cap = "SmCCNet K-fold CV. The best penalty pairs are chosen based on the smallest total prediction error.", echo = FALSE}
+knitr::include_graphics("SmCCNetCV.pdf")
+```
+
+```{r CVpara, eval = FALSE, warning = FALSE}
+K <- 3 # Number of folds in K-fold CV.
+CCcoef <- NULL # Unweighted version of SmCCNet.
+s1 <- 0.7; s2 <- 0.9 # Feature sampling proportions.
+numSubsamp <- 500 # Number of subsamples.
+
+# Create sparsity penalty options.
+pen1 <- seq(.05, .3, by = .05)
+pen2 <- seq(.05, .3, by = .05)
+P1P2 <- expand.grid(pen1, pen2)
+# Map (l1, l2) to (c1, c2).
+c1 <- sqrt(p1 * s1) * P1P2[ , 1]; c1[c1] <- 1
+c2 <- sqrt(p2 * s2) * P1P2[ , 2]; c2[c2 < 1] <- 1
+# Based on prior knowledge we may assume that there are at least as many genes 
+# as miRNAs in each network.
+P1P2 <- P1P2[which(c1>c2), ]
+
+# Set a CV directory.
+CVDir <- "Example3foldCV/" 
+dir.create(CVDir)
+```
+
+### Create test and training data sets. 
+First, we need to split the data ($X_1, X_2, Y$) into test and training sets (Figure \@ref(fig:CVflow), Step I.1). The data sets will be standardized (centered and scaled) by columns. Since data with zero column variance can not be scaled, we require each column variance to be greater than zero for the test and training sets. Valid test and training sets are saved under a CV directory.
+
+```{r make K-fold, eval = FALSE}
+set.seed(12345) # Set random seed.
+
+foldIdx <- split(1:n, sample(1:n, K))
+for(i in 1:K){
+  iIdx <- foldIdx[[i]]
+  x1.train <- scale(X1[-iIdx, ])
+  x2.train <- scale(X2[-iIdx, ])
+  yy.train <- scale(Y[-iIdx, ])
+  x1.test <- scale(X1[iIdx, ])
+  x2.test <- scale(X2[iIdx, ])
+  yy.test <- scale(Y[iIdx, ])
+  
+  # Check if standardized data sets are valid.
+  if(is.na(min(min(x1.train), min(x2.train), min(yy.train), min(x1.test), 
+               min(x2.test), min(yy.test)))){
+    stop("Invalid scaled data. At least one of the data matrices include a 
+         column with zero variance.")
+  }
+  
+  subD <- paste0(CVDir, "CV_", i, "/")
+  dir.create(subD)
+  save(x1.train, x2.train, yy.train, x1.test, x2.test, yy.test,
+       s1, s2, P1P2, p1, p2, numSubsamp, CCcoef,
+       file = paste0(subD, "Data.Rdata"))
+}
+```
+
+### Run K-fold CV
+
+For each of the K-fold we compute the prediction error for each penalty pair option (Figure \@ref(fig:CVflow), Step I.2). For computational efficiency, we recommend utilizing parallel computing for K-fold CV. As an illustration, we will use the R package **parallel**. The R code below can be easily modified into a *for* loop if multiple cords/threads is not available.
+
+```{r run CV, eval = FALSE}
+library(parallel)
+
+cl <- makeCluster(K, type = "FORK") # Create K parallel threads.
+clusterExport(cl = cl, "CVDir") # Pass on variable CVDir to each thread.
+parSapply(cl, 1:K, function(CVidx){
+    # Reload source code files for each thread. 
+    source("../R/ModifiedPMA.R")
+    source("../R/SmCCNetSource.R")
+  
+    # Create a result directory for each thread.
+    subD <- paste0(CVDir, "CV_", CVidx, "/")
+    load(paste0(subD, "Data.Rdata"))
+    dir.create(paste0(subD, "SmCCA/"))
+  
+    RhoTrain <- RhoTest <- DeltaCor <- rep(0, nrow(P1P2))
+    for(idx in 1:nrow(P1P2)){
+        # Consider one pair of sparsity penalties at a time.
+        l1 <- P1P2[idx, 1]
+        l2 <- P1P2[idx, 2]
+        
+        # Run SmCCA on the subsamples (Figure 1, Step II)
+        Ws <- getRobustPseudoWeights(x1.train, x2.train, yy.train, l1, l2, 
+                                     s1, s2, NoTrait = FALSE,
+                                     FilterByTrait = FALSE, Bipartite = TRUE,
+                                     SubsamplingNum = numSubsamp, 
+                                     CCcoef = CCcoef)
+        
+        # Aggregate pseudo-canonical weights from the subsamples.
+        meanW <- rowMeans(Ws)
+        v <- meanW[1:p1]
+        u <- meanW[p1 + 1:p2]
+    
+        # Compute the prediction error for given CV fold and sparsity penalties.
+        if(is.null(CCcoef)){CCcoef <- rep(1, 3)} # Unweighted SmCCA.
+        rho.train <- cor(x1.train %*% v, x2.train %*% u) * CCcoef[1] + 
+            cor(x1.train %*% v, yy.train) * CCcoef[2] + 
+            cor(x2.train %*% u, yy.train) * CCcoef[3]
+        rho.test <- cor(x1.test %*% v, x2.test %*% u) * CCcoef[1] +
+            cor(x1.test %*% v, yy.test) * CCcoef[2] + 
+            cor(x2.test %*% u, yy.test) * CCcoef[3]
+        RhoTrain[idx] <- round(rho.train, digits = 5)
+        RhoTest[idx] <- round(rho.test, digits = 5)
+        DeltaCor[idx] <- abs(rho.train - rho.test)
+    
+        # Periodically save results in a temporary file.
+        if(idx %% 10 == 0){
+            save(P1P2, RhoTrain, RhoTest, DeltaCor, idx, 
+                 file = paste0(subD, "temp.Rdata"))
+        }
+    }
+    
+    # Record prediction errors for given CV fold and all sparsity penalty 
+    # options.
+    DeltaCor.all <- cbind(P1P2, RhoTrain, RhoTest, DeltaCor)
+    colnames(DeltaCor.all) <- c("l1", "l2", "Training CC", "Test CC", 
+                                "CC Pred. Error")
+    write.csv(DeltaCor.all, 
+            file = paste0(subD, "SmCCA/PredictionError.csv"))
+    
+    # Remove the temporary file.
+    system(paste0("rm ", subD, "temp.Rdata"))
+    return(CVidx)
+    })
+
+# Close cluster
+stopCluster(cl)
+```
+
+
+
+### Extract penalty pair with the smallest total prediction error
+
+Finally, we extract the total prediction errors  (Figure \@ref(fig:CVflow), Step I.3) and conclude the best penalty pair as the pair with the smallest error (Figure \@ref(fig:CVflow), Step I.4). 
+
+```{r aggregate error, eval = FALSE}
+# Combine prediction errors from all K folds and compute the total prediction
+# error for each sparsity penalty pair.
+testCC <- predError <- NULL
+for(j in 1:K){
+    resultT <- paste0(CVDir, "CV_", j, "/SmCCA/PredictionError.csv")
+    dCorT <- read.csv(resultT)[ , -1]
+    testCC <- cbind(testCC, abs(dCorT[ , 4]))
+    predError <- cbind(predError, dCorT[ , 5])
+}
+    
+S1 <- rowMeans(testCC)
+S2 <- rowMeans(predError)
+T12 <- dCorT[ , -3]; T12[ , 3] <- S1; T12[ , 4] <- S2
+write.csv(T12, file = paste0(CVDir, "TotalPredictionError.csv"))
+```
+
+
+Table \@ref(tab:errorTable) shows the total prediction error (CC.Pred.Error) for all penalty options. Note that in this example, we are only including 26 optional penalty pairs, and we require there are at least as many genes as miRNAs in each multi-omics module (i.e., $c_1\geq c_2$). The fourth column (Test.CC) records the aggregated pseudo canonical correlations for the test data set.
+
+```{r errorTable, echo = FALSE}
+knitr::kable(read.csv("Example3foldCV/TotalPredictionError.csv"), caption = "Total Prediction Error from a 3-fold CV for the synthetic dataset")
+```
+
+
+We can visualize the total prediction errors with a contour plot (Figure \@ref(fig:contourPlot)). 
+
+```{r contour, eval = FALSE}
+library(plotly)
+library(reshape2)
+
+f1 <- list(
+  family = "Arial, sans-serif",
+  size = 20,
+  color = "black"
+)
+f2 <- list(
+  family = "Old Standard TT, serif",
+  size = 20,
+  color = "black"
+)
+a <- list(
+  title = "l1",
+  titlefont = f1,
+  showticklabels = TRUE,
+  # tickangle = 45,
+  tickfont = f2
+)
+b <- list(
+  title = "l2",
+  titlefont = f1,
+  showticklabels = TRUE,
+  # tickangle = 45,
+  tickfont = f2
+)
+hmelt <- melt(T12[ , -3], id.vars = c("l1", "l2"))
+contourPlot <- plot_ly(hmelt, x = ~l1, y = ~l2, z = ~value, type = "contour") %>%
+  # add_markers() %>%
+  # add_markers(y = ~rev(s)) %>%
+  layout(xaxis = a, yaxis = b, showlegend = TRUE, legend = f1)  
+export(contourPlot, file = paste0(CVDir, "TotalPredictionError.pdf"))
+```
+
+```{r contourPlot, fig.cap = "Total prediction error contour plot. The x- and y-axes indicate LASSO penalties considered for mRNA and miRNA, respectively. Blue to yellow scale indicates increasing of total prediction error.", echo = FALSE}
+
+knitr::include_graphics("Example3foldCV/TotalPredictionError.pdf")
+```
+
+
+For the synthetic data set, the optimal penalty pair that gives the smallest prediction error is $(l_1, l_2) = (0.1, 0.05)$.
+```{r best pen, eval = FALSE}
+pen <- which(S2 == min(S2))
+l1 <- T12$l1[pen]; l2 <- T12$l2[pen]
+print(paste0("Optimal penalty pair (l1, l2): (", l1, ",", l2, ")"))
+# [1] "Optimal penalty pair (l1, l2): (0.1,0.05)"
+```
+
+
+
+
+## Step II: Integrate two omics data types and a quantitative phenotype
+
+With a pre-selected penalty pair, we apply SmCCA to subsampled features of $X_1, X_2$ and $Y$, and repeat the process to generate a robust similarity matrix (Figure \@ref(fig:flowchart), Step II). If the penalties were selected through a K-fold CV, the subsampling proportions $s_1, s_2$ need to be consistent with what was used in the CV. As for the number of subsamples, a larger number of subsamples leads to more accurate results, while a smaller number of subsamples is faster computationally. We use 500 in this example. In general, we recommend to subsample 1000 times or more.
+
+```{r get abar, eval = FALSE}
+Ws <- getRobustPseudoWeights(X1, X2, Y.scaled, l1, l2, s1, s2, NoTrait = FALSE,
+                               FilterByTrait = FALSE, Bipartite = TRUE,
+                               SubsamplingNum = numSubsamp, CCcoef = CCcoef)
+Abar <- getAbar(Ws, AbarLabel)
+```
+
+
+
+## Step III: Obtain multi-omics modules and plot subnetworks
+
+From the similarity matrix obtained in the last step, we can get multi-omics modules by applying a hierarchical tree cutting and plotting the reconstructed networks (Figure \@ref(fig:flowchart)). The edge signs are recovered from pairwise feature correlations. 
+
+```{r get modules, eval = FALSE}
+Modules <- getMultiOmicsModules(Abar, p1)
+save(Ws, Abar, Modules, file = paste0(CVDir, "SmCCNetWeights.Rdata"))
+```
+
+```{r, echo = FALSE}
+load("Example3foldCV/SmCCNetWeights.Rdata")
+```
+
+The trimmed module (edge cut = 0.1) is shown below. If a full module does not contain any edge that passes the cut threshold, a message "No edge passes threshold" will be produced. To see all complete module, set **edgeCut = 0**. 
+```{r plotNet, eval = FALSE}
+bigCor <- cor(cbind(X1, X2))
+edgeCut <- 0.1
+for(idx in 1:length(Modules)){
+    filename <- paste0(CVDir, "Net_", idx, ".pdf")
+    plotMultiOmicsNetwork(Abar = Abar, CorrMatrix = bigCor, 
+                          multiOmicsModule = Modules, ModuleIdx = idx, P1 = p1, 
+                          EdgeCut = edgeCut, FeatureLabel = AbarLabel,
+                          SaveFile = filename)
+}
+```
+```{r netPlot, fig.cap = "Trimmed module 1. The strength of the node connections is indicated by the thickness of edges. Red edges and gray edges are for negative and positive connections, respectively.", echo = FALSE}
+knitr::include_graphics("Example3foldCV/Net_1.pdf")
+```
+
+
+
+
+# Alternative canonical correlation analysis (CCA) methods 
+
+The function **getRobustPseudoWeights()** includes two other CCA methods (sparse supervised CCA (SsCCA) and sparse CCA (SCCA)), both of which are also coupled with subsampling scheme for more robust results. Users should pick the appropriate CCA method according to their studies. 
+
+## SsCCA
+SsCCA prioritizes omics features according to the correlation to the phenotype. This approach can be useful when the phenotype is not quantitative. To use SsCCA, set **NoTrait = FALSE** and **FilterByTrait = TRUE**.
+
+
+## SCCA
+If the study purpose is to integrate two omics data type without any phenotype information, one can choose SCCA. To use SCCA, set **NoTrait = TRUE**.
+
+
+
+
+
+
+# Session info
+
+```{r sessionInfo}
+sessionInfo()
+warnings()
+```
+
+
+
+# References
+
+> Shi, W.J., Y. Zhuang, P.H. Russell, B.D. Hobbs, M.M. Parker,P.J. Castaldi, P. Rudra, B. Vestal, C.P. Hersh, L.M. Saba, and K. Kechris, “Unsupervised Discovery of PhenotypeSpecific Multi-Omics Networks.” (*Submitted*)
+
+
+
