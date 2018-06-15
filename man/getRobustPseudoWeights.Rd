@@ -6,9 +6,8 @@
 (SmCCA), sparse supervised canonical correlations (SsCCA), or sparse
 canonical correlations (SCCA).}
 \usage{
-getRobustPseudoWeights(X1, X2, Trait, Lambda1, Lambda2, s1 = 0.9, s2 = 1,
-  NoTrait = FALSE, FilterByTrait = FALSE, Bipartite = FALSE,
-  SubsamplingNum = 100, PartitionNum = 100, CCcoef = NULL,
+getRobustPseudoWeights(X1, X2, Trait, Lambda1, Lambda2, s1, s2, NoTrait,
+  FilterByTrait, Bipartite, SubsamplingNum, PartitionNum, CCcoef = NULL,
   trace = FALSE)
 }
 \arguments{
@@ -39,15 +38,15 @@ correlation to the trait will be assigned nonzero weights.}
 more accurate results, but at a higher cost. We recommend to subsample at
 least 1000 times.}
 
+\item{PartitionNum}{Number of random partitions for each set of subsamples.
+This is only used if Bipartite = FALSE.}
+
 \item{CCcoef}{Optional coefficients for the pairwise canonical correlations
 (CC). If CCcoef = NULL (default), then the objective function is the total
 sum of all pairwise CC. It can also be a coefficient vector that follows
 the column order of combn(K, 2).}
 
 \item{trace}{Logical. Whether to display CCA algorithm trace.}
-
-\item{PartitionNum:}{Number of random partitions for each . This is only used if
-Bipartite = FALSE.}
 }
 \value{
 A canonical weight matrix with p1+p2 rows. Each column is the
@@ -72,13 +71,13 @@ set.seed(123)
 # SmCCA
 W1 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = 0.05,
   Lambda2 = 0.05, s1 = 0.7, s2 = 0.9, NoTrait = FALSE, FilterByTrait = FALSE,
-  Bipartite = FALSE, SubsamplingNum = 100, PartitionNum = 5,
+  Bipartite = FALSE, SubsamplingNum = 100, PartitionNum = NULL,
   CCcoef = NULL, trace = FALSE)
 
 # SsCCA
-W2 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = .05, Lambda2 = 0.5
+W2 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = .05, Lambda2 = 0.5,
   s1 = 0.7, s2 = 0.9, NoTrait = FALSE, FilterByTrait = TRUE,
-  Bipartite = FALSE, SubsamplingNum = 100, PartitionNum = 5,
+  Bipartite = FALSE, SubsamplingNum = 100, PartitionNum = NULL,
   CCcoef = NULL, trace = FALSE)
 
 # SCCA

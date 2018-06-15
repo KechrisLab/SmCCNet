@@ -58,8 +58,8 @@ requireNamespace("igraph", quietly = TRUE)
 #' @param SubsamplingNum Number of feature subsamples. Larger number leads to
 #'   more accurate results, but at a higher cost. We recommend to subsample at
 #'   least 1000 times.
-#' @param PartitionNum: Number of random partitions for each . This is only used if
-#'   Bipartite = FALSE.
+#' @param PartitionNum Number of random partitions for each set of subsamples.
+#'   This is only used if Bipartite = FALSE.
 #' @param CCcoef Optional coefficients for the pairwise canonical correlations
 #'   (CC). If CCcoef = NULL (default), then the objective function is the total
 #'   sum of all pairwise CC. It can also be a coefficient vector that follows
@@ -77,13 +77,13 @@ requireNamespace("igraph", quietly = TRUE)
 #' # SmCCA
 #' W1 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = 0.05,
 #'   Lambda2 = 0.05, s1 = 0.7, s2 = 0.9, NoTrait = FALSE, FilterByTrait = FALSE,
-#'   Bipartite = FALSE, SubsamplingNum = 100, PartitionNum = 5,
+#'   Bipartite = FALSE, SubsamplingNum = 100, PartitionNum = NULL,
 #'   CCcoef = NULL, trace = FALSE)
 #'
 #' # SsCCA
-#' W2 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = .05, Lambda2 = 0.5
+#' W2 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = .05, Lambda2 = 0.5,
 #'   s1 = 0.7, s2 = 0.9, NoTrait = FALSE, FilterByTrait = TRUE,
-#'   Bipartite = FALSE, SubsamplingNum = 100, PartitionNum = 5,
+#'   Bipartite = FALSE, SubsamplingNum = 100, PartitionNum = NULL,
 #'   CCcoef = NULL, trace = FALSE)
 #'
 #' # SCCA
@@ -94,9 +94,8 @@ requireNamespace("igraph", quietly = TRUE)
 #'
 #' @export
 getRobustPseudoWeights <- function(X1, X2, Trait, Lambda1, Lambda2,
-                                   s1 = 0.9, s2 = 1, NoTrait = FALSE,
-                                   FilterByTrait = FALSE, Bipartite = FALSE,
-                                   SubsamplingNum = 100, PartitionNum = 100,
+                                   s1, s2, NoTrait, FilterByTrait, Bipartite,
+                                   SubsamplingNum, PartitionNum,
                                    CCcoef = NULL, trace = FALSE){
 
   if(min(s1, s2) == 0){
@@ -115,7 +114,7 @@ getRobustPseudoWeights <- function(X1, X2, Trait, Lambda1, Lambda2,
   p1.sub <- ceiling(s1 * p1);   p2.sub <- ceiling(s2 * p2)
   X <- cbind(X1, X2)
 
-  beta <- pbsapply(1:SubsamplingNum, function(x){
+  beta <- pbapply::pbsapply(1:SubsamplingNum, function(x){
     # Subsample features
     samp1 <- sort(sample(1:p1, p1.sub, replace = FALSE))
     samp2 <- sort(sample(1:p2, p2.sub, replace = FALSE))
@@ -138,7 +137,7 @@ getRobustPseudoWeights <- function(X1, X2, Trait, Lambda1, Lambda2,
       subSamp <- scale(X[ , samp], center = TRUE, scale = TRUE)
       p.sub <- ncol(subSamp); p.par <- p.sub %/% 2
 
-      coeff <- pbsapply(1:PartitionNum, function(y){
+      coeff <- pbapply::pbsapply(1:PartitionNum, function(y){
         gp1 <- sample(1:p.sub, p.par, replace = FALSE)
         x1.par <- subSamp[ , gp1]
         gp2 <- sample((1:p.sub)[-gp1], p.sub-p.par, replace = FALSE)
@@ -234,12 +233,12 @@ getAbar <- function(Ws, FeatureLabel = NULL){
 #' @export
 getMultiOmicsModules <- function(Abar, P1, CutHeight = 1-.1^10, PlotTree = TRUE){
 
-    hc <- hclust(as.dist(1 - Abar))
-    if(PlotTree){plot(hc)}
+    hc <- stats::hclust(stats::as.dist(1 - Abar))
+    if(PlotTree){graphics::plot(hc)}
     cut.merge <- hc$merge[hc$height < CutHeight, ]
     lower.leaves <- sort(-cut.merge[cut.merge<0])
 
-    grpID <- cutree(hc, h = CutHeight)
+    grpID <- stats::cutree(hc, h = CutHeight)
     id <- grpID[lower.leaves]
     M <- lapply(1:length(unique(id)), function(x){
         M.x <- lower.leaves[which(id == unique(id)[x])]
@@ -345,7 +344,7 @@ plotMultiOmicsNetwork <- function(Abar, CorrMatrix, multiOmicsModule,
         rownames(allidx) <- rownames(Abar)
 
         NodeInfo <- data.frame(id = newM.node, idx = allidx[newM.node, ])
-        net <- graph_from_adjacency_matrix(M, weighted = TRUE,
+        net <- igraph::graph_from_adjacency_matrix(M, weighted = TRUE,
                                            diag = FALSE, mode = "undirected")
 
         # Define colors and shapes for vertex and label.
@@ -363,19 +362,19 @@ plotMultiOmicsNetwork <- function(Abar, CorrMatrix, multiOmicsModule,
 
 
         # Define edge colors.
-        ecol <- rep("gray80", ecount(net))
-        ew <- abs(edge.attributes(net)$weight) * 5
-        ecol[which(edge.attributes(net)$weight < 0)] <- "red"
+        ecol <- rep("gray80", igraph::ecount(net))
+        ew <- abs(igraph::edge.attributes(net)$weight) * 5
+        ecol[which(igraph::edge.attributes(net)$weight < 0)] <- "red"
 
         # Define network layout.
         if(NetLayout == "circle"){
-            l <- layout_in_circle(net)
+            l <- igraph::layout_in_circle(net)
         }else if(NetLayout == "sphere"){
-            l <- layout_on_sphere(net)
+            l <- igraph::layout_on_sphere(net)
         }else if(NetLayout == "fr"){
-            l <- layout_with_fr(net)
+            l <- igraph::layout_with_fr(net)
         }else if(NetLayout == "lgl"){
-            l <- layout_with_lgl(net)
+            l <- igraph::layout_with_lgl(net)
         }else{
             stop("Unrecognized NetLayout input. Acceptable options are 'circle',
                  'sphere', 'fr', and 'lgl'.")
@@ -390,10 +389,10 @@ plotMultiOmicsNetwork <- function(Abar, CorrMatrix, multiOmicsModule,
                  vertex.size = VertexSize, vertex.label = newM.node,
                  edge.width = ew, vertex.label.color = lcol, edge.color = ecol,
                  vertex.label.font = 2)
-            title(PlotTitle)
-            dev.off()
+            graphics::title(PlotTitle)
+            grDevices::dev.off()
         }else{
-            plot(net, vertex.color = vcol, vertex.shape = vshape,
+            graphics::plot(net, vertex.color = vcol, vertex.shape = vshape,
                  vertex.label.cex = VertexLabelCex, layout = l,
                  vertex.size = VertexSize, vertex.label = newM.node,
                  edge.width = ew, vertex.label.color = lcol, edge.color = ecol,
@@ -450,7 +449,7 @@ getCCAout <- function(X1, X2, Trait, Lambda1, Lambda2, CCcoef = NULL,
     if(k > 1){
       stop("'FilterByTrait == TRUE' only allows one trait at a time.")
     }else{
-      out <- CCA(X1, X2, outcome = "quantitative", y = Trait,
+      out <- PMA::CCA(X1, X2, outcome = "quantitative", y = Trait,
                  typex = "standard", typez = "standard", penaltyx = Lambda1,
                  penaltyz = Lambda2, trace = trace)
     }

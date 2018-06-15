@@ -10,7 +10,7 @@ author:
   affiliation: *id
 - name: Katerina Kechris
   affiliation: *id
-date: "June 4, 2018"
+date: "`r Sys.Date()`"
 # package: SmCCNet
 abstract: >
     Sparse multiple canonical correlation network analysis (SmCCNet) is a machine learning technique for integrating multiple omics data on the same subjects, along with a quantitative phenotype of interest, and reconstructing multi-omics networks that are specific to the phenotype. While the current version integrates two omics data types in addition to a phenotype, the framework can be easily generalized to more than two omics data types and multiple quantitative phenotypes. In this document, we illustrate a standard workflow of SmCCNet with a synthetic miRNA, mRNA expression dataset.
@@ -18,8 +18,8 @@ vignette: >
     %\VignetteIndexEntry{Reconstructing phenotype-specific multi-omics networks with SmCCNet}
     %\VignetteKeywords{Multi-omics Integration}
     %\VignettePackage{SmCCNet}
-    %\VignetteEngine{knitr::rmarkdown}
-    %\VignetteEncoding{UTF-8}  
+    %\VignetteEngine{knitr::knitr}
+    %\VignetteEncoding{UTF-8}{inputenc} 
 # # bibliography: references.bib
 # references:
 # - id: shi2018unsupervised
@@ -106,7 +106,7 @@ knitr::include_graphics("SmCCNetWorkflow.pdf")
 
 The SmCCNet package has the following dependencies: 
 
-```{r, echo = FALSE, results = "hide", warning = FALSE}
+```{r, echo = FALSE, results = "hide", warning = FALSE, eval = FALSE}
 suppressPackageStartupMessages({
     library(PMA)
     library(pbapply)
@@ -114,7 +114,7 @@ suppressPackageStartupMessages({
     library(igraph)
 })
 ```
-```{r}
+```{r, eval = FALSE}
 library(PMA)
 library(pbapply)
 library(Matrix)
@@ -122,7 +122,7 @@ library(igraph)
 ```
 
 The SmCCNet package consists of two R scripts:
-```{r source}
+```{r source, eval = FALSE}
 source("../R/ModifiedPMA.R")
 source("../R/SmCCNetSource.R")
 ```
@@ -145,8 +145,8 @@ More details on above functions can be found in a separate package description d
 
 For the illustration we consider a synthetic data set with 500 genes $(X_1)$ and 100 miRNAs $(X_2)$ expression levels measured for 358 subjects, along with a quantitative phenotype $(Y)$.
 
-```{r toy data}
-load("../data/ExampleData.Rdata")
+```{r example data}
+load("../data/ExampleData.RData")
 head(X1[ , 1:6])
 head(X2[ , 1:6])
 head(Y)
@@ -162,8 +162,7 @@ AbarLabel <- c(colnames(cbind(X1, X2)))
 ```
 
 Although SmCCNet does not require normality, it calculates the Pearson correlation between linear combinations of omics features and the phenotype, which assumes finite variances and finite covariance. It is necessary to include a transformation if the data are skewed. The algorithm also requires standardization (center and scale) of the data. 
-<!-- If you are working with high-throughput sequencing (RNASeq) data, we recommend to first address heteroscedasticity. -->
- 
+
 
 
 ## Step I: Determine optimal sparsity penalties through CV (optional)
@@ -230,7 +229,7 @@ for(i in 1:K){
   dir.create(subD)
   save(x1.train, x2.train, yy.train, x1.test, x2.test, yy.test,
        s1, s2, P1P2, p1, p2, numSubsamp, CCcoef,
-       file = paste0(subD, "Data.Rdata"))
+       file = paste0(subD, "Data.RData"))
 }
 ```
 
@@ -250,7 +249,7 @@ parSapply(cl, 1:K, function(CVidx){
   
     # Create a result directory for each thread.
     subD <- paste0(CVDir, "CV_", CVidx, "/")
-    load(paste0(subD, "Data.Rdata"))
+    load(paste0(subD, "Data.RData"))
     dir.create(paste0(subD, "SmCCA/"))
   
     RhoTrain <- RhoTest <- DeltaCor <- rep(0, nrow(P1P2))
@@ -286,7 +285,7 @@ parSapply(cl, 1:K, function(CVidx){
         # Periodically save results in a temporary file.
         if(idx %% 10 == 0){
             save(P1P2, RhoTrain, RhoTest, DeltaCor, idx, 
-                 file = paste0(subD, "temp.Rdata"))
+                 file = paste0(subD, "temp.RData"))
         }
     }
     
@@ -299,7 +298,7 @@ parSapply(cl, 1:K, function(CVidx){
             file = paste0(subD, "SmCCA/PredictionError.csv"))
     
     # Remove the temporary file.
-    system(paste0("rm ", subD, "temp.Rdata"))
+    system(paste0("rm ", subD, "temp.RData"))
     return(CVidx)
     })
 
@@ -334,7 +333,7 @@ write.csv(T12, file = paste0(CVDir, "TotalPredictionError.csv"))
 Table \@ref(tab:errorTable) shows the total prediction error (CC.Pred.Error) for all penalty options. Note that in this example, we are only including 26 optional penalty pairs, and we require there are at least as many genes as miRNAs in each multi-omics module (i.e., $c_1\geq c_2$). The fourth column (Test.CC) records the aggregated pseudo canonical correlations for the test data set.
 
 ```{r errorTable, echo = FALSE}
-knitr::kable(read.csv("Example3foldCV/TotalPredictionError.csv"), caption = "Total Prediction Error from a 3-fold CV for the synthetic dataset")
+knitr::kable(read.csv("TotalPredictionError.csv"), caption = "Total Prediction Error from a 3-fold CV for the synthetic dataset")
 ```
 
 
@@ -378,7 +377,7 @@ export(contourPlot, file = paste0(CVDir, "TotalPredictionError.pdf"))
 
 ```{r contourPlot, fig.cap = "Total prediction error contour plot. The x- and y-axes indicate LASSO penalties considered for mRNA and miRNA, respectively. Blue to yellow scale indicates increasing of total prediction error.", echo = FALSE}
 
-knitr::include_graphics("Example3foldCV/TotalPredictionError.pdf")
+knitr::include_graphics("TotalPredictionError.pdf")
 ```
 
 
@@ -412,12 +411,9 @@ From the similarity matrix obtained in the last step, we can get multi-omics mod
 
 ```{r get modules, eval = FALSE}
 Modules <- getMultiOmicsModules(Abar, p1)
-save(Ws, Abar, Modules, file = paste0(CVDir, "SmCCNetWeights.Rdata"))
+save(Ws, Abar, Modules, file = paste0(CVDir, "SmCCNetWeights.RData"))
 ```
 
-```{r, echo = FALSE}
-load("Example3foldCV/SmCCNetWeights.Rdata")
-```
 
 The trimmed module (edge cut = 0.1) is shown below. If a full module does not contain any edge that passes the cut threshold, a message "No edge passes threshold" will be produced. To see all complete module, set **edgeCut = 0**. 
 ```{r plotNet, eval = FALSE}
@@ -432,7 +428,7 @@ for(idx in 1:length(Modules)){
 }
 ```
 ```{r netPlot, fig.cap = "Trimmed module 1. The strength of the node connections is indicated by the thickness of edges. Red edges and gray edges are for negative and positive connections, respectively.", echo = FALSE}
-knitr::include_graphics("Example3foldCV/Net_1.pdf")
+knitr::include_graphics("Net_1.pdf")
 ```
 
 

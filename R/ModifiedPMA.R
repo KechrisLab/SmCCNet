@@ -64,7 +64,7 @@ myMultiCCA <- function(xlist, penalty=NULL, ws=NULL, niter=25,
   #   column order of combn(K, 2).
 
   if(ncol(xlist[[length(xlist)]]) > 1){
-    out <- MultiCCA(xlist, penalty=penalty, ws=ws, niter=niter,
+    out <- PMA::MultiCCA(xlist, penalty=penalty, ws=ws, niter=niter,
                     type=type, ncomponents=ncomponents, trace=ncomponents,
                     standardize=standardize)
 
@@ -72,8 +72,8 @@ myMultiCCA <- function(xlist, penalty=NULL, ws=NULL, niter=25,
     # The Kth data set in xlist is a one dimensional phenotype
     call <- match.call()
     K <- length(xlist)
-    pair_CC <- combn(K, 2)
-    num_CC <- ncol(combn(K, 2))
+    pair_CC <- utils::combn(K, 2)
+    num_CC <- ncol(utils::combn(K, 2))
 
     # Check canonical correlation coefficients.
     if(is.null(CCcoef)){CCcoef <- rep(1, num_CC)}
@@ -91,8 +91,8 @@ myMultiCCA <- function(xlist, penalty=NULL, ws=NULL, niter=25,
       type <- rep(type, K)}
     if(length(type)!=K){
       stop("Type must be a vector of length 1, or length(xlist)")}
-    if(sum(type!="standard" & type!="ordered")>0){
-      stop("Each element of type must be standard or ordered.")}
+    if(sum(type!="standard")>0){
+      stop("Each element of type must be standard and not ordered.")}
 
     # Standardize or not.
     if(standardize){xlist <- lapply(xlist, scale)}
@@ -120,8 +120,7 @@ myMultiCCA <- function(xlist, penalty=NULL, ws=NULL, niter=25,
       penalty[type=="standard"] <- 4 # this is the default value of sumabs
       for(k in 1:(K-1)){
         if(type[k]=="ordered"){
-          v <- svd(xlist[[k]])$v[,1]
-          penalty[k] <- ChooseLambda1Lambda2(v)
+          stop("Current version requires all element types to be standard (not ordered).")
         }
       }
     }
@@ -230,14 +229,7 @@ myUpdateW <- function(xlist, i, K, sumabsthis, ws, type="standard", ws.final,
     sumabsthis <- BinarySearch(tots, sumabsthis)
     w <- soft(tots, sumabsthis)/l2n(soft(tots, sumabsthis))
   } else {
-    tots <- as.numeric(tots)
-    tots <- tots/mean(abs(tots))
-    w <- FLSA(tots,lambda1=sumabsthis,lambda2=sumabsthis)[1,1,]
-    #    flsa.out <- diag.fused.lasso.new(tots,lam1=sumabsthis)
-    #    lam2ind <- which.min(abs(flsa.out$lam2-sumabsthis))
-    #    w <- flsa.out$coef[,lam2ind]
-    w <- w/l2n(w)
-    w[is.na(w)] <- 0
+      stop("Current version requires all element types to be standard (not ordered).")
   }
   return(w)
 }
@@ -274,7 +266,7 @@ myGetCors <- function(xlist, ws, pair_CC, CCcoef){
   CCs <- apply(pair_CC, 2, function(x){
     i <- x[1]
     j <- x[2]
-    y <- cor(xlist[[i]]%*%ws[[i]], xlist[[j]]%*%ws[[j]])
+    y <- stats::cor(xlist[[i]]%*%ws[[i]], xlist[[j]]%*%ws[[j]])
     if(is.na(y)){y <- 0}
     return(y)
   })
