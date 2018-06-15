@@ -2,8 +2,7 @@
 % Please edit documentation in R/SmCCNetSource.R
 \name{plotMultiOmicsNetwork}
 \alias{plotMultiOmicsNetwork}
-\title{Plot multi-omics modules based on similarity matrix derived from pseudo
-canonical weights and pairwise feature correlations.}
+\title{Plot multi-omics module networks.}
 \usage{
 plotMultiOmicsNetwork(Abar, CorrMatrix, multiOmicsModule, ModuleIdx, P1,
   EdgeCut, FeatureLabel = NULL, AddCorrSign = TRUE, SaveFile = NULL,
@@ -12,16 +11,17 @@ plotMultiOmicsNetwork(Abar, CorrMatrix, multiOmicsModule, ModuleIdx, P1,
   VertexSize = 1)
 }
 \arguments{
-\item{Abar}{A p\eqn{\times}p similary matrix for both omics data types
-based on pseudo canonical weights. All entries are non-negative.}
+\item{Abar}{A \eqn{p\times p} similary matrix for both omics data types
+based on pseudo canonical correlation weights. \eqn{p} is the number of 
+total features for the two omics data types. All entries are non-negative.}
 
-\item{CorrMatrix}{A p\eqn{\times}p correlation matrix that provides sign
+\item{CorrMatrix}{A \eqn{p\times p} correlation matrix that provides sign
 information for the network.}
 
 \item{multiOmicsModule}{A list of multi-omics modules.}
 
 \item{ModuleIdx}{Index for the module to be plotted. It can not exceed the
-length of multiOmicsModule.}
+length of \code{multiOmicsModule}.}
 
 \item{P1}{Total number of features for the first omics data type.}
 
@@ -29,15 +29,15 @@ length of multiOmicsModule.}
 threshold for the network. Any features (network nodes) without any edge
 strength that passes the threshold are excluded from the figure.}
 
-\item{FeatureLabel}{A 1\eqn{\times}p vector indicating feature names. If
-FeatureLabel = NULL (default), the feature names will be indices 1
-through p, where p is the total number of omics features.}
+\item{FeatureLabel}{A \eqn{1\times p} vector indicating feature names. If
+\code{FeatureLabel = NULL} (default), the feature names will be indices 1
+through \eqn{p}.}
 
 \item{AddCorrSign}{Logical. Whether to add a positive or negative sign to
 each network edge based on pairwise feature correlations.}
 
-\item{SaveFile}{A pdf file name for the figure output. If SaveFile = NULL
-(default), the figure will not be saved.}
+\item{SaveFile}{A pdf file name for the figure output. 
+If \code{SaveFile = NULL} (default), the figure will not be saved.}
 
 \item{ShowType1Label}{Logical. Whether to label the network nodes for the
 first omics data type.}
@@ -48,9 +48,9 @@ second omics data type.}
 \item{PlotTitle}{A title for the figure. Default is without any title.}
 
 \item{NetLayout}{Graphical layout for the network. Possible options are
-"circle", "sphere" for 3D sphere, "fr" for Fruchterman-Reinhold, and "lgl"
-for the LGL algorithm. Refer to igraph manual for more details on the
-layout options.}
+\code{circle} for circle layout, \code{sphere} for 3D sphere, \code{fr} for
+Fruchterman-Reinhold, and \code{lgl} for the LGL algorithm. Refer to igraph 
+manual for more details on the layout options.}
 
 \item{ShowNodes}{Logical. Whether to show network nodes.}
 

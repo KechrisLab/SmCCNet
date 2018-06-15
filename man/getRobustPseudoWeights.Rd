@@ -2,30 +2,34 @@
 % Please edit documentation in R/SmCCNetSource.R
 \name{getRobustPseudoWeights}
 \alias{getRobustPseudoWeights}
-\title{Compute canonical weights based on sparse multiple canonical correlations
-(SmCCA), sparse supervised canonical correlations (SsCCA), or sparse
-canonical correlations (SCCA).}
+\title{Calculate the canonical correlation weights based on sparse multiple
+canonical correlation analysis (SmCCA), sparse supervised canonical 
+correlation analysis (SsCCA), or sparse canonical correlation analysis (SCCA).}
 \usage{
 getRobustPseudoWeights(X1, X2, Trait, Lambda1, Lambda2, s1, s2, NoTrait,
   FilterByTrait, Bipartite, SubsamplingNum, PartitionNum, CCcoef = NULL,
   trace = FALSE)
 }
 \arguments{
-\item{X1}{An n\eqn{\times}p1 data matrix (e.g. mRNA) with p1 features and n
-subjects.}
+\item{X1}{An \eqn{n\times p_1} data matrix (e.g. mRNA) with \eqn{p_1} 
+features and \eqn{n} subjects.}
 
-\item{X2}{An n\eqn{\times}p2 data matrix (e.g. miRNA) with p2 features and n
-subjects.}
+\item{X2}{An \eqn{n\times p_2} data matrix (e.g. miRNA) with \eqn{p_2} 
+features and \eqn{n} subjects.}
 
 \item{Trait}{An n\eqn{\times}1 trait data matrix for the same n subjects.}
 
-\item{Lambda1}{LASSO pentalty parameter for X1, need to be between 0 and 1.}
+\item{Lambda1}{LASSO pentalty parameter for \code{X1}. \code{Lambda1} needs
+to be between 0 and 1.}
 
-\item{Lambda2}{LASSO pentalty parameter for X2, need to be between 0 and 1.}
+\item{Lambda2}{LASSO pentalty parameter for \code{X2}. \code{Lambda2} needs 
+to be between 0 and 1.}
 
-\item{s1}{Proportion of mRNA features to be included.}
+\item{s1}{Proportion of mRNA features to be included. \code{s1} needs to be
+between 0 and 1.}
 
-\item{s2}{Proportion of miRNA features to be included.}
+\item{s2}{Proportion of miRNA features to be included. \code{s2} needs to be
+between 0 and 1.}
 
 \item{NoTrait}{Logical. Whether trait information is provided.}
 
@@ -39,29 +43,38 @@ more accurate results, but at a higher cost. We recommend to subsample at
 least 1000 times.}
 
 \item{PartitionNum}{Number of random partitions for each set of subsamples.
-This is only used if Bipartite = FALSE.}
+This is only used if \code{Bipartite = FALSE}.}
 
-\item{CCcoef}{Optional coefficients for the pairwise canonical correlations
-(CC). If CCcoef = NULL (default), then the objective function is the total
-sum of all pairwise CC. It can also be a coefficient vector that follows
-the column order of combn(K, 2).}
+\item{CCcoef}{Optional coefficients for the SmCCA pairwise canonical 
+correlations. If \code{CCcoef = NULL} (default), then the objective 
+function is the total sum of all pairwise canonical correlations. It can 
+also be a coefficient vector that follows the column order of 
+\code{combn(K, 2)}.}
 
 \item{trace}{Logical. Whether to display CCA algorithm trace.}
 }
 \value{
-A canonical weight matrix with p1+p2 rows. Each column is the
-  canonical weights based on subsampled X1 and X2 features.The column number
-  equals to SubsamplineNum.
+A canonical correlation weight matrix with \eqn{p_1+p_2} rows. Each 
+  column is the canonical correlation weights based on subsampled \code{X1}
+  and \code{X2} features. The column number equals to \code{SubsamplineNum}.
 }
 \description{
-SmCCA and SsCCA take into account of a phenotype/trait. SmCCA maximizes the
-total (weighted or unweighted) pairwise canonical weights between two omics
-data type and the trait. It requires the trait to be quantitative. SsCCA
-prioritizes omics features based on the trait, and assigns non-zero canonical
-weights to features that are more correlated to the trait. SCCA does not use
-any trait information for computing the canonical weights. All of these three
-methods are included in the function, along with an omic feature subsampling
-scheme.
+Integrate two omics data type (and a quantitative phenotype), and calculate
+the absolute canonical correlation weights for the omics features using SmCCA
+SsCCA, or SCCA. SmCCA and SsCCA take into account a phenotype/trait. SmCCA 
+maximizes the total (weighted or unweighted) pairwise canonical correlation 
+weights between two omics data types and the trait. It requires the trait to 
+be quantitative. SsCCA prioritizes omics features based on the trait, and 
+assigns non-zero canonical weights to features that are more correlated to 
+the trait. SCCA does not use any trait information for computing the 
+canonical correlation weights. All of these three methods are included in 
+this function, along with an omic feature subsampling scheme and an optional 
+random feature partition scheme.
+}
+\details{
+To choose SmCCA, set \code{NoTrait = FALSE, FilterByTrait = FALSE}.  
+To choose SsCCA, set \code{NoTrait = FALSE, FilterByTrait = TRUE}.
+To choose SCCA, set \code{Trait = NULL, NoTrait = TRUE}.
 }
 \examples{
 \donttest{

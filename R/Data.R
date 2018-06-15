@@ -1,12 +1,18 @@
-#' Two simulated omics datasets and a quantitative phenotype for the same 358 subjects.
+#' A simulated mRNA expression dataset.
 #'
-#' @docType data
-#' @format A mRNA matrix with 358 rows and 500 columns
+#' A matrix containing simulated mRNA expression levels for 358 subjects (rows)
+#' and 500 features (columns).
 "X1"
 
-#' A miRNA matrix with 358 rows and 100 columns
+#' A simulated miRNA expression dataset.
+#'
+#' A matrix containing simulated miRNA expression levels for 358 subjects (rows)
+#' and 100 features (columns).
 "X2"
 
-#' A phenotype matrix with 358 rows and 1 column
+#' A simulated phenotype dataset.
+#'
+#' A matrix containing simulated quantitative phenotype measures for 358 
+#' subjects (rows).
 "Y"
 

@@ -3,12 +3,13 @@
 \docType{data}
 \name{Y}
 \alias{Y}
-\title{A phenotype matrix with 358 rows and 1 column}
+\title{A simulated phenotype dataset.}
 \format{An object of class \code{matrix} with 358 rows and 1 columns.}
 \usage{
 Y
 }
 \description{
-A phenotype matrix with 358 rows and 1 column
+A matrix containing simulated quantitative phenotype measures for 358 
+subjects (rows).
 }
 \keyword{datasets}

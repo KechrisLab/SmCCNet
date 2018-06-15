@@ -3,12 +3,13 @@
 \docType{data}
 \name{X1}
 \alias{X1}
-\title{Two simulated omics datasets and a quantitative phenotype for the same 358 subjects.}
-\format{A mRNA matrix with 358 rows and 500 columns}
+\title{A simulated mRNA expression dataset.}
+\format{An object of class \code{matrix} with 358 rows and 500 columns.}
 \usage{
 X1
 }
 \description{
-Two simulated omics datasets and a quantitative phenotype for the same 358 subjects.
+A matrix containing simulated mRNA expression levels for 358 subjects (rows)
+and 500 features (columns).
 }
 \keyword{datasets}

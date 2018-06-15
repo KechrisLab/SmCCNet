@@ -2,8 +2,9 @@
 # Author: W. Jenny Shi
 #
 # About: This script incorporates subsampling and possibly random partition of
-#   data features to SmCCA and SsCCA. Here we assume two data types (e.g. miRNA
-#   and genes) and one quantitative phenotype measured for the same subjects.
+#   data features to SmCCA, SsCCA, and SCCA. Here we assume two data types 
+#   (e.g. mRNA and miRNA expression levels) and one quantitative phenotype
+#   measured for the same subjects.
 #
 ################################################################################
 
@@ -19,38 +20,44 @@ requireNamespace("pbapply", quietly = TRUE)
 requireNamespace("igraph", quietly = TRUE)
 
 
-# library(Matrix)
-# library(pbapply)
-# library(igraph)
-
 
 ################################################################################
 ### Apply sparse multiple canonical correlation analysis to omics feature
 ### subsamples
 
-#' Compute canonical weights based on sparse multiple canonical correlations
-#' (SmCCA), sparse supervised canonical correlations (SsCCA), or sparse
-#' canonical correlations (SCCA).
+#' Calculate the canonical correlation weights based on sparse multiple
+#' canonical correlation analysis (SmCCA), sparse supervised canonical 
+#' correlation analysis (SsCCA), or sparse canonical correlation analysis (SCCA).
+#' 
+#' Integrate two omics data type (and a quantitative phenotype), and calculate
+#' the absolute canonical correlation weights for the omics features using SmCCA
+#' SsCCA, or SCCA. SmCCA and SsCCA take into account a phenotype/trait. SmCCA 
+#' maximizes the total (weighted or unweighted) pairwise canonical correlation 
+#' weights between two omics data types and the trait. It requires the trait to 
+#' be quantitative. SsCCA prioritizes omics features based on the trait, and 
+#' assigns non-zero canonical weights to features that are more correlated to 
+#' the trait. SCCA does not use any trait information for computing the 
+#' canonical correlation weights. All of these three methods are included in 
+#' this function, along with an omic feature subsampling scheme and an optional 
+#' random feature partition scheme. 
+#' 
+#' To choose SmCCA, set \code{NoTrait = FALSE, FilterByTrait = FALSE}.  
+#' To choose SsCCA, set \code{NoTrait = FALSE, FilterByTrait = TRUE}.
+#' To choose SCCA, set \code{Trait = NULL, NoTrait = TRUE}.
 #'
-#' SmCCA and SsCCA take into account of a phenotype/trait. SmCCA maximizes the
-#' total (weighted or unweighted) pairwise canonical weights between two omics
-#' data type and the trait. It requires the trait to be quantitative. SsCCA
-#' prioritizes omics features based on the trait, and assigns non-zero canonical
-#' weights to features that are more correlated to the trait. SCCA does not use
-#' any trait information for computing the canonical weights. All of these three
-#' methods are included in the function, along with an omic feature subsampling
-#' scheme.
-#'
-#'
-#' @param X1 An n\eqn{\times}p1 data matrix (e.g. mRNA) with p1 features and n
-#'   subjects.
-#' @param X2 An n\eqn{\times}p2 data matrix (e.g. miRNA) with p2 features and n
-#'   subjects.
+#' @param X1 An \eqn{n\times p_1} data matrix (e.g. mRNA) with \eqn{p_1} 
+#'   features and \eqn{n} subjects.
+#' @param X2 An \eqn{n\times p_2} data matrix (e.g. miRNA) with \eqn{p_2} 
+#'   features and \eqn{n} subjects.
 #' @param Trait An n\eqn{\times}1 trait data matrix for the same n subjects.
-#' @param Lambda1 LASSO pentalty parameter for X1, need to be between 0 and 1.
-#' @param Lambda2 LASSO pentalty parameter for X2, need to be between 0 and 1.
-#' @param s1 Proportion of mRNA features to be included.
-#' @param s2 Proportion of miRNA features to be included.
+#' @param Lambda1 LASSO pentalty parameter for \code{X1}. \code{Lambda1} needs
+#'   to be between 0 and 1.
+#' @param Lambda2 LASSO pentalty parameter for \code{X2}. \code{Lambda2} needs 
+#'   to be between 0 and 1.
+#' @param s1 Proportion of mRNA features to be included. \code{s1} needs to be
+#'   between 0 and 1.
+#' @param s2 Proportion of miRNA features to be included. \code{s2} needs to be
+#'   between 0 and 1.
 #' @param NoTrait Logical. Whether trait information is provided.
 #' @param FilterByTrait Logical. Whether only the top 80% features with highest
 #'   correlation to the trait will be assigned nonzero weights.
@@ -59,15 +66,16 @@ requireNamespace("igraph", quietly = TRUE)
 #'   more accurate results, but at a higher cost. We recommend to subsample at
 #'   least 1000 times.
 #' @param PartitionNum Number of random partitions for each set of subsamples.
-#'   This is only used if Bipartite = FALSE.
-#' @param CCcoef Optional coefficients for the pairwise canonical correlations
-#'   (CC). If CCcoef = NULL (default), then the objective function is the total
-#'   sum of all pairwise CC. It can also be a coefficient vector that follows
-#'   the column order of combn(K, 2).
+#'   This is only used if \code{Bipartite = FALSE}.
+#' @param CCcoef Optional coefficients for the SmCCA pairwise canonical 
+#'   correlations. If \code{CCcoef = NULL} (default), then the objective 
+#'   function is the total sum of all pairwise canonical correlations. It can 
+#'   also be a coefficient vector that follows the column order of 
+#'   \code{combn(K, 2)}.
 #' @param trace Logical. Whether to display CCA algorithm trace.
-#' @return A canonical weight matrix with p1+p2 rows. Each column is the
-#'   canonical weights based on subsampled X1 and X2 features.The column number
-#'   equals to SubsamplineNum.
+#' @return A canonical correlation weight matrix with \eqn{p_1+p_2} rows. Each 
+#'   column is the canonical correlation weights based on subsampled \code{X1}
+#'   and \code{X2} features. The column number equals to \code{SubsamplineNum}.
 #'
 #' @examples
 #' \donttest{
@@ -167,16 +175,19 @@ getRobustPseudoWeights <- function(X1, X2, Trait, Lambda1, Lambda2,
 ### Aggregate pseudo canonical weights and compute the network similarity matrix
 ### for all omics features.
 
-#' Compute the similarity matrix based on the outer products of absolute canonical
-#' weights.
+#' Compute the similarity matrix based on one or more canonical correlation 
+#' weight vectors.
+#' 
+#' Compute the similarity matrix based on the outer products of absolute 
+#' canonical correlation weights.
 #'
 #'
-#' @param Ws A canonical weight vector or matrix. If Ws is a matrix, then each
-#'   column corresponds to one weight vector.
-#' @param FeatureLabel A 1\eqn{\times}p vector indicating feature names. If
-#'   FeatureLabel = NULL (default), the feature names will be indices 1
-#'   through p, where p is the total number of omics features.
-#' @return A p\eqn{\times}p symmetric non-negative matrix.
+#' @param Ws A canonical correlation weight vector or matrix. If \code{Ws} is a
+#'   matrix, then each column corresponds to one weight vector.
+#' @param FeatureLabel A \eqn{1\times p} vector indicating feature names. If 
+#'   \code{FeatureLabel = NULL} (default), the feature names will be indices 
+#'   1 through \eqn{p}, where \eqn{p} is the total number of omics features.
+#' @return A \eqn{p\times p} symmetric non-negative matrix.
 #'
 #' @examples
 #' w <- matrix(rnorm(6), nrow = 3)
@@ -213,14 +224,16 @@ getAbar <- function(Ws, FeatureLabel = NULL){
 ################################################################################
 ### Extract multi-omics modules.
 
+#' Extract multi-omics modules based on the similarity matrix.
+#' 
 #' Apply a hierarchical tree cutting to the similarity matrix and extract
 #' modules that contain both omics data types.
 #'
-#' @param Abar A similary matrix for both omics data types.
+#' @param Abar A similary matrix for all features (both omics data types).
 #' @param P1 Total number of features for the first omics data type.
-#' @param CutHeight Height threshold for the hierarchical tree. Default is
-#'   1-.1^10.
-#' @param PlotTree Logical. Whether to create the hierarchical tree plot.
+#' @param CutHeight Height threshold for the hierarchical tree cutting. Default 
+#'   is \eqn{1-0.1^{10}}.
+#' @param PlotTree Logical. Whether to create a hierarchical tree plot.
 #' @return A list of multi-omics modules.
 #'
 #' @examples
@@ -265,36 +278,39 @@ getMultiOmicsModules <- function(Abar, P1, CutHeight = 1-.1^10, PlotTree = TRUE)
 ################################################################################
 ### Visualize multi-omics subnetworks.
 
+#' Plot multi-omics module networks.
+#' 
 #' Plot multi-omics modules based on similarity matrix derived from pseudo
 #' canonical weights and pairwise feature correlations.
 #'
-#' @param Abar A p\eqn{\times}p similary matrix for both omics data types
-#'   based on pseudo canonical weights. All entries are non-negative.
-#' @param CorrMatrix A p\eqn{\times}p correlation matrix that provides sign
+#' @param Abar A \eqn{p\times p} similary matrix for both omics data types
+#'   based on pseudo canonical correlation weights. \eqn{p} is the number of 
+#'   total features for the two omics data types. All entries are non-negative.
+#' @param CorrMatrix A \eqn{p\times p} correlation matrix that provides sign
 #'   information for the network.
 #' @param multiOmicsModule A list of multi-omics modules.
 #' @param ModuleIdx Index for the module to be plotted. It can not exceed the
-#'   length of multiOmicsModule.
+#'   length of \code{multiOmicsModule}.
 #' @param P1 Total number of features for the first omics data type.
 #' @param EdgeCut A numerical value between 0 and 1, indicating an edge
 #'   threshold for the network. Any features (network nodes) without any edge
 #'   strength that passes the threshold are excluded from the figure.
-#' @param FeatureLabel A 1\eqn{\times}p vector indicating feature names. If
-#'   FeatureLabel = NULL (default), the feature names will be indices 1
-#'   through p, where p is the total number of omics features.
+#' @param FeatureLabel A \eqn{1\times p} vector indicating feature names. If
+#'   \code{FeatureLabel = NULL} (default), the feature names will be indices 1
+#'   through \eqn{p}.
 #' @param AddCorrSign Logical. Whether to add a positive or negative sign to
 #'   each network edge based on pairwise feature correlations.
-#' @param SaveFile A pdf file name for the figure output. If SaveFile = NULL
-#'   (default), the figure will not be saved.
+#' @param SaveFile A pdf file name for the figure output. 
+#'   If \code{SaveFile = NULL} (default), the figure will not be saved.
 #' @param ShowType1Label Logical. Whether to label the network nodes for the
 #'   first omics data type.
 #' @param ShowType2Label Logical. Whether to label the network nodes for the
 #'   second omics data type.
 #' @param PlotTitle A title for the figure. Default is without any title.
 #' @param NetLayout Graphical layout for the network. Possible options are
-#'   "circle", "sphere" for 3D sphere, "fr" for Fruchterman-Reinhold, and "lgl"
-#'   for the LGL algorithm. Refer to igraph manual for more details on the
-#'   layout options.
+#'   \code{circle} for circle layout, \code{sphere} for 3D sphere, \code{fr} for
+#'   Fruchterman-Reinhold, and \code{lgl} for the LGL algorithm. Refer to igraph 
+#'   manual for more details on the layout options.
 #' @param ShowNodes Logical. Whether to show network nodes.
 #' @param VertexLabelCex Scaling factor for the vertex labels.
 #' @param VertexSize Size of the vertices.

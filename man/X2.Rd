@@ -3,12 +3,13 @@
 \docType{data}
 \name{X2}
 \alias{X2}
-\title{A miRNA matrix with 358 rows and 100 columns}
+\title{A simulated miRNA expression dataset.}
 \format{An object of class \code{matrix} with 358 rows and 100 columns.}
 \usage{
 X2
 }
 \description{
-A miRNA matrix with 358 rows and 100 columns
+A matrix containing simulated miRNA expression levels for 358 subjects (rows)
+and 100 features (columns).
 }
 \keyword{datasets}

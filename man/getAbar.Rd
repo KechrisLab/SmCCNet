@@ -2,25 +2,25 @@
 % Please edit documentation in R/SmCCNetSource.R
 \name{getAbar}
 \alias{getAbar}
-\title{Compute the similarity matrix based on the outer products of absolute canonical
-weights.}
+\title{Compute the similarity matrix based on one or more canonical correlation 
+weight vectors.}
 \usage{
 getAbar(Ws, FeatureLabel = NULL)
 }
 \arguments{
-\item{Ws}{A canonical weight vector or matrix. If Ws is a matrix, then each
-column corresponds to one weight vector.}
+\item{Ws}{A canonical correlation weight vector or matrix. If \code{Ws} is a
+matrix, then each column corresponds to one weight vector.}
 
-\item{FeatureLabel}{A 1\eqn{\times}p vector indicating feature names. If
-FeatureLabel = NULL (default), the feature names will be indices 1
-through p, where p is the total number of omics features.}
+\item{FeatureLabel}{A \eqn{1\times p} vector indicating feature names. If 
+\code{FeatureLabel = NULL} (default), the feature names will be indices 
+1 through \eqn{p}, where \eqn{p} is the total number of omics features.}
 }
 \value{
-A p\eqn{\times}p symmetric non-negative matrix.
+A \eqn{p\times p} symmetric non-negative matrix.
 }
 \description{
-Compute the similarity matrix based on the outer products of absolute canonical
-weights.
+Compute the similarity matrix based on the outer products of absolute 
+canonical correlation weights.
 }
 \examples{
 w <- matrix(rnorm(6), nrow = 3)
