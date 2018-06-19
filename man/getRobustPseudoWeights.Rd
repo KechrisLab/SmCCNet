@@ -73,29 +73,29 @@ To choose SsCCA, set \code{NoTrait = FALSE, FilterByTrait = TRUE}.
 To choose SCCA, set \code{Trait = NULL, NoTrait = TRUE}.
 }
 \examples{
-\donttest{
+
 ## For illustration, we only subsample 5 times.
 set.seed(123)
 
 # Unweighted SmCCA
 W1 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = 0.05,
   Lambda2 = 0.05, s1 = 0.7, s2 = 0.9, NoTrait = FALSE, FilterByTrait = FALSE,
-  SubsamplingNum = 100, CCcoef = NULL, trace = FALSE)
+  SubsamplingNum = 5, CCcoef = NULL, trace = FALSE)
   
 # Weighted SmCCA
 W2 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = 0.05,
   Lambda2 = 0.05, s1 = 0.7, s2 = 0.9, NoTrait = FALSE, FilterByTrait = FALSE,
-  SubsamplingNum = 100, CCcoef = c(1, 5, 5), trace = FALSE)
+  SubsamplingNum = 5, CCcoef = c(1, 5, 5), trace = FALSE)
   
 # SsCCA
 W3 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = .05, Lambda2 = 0.5,
   s1 = 0.7, s2 = 0.9, NoTrait = FALSE, FilterByTrait = TRUE,
-  SubsamplingNum = 100, CCcoef = NULL, trace = FALSE)
+  SubsamplingNum = 5, CCcoef = NULL, trace = FALSE)
 
 # SCCA
 W4 <- getRobustPseudoWeights(X1, X2, Trait = NULL, Lambda1 = 0.05,
   Lambda2 = 0.05, s1 = 0.7, s2 = 0.9, NoTrait = TRUE, 
-  SubsamplingNum = 100, CCcoef = NULL, trace = FALSE)
-  }
+  SubsamplingNum = 5, CCcoef = NULL, trace = FALSE)
+  
 
 }

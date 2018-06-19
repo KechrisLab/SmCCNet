@@ -76,30 +76,30 @@ requireNamespace("igraph", quietly = TRUE)
 #'   and \code{X2} features. The number of columns is \code{SubsamplineNum}.
 #'
 #' @examples
-#' \donttest{
+#' 
 #' ## For illustration, we only subsample 5 times.
 #' set.seed(123)
 #'
 #' # Unweighted SmCCA
 #' W1 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = 0.05,
 #'   Lambda2 = 0.05, s1 = 0.7, s2 = 0.9, NoTrait = FALSE, FilterByTrait = FALSE,
-#'   SubsamplingNum = 100, CCcoef = NULL, trace = FALSE)
+#'   SubsamplingNum = 5, CCcoef = NULL, trace = FALSE)
 #'   
 #' # Weighted SmCCA
 #' W2 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = 0.05,
 #'   Lambda2 = 0.05, s1 = 0.7, s2 = 0.9, NoTrait = FALSE, FilterByTrait = FALSE,
-#'   SubsamplingNum = 100, CCcoef = c(1, 5, 5), trace = FALSE)
+#'   SubsamplingNum = 5, CCcoef = c(1, 5, 5), trace = FALSE)
 #'   
 #' # SsCCA
 #' W3 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = .05, Lambda2 = 0.5,
 #'   s1 = 0.7, s2 = 0.9, NoTrait = FALSE, FilterByTrait = TRUE,
-#'   SubsamplingNum = 100, CCcoef = NULL, trace = FALSE)
+#'   SubsamplingNum = 5, CCcoef = NULL, trace = FALSE)
 #'
 #' # SCCA
 #' W4 <- getRobustPseudoWeights(X1, X2, Trait = NULL, Lambda1 = 0.05,
 #'   Lambda2 = 0.05, s1 = 0.7, s2 = 0.9, NoTrait = TRUE, 
-#'   SubsamplingNum = 100, CCcoef = NULL, trace = FALSE)
-#'   }
+#'   SubsamplingNum = 5, CCcoef = NULL, trace = FALSE)
+#'   
 #'
 #' @export
 getRobustPseudoWeights <- function(X1, X2, Trait, Lambda1, Lambda2,
@@ -434,24 +434,29 @@ getCCAout <- function(X1, X2, Trait, Lambda1, Lambda2, CCcoef = NULL,
            greater than 0.")
   }
 
-  k <- ncol(Trait)
-  if(NoTrait){Trait <- NULL; FilterByTrait <- TRUE; k <- 1}
-
-  if(FilterByTrait){
-    if(k > 1){
-      stop("'FilterByTrait == TRUE' only allows one trait at a time.")
-    }else{
-      out <- PMA::CCA(X1, X2, outcome = "quantitative", y = Trait,
-                 typex = "standard", typez = "standard", penaltyx = Lambda1,
-                 penaltyz = Lambda2, trace = trace)
-    }
+  k <- ncol(Trait)    
+  if(NoTrait | is.null(k)){
+      out <- PMA::CCA(X1, X2, typex = "standard", typez = "standard", 
+                      penaltyx = Lambda1, penaltyz = Lambda2, K = 1, 
+                      trace = trace)
   }else{
-    xlist <- list(x1 = X1, x2 = X2, y = Trait)
-    L1 <- max(1, sqrt(ncol(X1)) * Lambda1)
-    L2 <- max(1, sqrt(ncol(X2)) * Lambda2)
-    out <- myMultiCCA(xlist, penalty = c(L1, L2, sqrt(ncol(Trait))),
-                      CCcoef = CCcoef, trace = trace)
-    out$u <- out$ws[[1]]; out$v <- out$ws[[2]]
+      if(FilterByTrait){
+          if(k > 1){
+              stop("'FilterByTrait == TRUE' only allows one trait at a time.")
+          }else{
+              out <- PMA::CCA(X1, X2, outcome = "quantitative", y = Trait,
+                              typex = "standard", typez = "standard", 
+                              penaltyx = Lambda1, penaltyz = Lambda2, K = 1, 
+                              trace = trace)
+          }
+      }else{
+          xlist <- list(x1 = X1, x2 = X2, y = Trait)
+          L1 <- max(1, sqrt(ncol(X1)) * Lambda1)
+          L2 <- max(1, sqrt(ncol(X2)) * Lambda2)
+          out <- myMultiCCA(xlist, penalty = c(L1, L2, sqrt(ncol(Trait))),
+                            CCcoef = CCcoef, trace = trace)
+          out$u <- out$ws[[1]]; out$v <- out$ws[[2]]
+      }
   }
 
   return(out)
