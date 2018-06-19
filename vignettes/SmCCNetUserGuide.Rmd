@@ -1,5 +1,5 @@
 ---
-title: "Reconstructing phenotype-specific multi-omics networks with SmCCNet"
+title: "Reconstructing phenotype specific multi-omics networks with SmCCNet"
 shorttitle: "SmCCNet"
 author:
 - name: W.Jenny Shi
@@ -89,7 +89,7 @@ The sparsity penalties $c_1, c_2$ influence how many features will be included i
 
 - Step I: Determine SmCCA sparsity penalties $c_1, c_2$. The user can select the penalties for omics feature selection based on the study purpose and/or prior knowledge. Alternatively, one can pick sparsity penalties based on a K-fold cross validation (CV) procedure that minimizes the total prediction error (Figure \@ref(fig:CVflow)). The K-fold CV procedure ensures selected penalties to be generalizable to similar independent data sets and prevents over-fitting. 
 - Step II: Randomly subsample omics features without replacement, apply SmCCA with chosen penalties, and compute a feature relationship matrix for each subset. Repeat the process many times and define the similarity matrix to be the average of all feature relationship matrices. 
-- Step III: Apply a hierarchical tree cutting to the similarity matrix to find the multi-omics networks. This step simultaneously identifies multiple subnetworks.
+- Step III: Apply hierarchical tree cutting to the similarity matrix to find the multi-omics networks. This step simultaneously identifies multiple subnetworks.
 
 
 
@@ -403,7 +403,7 @@ Abar <- getAbar(Ws, AbarLabel)
 
 ## Step III: Obtain multi-omics modules and plot subnetworks
 
-From the similarity matrix obtained in the last step, we can get multi-omics modules by applying a hierarchical tree cutting and plotting the reconstructed networks (Figure \@ref(fig:flowchart)). The edge signs are recovered from pairwise feature correlations. 
+From the similarity matrix obtained in the last step, we can get multi-omics modules by applying hierarchical tree cutting and plotting the reconstructed networks (Figure \@ref(fig:flowchart)). The edge signs are recovered from pairwise feature correlations. 
 
 ```{r get modules, eval = FALSE}
 Modules <- getMultiOmicsModules(Abar, p1)

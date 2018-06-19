@@ -38,8 +38,7 @@ requireNamespace("igraph", quietly = TRUE)
 #' assigns non-zero canonical weights to features that are more correlated to 
 #' the trait. SCCA does not use any trait information for computing the 
 #' canonical correlation weights. All of these three methods are included in 
-#' this function, along with an omic feature subsampling scheme and an optional 
-#' random feature partition scheme. 
+#' this function, along with an omics feature subsampling scheme. 
 #' 
 #' To choose SmCCA, set \code{NoTrait = FALSE, FilterByTrait = FALSE}.  
 #' To choose SsCCA, set \code{NoTrait = FALSE, FilterByTrait = TRUE}.
@@ -73,7 +72,7 @@ requireNamespace("igraph", quietly = TRUE)
 #' @param trace Logical. Whether to display the CCA algorithm trace.
 #' @return A canonical correlation weight matrix with \eqn{p_1+p_2} rows. Each 
 #'   column is the canonical correlation weights based on subsampled \code{X1}
-#'   and \code{X2} features. The number of columns is \code{SubsamplineNum}.
+#'   and \code{X2} features. The number of columns is \code{SubsamplingNum}.
 #'
 #' @examples
 #' 
