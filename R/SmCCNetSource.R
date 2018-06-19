@@ -1,11 +1,11 @@
 ################################################################################
 # Author: W. Jenny Shi
 #
-# About: This script incorporates subsampling and possibly random partition of
-#   data features to SmCCA, SsCCA, and SCCA. Here we assume two data types 
-#   (e.g. mRNA and miRNA expression levels) and one quantitative phenotype
-#   measured for the same subjects.
-#
+# About: This script incorporates a data feature subsampling scheme to SmCCA,  
+#   SsCCA, and SCCA. Here we assume two data types (e.g. mRNA and miRNA 
+#   expression levels) and one quantitative phenotype measured for the same 
+#   subjects.
+# 
 ################################################################################
 
 
@@ -49,61 +49,62 @@ requireNamespace("igraph", quietly = TRUE)
 #'   features and \eqn{n} subjects.
 #' @param X2 An \eqn{n\times p_2} data matrix (e.g. miRNA) with \eqn{p_2} 
 #'   features and \eqn{n} subjects.
-#' @param Trait An n\eqn{\times}1 trait data matrix for the same n subjects.
-#' @param Lambda1 LASSO pentalty parameter for \code{X1}. \code{Lambda1} needs
+#' @param Trait An \eqn{n\times 1} trait data matrix for the same n subjects.
+#' @param Lambda1 LASSO penalty parameter for \code{X1}. \code{Lambda1} needs
 #'   to be between 0 and 1.
-#' @param Lambda2 LASSO pentalty parameter for \code{X2}. \code{Lambda2} needs 
+#' @param Lambda2 LASSO penalty parameter for \code{X2}. \code{Lambda2} needs 
 #'   to be between 0 and 1.
-#' @param s1 Proportion of mRNA features to be included. \code{s1} needs to be
-#'   between 0 and 1.
-#' @param s2 Proportion of miRNA features to be included. \code{s2} needs to be
-#'   between 0 and 1.
-#' @param NoTrait Logical. Whether trait information is provided.
-#' @param FilterByTrait Logical. Whether only the top 80% features with highest
-#'   correlation to the trait will be assigned nonzero weights.
-#' @param Bipartite Logical. Whether to include random partition.
-#' @param SubsamplingNum Number of feature subsamples. Larger number leads to
-#'   more accurate results, but at a higher cost. We recommend to subsample at
-#'   least 1000 times.
-#' @param PartitionNum Number of random partitions for each set of subsamples.
-#'   This is only used if \code{Bipartite = FALSE}.
+#' @param s1 Proportion of mRNA features to be included, default at \code{s1 = 0.7}.
+#'   \code{s1} needs to be between 0 and 1.
+#' @param s2 Proportion of miRNA features to be included, default at \code{s1 = 0.9}.
+#'   \code{s2} needs to be between 0 and 1.
+#' @param NoTrait Logical, default is \code{FALSE}. Whether trait information is
+#'   provided.
+#' @param FilterByTrait Logical, default is \code{FALSE}. Whether only the top 
+#'   (80%) features with highest correlation to the trait will be assigned 
+#'   nonzero weights. The choice of 80% is based on the PMA package.
+#' @param SubsamplingNum Number of feature subsamples. Default is 1000. Larger
+#'   number leads to more accurate results, but at a higher cost. 
 #' @param CCcoef Optional coefficients for the SmCCA pairwise canonical 
 #'   correlations. If \code{CCcoef = NULL} (default), then the objective 
 #'   function is the total sum of all pairwise canonical correlations. It can 
 #'   also be a coefficient vector that follows the column order of 
 #'   \code{combn(K, 2)}.
-#' @param trace Logical. Whether to display CCA algorithm trace.
+#' @param trace Logical. Whether to display the CCA algorithm trace.
 #' @return A canonical correlation weight matrix with \eqn{p_1+p_2} rows. Each 
 #'   column is the canonical correlation weights based on subsampled \code{X1}
-#'   and \code{X2} features. The column number equals to \code{SubsamplineNum}.
+#'   and \code{X2} features. The number of columns is \code{SubsamplineNum}.
 #'
 #' @examples
 #' \donttest{
 #' ## For illustration, we only subsample 5 times.
 #' set.seed(123)
 #'
-#' # SmCCA
+#' # Unweighted SmCCA
 #' W1 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = 0.05,
 #'   Lambda2 = 0.05, s1 = 0.7, s2 = 0.9, NoTrait = FALSE, FilterByTrait = FALSE,
-#'   Bipartite = FALSE, SubsamplingNum = 100, PartitionNum = NULL,
-#'   CCcoef = NULL, trace = FALSE)
-#'
+#'   SubsamplingNum = 100, CCcoef = NULL, trace = FALSE)
+#'   
+#' # Weighted SmCCA
+#' W2 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = 0.05,
+#'   Lambda2 = 0.05, s1 = 0.7, s2 = 0.9, NoTrait = FALSE, FilterByTrait = FALSE,
+#'   SubsamplingNum = 100, CCcoef = c(1, 5, 5), trace = FALSE)
+#'   
 #' # SsCCA
-#' W2 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = .05, Lambda2 = 0.5,
+#' W3 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = .05, Lambda2 = 0.5,
 #'   s1 = 0.7, s2 = 0.9, NoTrait = FALSE, FilterByTrait = TRUE,
-#'   Bipartite = FALSE, SubsamplingNum = 100, PartitionNum = NULL,
-#'   CCcoef = NULL, trace = FALSE)
+#'   SubsamplingNum = 100, CCcoef = NULL, trace = FALSE)
 #'
 #' # SCCA
-#' W3 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = 0.05,
-#'   Lambda2 = 0.05, s1 = 0.7, s2 = 0.9, NoTrait = TRUE, Bipartite = FALSE,
-#'   SubsamplingNum = 100, PartitionNum = 5, CCcoef = NULL, trace = FALSE)
+#' W4 <- getRobustPseudoWeights(X1, X2, Trait = NULL, Lambda1 = 0.05,
+#'   Lambda2 = 0.05, s1 = 0.7, s2 = 0.9, NoTrait = TRUE, 
+#'   SubsamplingNum = 100, CCcoef = NULL, trace = FALSE)
 #'   }
 #'
 #' @export
 getRobustPseudoWeights <- function(X1, X2, Trait, Lambda1, Lambda2,
-                                   s1, s2, NoTrait, FilterByTrait, Bipartite,
-                                   SubsamplingNum, PartitionNum,
+                                   s1 = 0.7, s2 = 0.9, NoTrait = FALSE, 
+                                   FilterByTrait = FALSE, SubsamplingNum = 1000,
                                    CCcoef = NULL, trace = FALSE){
 
   if(min(s1, s2) == 0){
@@ -127,42 +128,17 @@ getRobustPseudoWeights <- function(X1, X2, Trait, Lambda1, Lambda2,
     samp1 <- sort(sample(1:p1, p1.sub, replace = FALSE))
     samp2 <- sort(sample(1:p2, p2.sub, replace = FALSE))
 
-    if(Bipartite){ # If only subsample features.
-      x1.par <- scale(X1[ , samp1], center = TRUE, scale = TRUE)
-      x2.par <- scale(X2[ , samp2], center = TRUE, scale = TRUE)
+    x1.par <- scale(X1[ , samp1], center = TRUE, scale = TRUE)
+    x2.par <- scale(X2[ , samp2], center = TRUE, scale = TRUE)
 
-      out <- getCCAout(x1.par, x2.par, Trait, Lambda1, Lambda2,
+    out <- getCCAout(x1.par, x2.par, Trait, Lambda1, Lambda2,
                        NoTrait = NoTrait, FilterByTrait = FilterByTrait,
                        trace = trace, CCcoef = CCcoef)
 
-      w <- rep(0, p)
-      w[samp1] <- out$u
-      w[samp2 + p1] <- out$v
-      coeff.avg <- w
-
-    }else{ # If perform both subsampling and random partition.
-      samp <- c(samp1, samp2 + p1)
-      subSamp <- scale(X[ , samp], center = TRUE, scale = TRUE)
-      p.sub <- ncol(subSamp); p.par <- p.sub %/% 2
-
-      coeff <- pbapply::pbsapply(1:PartitionNum, function(y){
-        gp1 <- sample(1:p.sub, p.par, replace = FALSE)
-        x1.par <- subSamp[ , gp1]
-        gp2 <- sample((1:p.sub)[-gp1], p.sub-p.par, replace = FALSE)
-        x2.par <- subSamp[ , gp2]
-
-        out <- getCCAout(x1.par, x2.par, Trait, Lambda1, Lambda2,
-                         NoTrait = NoTrait, FilterByTrait = FilterByTrait,
-                         trace = trace, CCcoef = CCcoef)
-
-        w <- rep(0, p)
-        w[samp[gp1]] <- out$u
-        w[samp[gp2]] <- out$v
-        return(w)
-      })
-
-      coeff.avg <- apply(abs(coeff), 1, mean)
-    }
+    w <- rep(0, p)
+    w[samp1] <- out$u
+    w[samp2 + p1] <- out$v
+    coeff.avg <- w
 
     return(coeff.avg)
   })
@@ -226,7 +202,7 @@ getAbar <- function(Ws, FeatureLabel = NULL){
 
 #' Extract multi-omics modules based on the similarity matrix.
 #' 
-#' Apply a hierarchical tree cutting to the similarity matrix and extract
+#' Apply hierarchical tree cutting to the similarity matrix and extract
 #' modules that contain both omics data types.
 #'
 #' @param Abar A similary matrix for all features (both omics data types).
@@ -294,7 +270,8 @@ getMultiOmicsModules <- function(Abar, P1, CutHeight = 1-.1^10, PlotTree = TRUE)
 #' @param P1 Total number of features for the first omics data type.
 #' @param EdgeCut A numerical value between 0 and 1, indicating an edge
 #'   threshold for the network. Any features (network nodes) without any edge
-#'   strength that passes the threshold are excluded from the figure.
+#'   strength that passes the threshold are excluded from the figure. If 
+#'   \code{EdgeCut = 0} (default), then the full module network will be created. 
 #' @param FeatureLabel A \eqn{1\times p} vector indicating feature names. If
 #'   \code{FeatureLabel = NULL} (default), the feature names will be indices 1
 #'   through \eqn{p}.
@@ -325,12 +302,11 @@ getMultiOmicsModules <- function(Abar, P1, CutHeight = 1-.1^10, PlotTree = TRUE)
 #' x <- cbind(X1[ ,1:2], X2[ , 1:3])
 #' corr <- cor(x)
 #'
-#' plotMultiOmicsNetwork(abar, corr, modules, ModuleIdx = 1, P1 = 2,
-#'   EdgeCut = 0)
+#' plotMultiOmicsNetwork(abar, corr, modules, ModuleIdx = 1, P1 = 2)
 #'
 #' @export
 plotMultiOmicsNetwork <- function(Abar, CorrMatrix, multiOmicsModule,
-                               ModuleIdx, P1, EdgeCut, FeatureLabel = NULL,
+                               ModuleIdx, P1, EdgeCut = 0, FeatureLabel = NULL,
                                AddCorrSign = TRUE, SaveFile = NULL,
                                ShowType1Label = TRUE, ShowType2Label = TRUE,
                                PlotTitle = "", NetLayout = "lgl",

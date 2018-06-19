@@ -11,7 +11,7 @@ Author:
 Maintainer: 
     W. Jenny Shi <wjennyshi@gmail.com>
 Description: 
-    A canoncial correlation based framework for integrating multiple omics data types and a quantitative phenotype of interest, and constructing phenotype-specific multi-omics networks. 
+    A canonical correlation based framework for constructing phenotype-specific multi-comics networks by integrating multiple omics data types and a quantitative phenotype of interest. 
 URL: https://github.com/KechrisLab/SmCCNet
 BugReports: https://github.com/KechrisLab/SmCCNet/issues
 Depends: 
