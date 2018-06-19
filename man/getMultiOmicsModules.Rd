@@ -20,7 +20,7 @@ is \eqn{1-0.1^{10}}.}
 A list of multi-omics modules.
 }
 \description{
-Apply a hierarchical tree cutting to the similarity matrix and extract
+Apply hierarchical tree cutting to the similarity matrix and extract
 modules that contain both omics data types.
 }
 \examples{

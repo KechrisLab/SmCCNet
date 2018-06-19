@@ -5,7 +5,7 @@
 \title{Plot multi-omics module networks.}
 \usage{
 plotMultiOmicsNetwork(Abar, CorrMatrix, multiOmicsModule, ModuleIdx, P1,
-  EdgeCut, FeatureLabel = NULL, AddCorrSign = TRUE, SaveFile = NULL,
+  EdgeCut = 0, FeatureLabel = NULL, AddCorrSign = TRUE, SaveFile = NULL,
   ShowType1Label = TRUE, ShowType2Label = TRUE, PlotTitle = "",
   NetLayout = "lgl", ShowNodes = TRUE, VertexLabelCex = 1,
   VertexSize = 1)
@@ -27,7 +27,8 @@ length of \code{multiOmicsModule}.}
 
 \item{EdgeCut}{A numerical value between 0 and 1, indicating an edge
 threshold for the network. Any features (network nodes) without any edge
-strength that passes the threshold are excluded from the figure.}
+strength that passes the threshold are excluded from the figure. If 
+\code{EdgeCut = 0} (default), then the full module network will be created.}
 
 \item{FeatureLabel}{A \eqn{1\times p} vector indicating feature names. If
 \code{FeatureLabel = NULL} (default), the feature names will be indices 1
@@ -74,7 +75,6 @@ modules <- getMultiOmicsModules(abar, P1 = 2, CutHeight = 0.5)
 x <- cbind(X1[ ,1:2], X2[ , 1:3])
 corr <- cor(x)
 
-plotMultiOmicsNetwork(abar, corr, modules, ModuleIdx = 1, P1 = 2,
-  EdgeCut = 0)
+plotMultiOmicsNetwork(abar, corr, modules, ModuleIdx = 1, P1 = 2)
 
 }

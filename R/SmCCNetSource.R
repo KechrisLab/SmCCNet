@@ -61,8 +61,8 @@ requireNamespace("igraph", quietly = TRUE)
 #' @param NoTrait Logical, default is \code{FALSE}. Whether trait information is
 #'   provided.
 #' @param FilterByTrait Logical, default is \code{FALSE}. Whether only the top 
-#'   (80%) features with highest correlation to the trait will be assigned 
-#'   nonzero weights. The choice of 80% is based on the PMA package.
+#'   (\eqn{80\%}) features with highest correlation to the trait will be assigned 
+#'   nonzero weights. The choice of \eqn{80\%} is based on the PMA package.
 #' @param SubsamplingNum Number of feature subsamples. Default is 1000. Larger
 #'   number leads to more accurate results, but at a higher cost. 
 #' @param CCcoef Optional coefficients for the SmCCA pairwise canonical 

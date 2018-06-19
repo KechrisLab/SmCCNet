@@ -3,7 +3,7 @@
 \docType{data}
 \name{Y}
 \alias{Y}
-\title{A simulated phenotype dataset.}
+\title{A synthetic phenotype dataset.}
 \format{An object of class \code{matrix} with 358 rows and 1 columns.}
 \usage{
 Y

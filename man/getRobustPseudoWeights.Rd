@@ -6,9 +6,9 @@
 canonical correlation analysis (SmCCA), sparse supervised canonical 
 correlation analysis (SsCCA), or sparse canonical correlation analysis (SCCA).}
 \usage{
-getRobustPseudoWeights(X1, X2, Trait, Lambda1, Lambda2, s1, s2, NoTrait,
-  FilterByTrait, Bipartite, SubsamplingNum, PartitionNum, CCcoef = NULL,
-  trace = FALSE)
+getRobustPseudoWeights(X1, X2, Trait, Lambda1, Lambda2, s1 = 0.7, s2 = 0.9,
+  NoTrait = FALSE, FilterByTrait = FALSE, SubsamplingNum = 1000,
+  CCcoef = NULL, trace = FALSE)
 }
 \arguments{
 \item{X1}{An \eqn{n\times p_1} data matrix (e.g. mRNA) with \eqn{p_1} 
@@ -17,33 +17,29 @@ features and \eqn{n} subjects.}
 \item{X2}{An \eqn{n\times p_2} data matrix (e.g. miRNA) with \eqn{p_2} 
 features and \eqn{n} subjects.}
 
-\item{Trait}{An n\eqn{\times}1 trait data matrix for the same n subjects.}
+\item{Trait}{An \eqn{n\times 1} trait data matrix for the same n subjects.}
 
-\item{Lambda1}{LASSO pentalty parameter for \code{X1}. \code{Lambda1} needs
+\item{Lambda1}{LASSO penalty parameter for \code{X1}. \code{Lambda1} needs
 to be between 0 and 1.}
 
-\item{Lambda2}{LASSO pentalty parameter for \code{X2}. \code{Lambda2} needs 
+\item{Lambda2}{LASSO penalty parameter for \code{X2}. \code{Lambda2} needs 
 to be between 0 and 1.}
 
-\item{s1}{Proportion of mRNA features to be included. \code{s1} needs to be
-between 0 and 1.}
+\item{s1}{Proportion of mRNA features to be included, default at \code{s1 = 0.7}.
+\code{s1} needs to be between 0 and 1.}
 
-\item{s2}{Proportion of miRNA features to be included. \code{s2} needs to be
-between 0 and 1.}
+\item{s2}{Proportion of miRNA features to be included, default at \code{s1 = 0.9}.
+\code{s2} needs to be between 0 and 1.}
 
-\item{NoTrait}{Logical. Whether trait information is provided.}
+\item{NoTrait}{Logical, default is \code{FALSE}. Whether trait information is
+provided.}
 
-\item{FilterByTrait}{Logical. Whether only the top 80% features with highest
-correlation to the trait will be assigned nonzero weights.}
+\item{FilterByTrait}{Logical, default is \code{FALSE}. Whether only the top 
+(\eqn{80\%}) features with highest correlation to the trait will be assigned 
+nonzero weights. The choice of \eqn{80\%} is based on the PMA package.}
 
-\item{Bipartite}{Logical. Whether to include random partition.}
-
-\item{SubsamplingNum}{Number of feature subsamples. Larger number leads to
-more accurate results, but at a higher cost. We recommend to subsample at
-least 1000 times.}
-
-\item{PartitionNum}{Number of random partitions for each set of subsamples.
-This is only used if \code{Bipartite = FALSE}.}
+\item{SubsamplingNum}{Number of feature subsamples. Default is 1000. Larger
+number leads to more accurate results, but at a higher cost.}
 
 \item{CCcoef}{Optional coefficients for the SmCCA pairwise canonical 
 correlations. If \code{CCcoef = NULL} (default), then the objective 
@@ -51,12 +47,12 @@ function is the total sum of all pairwise canonical correlations. It can
 also be a coefficient vector that follows the column order of 
 \code{combn(K, 2)}.}
 
-\item{trace}{Logical. Whether to display CCA algorithm trace.}
+\item{trace}{Logical. Whether to display the CCA algorithm trace.}
 }
 \value{
 A canonical correlation weight matrix with \eqn{p_1+p_2} rows. Each 
   column is the canonical correlation weights based on subsampled \code{X1}
-  and \code{X2} features. The column number equals to \code{SubsamplineNum}.
+  and \code{X2} features. The number of columns is \code{SubsamplineNum}.
 }
 \description{
 Integrate two omics data type (and a quantitative phenotype), and calculate
@@ -81,22 +77,25 @@ To choose SCCA, set \code{Trait = NULL, NoTrait = TRUE}.
 ## For illustration, we only subsample 5 times.
 set.seed(123)
 
-# SmCCA
+# Unweighted SmCCA
 W1 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = 0.05,
   Lambda2 = 0.05, s1 = 0.7, s2 = 0.9, NoTrait = FALSE, FilterByTrait = FALSE,
-  Bipartite = FALSE, SubsamplingNum = 100, PartitionNum = NULL,
-  CCcoef = NULL, trace = FALSE)
-
+  SubsamplingNum = 100, CCcoef = NULL, trace = FALSE)
+  
+# Weighted SmCCA
+W2 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = 0.05,
+  Lambda2 = 0.05, s1 = 0.7, s2 = 0.9, NoTrait = FALSE, FilterByTrait = FALSE,
+  SubsamplingNum = 100, CCcoef = c(1, 5, 5), trace = FALSE)
+  
 # SsCCA
-W2 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = .05, Lambda2 = 0.5,
+W3 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = .05, Lambda2 = 0.5,
   s1 = 0.7, s2 = 0.9, NoTrait = FALSE, FilterByTrait = TRUE,
-  Bipartite = FALSE, SubsamplingNum = 100, PartitionNum = NULL,
-  CCcoef = NULL, trace = FALSE)
+  SubsamplingNum = 100, CCcoef = NULL, trace = FALSE)
 
 # SCCA
-W3 <- getRobustPseudoWeights(X1, X2, Trait = Y, Lambda1 = 0.05,
-  Lambda2 = 0.05, s1 = 0.7, s2 = 0.9, NoTrait = TRUE, Bipartite = FALSE,
-  SubsamplingNum = 100, PartitionNum = 5, CCcoef = NULL, trace = FALSE)
+W4 <- getRobustPseudoWeights(X1, X2, Trait = NULL, Lambda1 = 0.05,
+  Lambda2 = 0.05, s1 = 0.7, s2 = 0.9, NoTrait = TRUE, 
+  SubsamplingNum = 100, CCcoef = NULL, trace = FALSE)
   }
 
 }

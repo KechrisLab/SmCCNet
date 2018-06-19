@@ -3,7 +3,7 @@
 \docType{data}
 \name{X1}
 \alias{X1}
-\title{A simulated mRNA expression dataset.}
+\title{A synthetic mRNA expression dataset.}
 \format{An object of class \code{matrix} with 358 rows and 500 columns.}
 \usage{
 X1
