@@ -55,7 +55,7 @@ requireNamespace("igraph", quietly = TRUE)
 #'   to be between 0 and 1.
 #' @param s1 Proportion of mRNA features to be included, default at \code{s1 = 0.7}.
 #'   \code{s1} needs to be between 0 and 1.
-#' @param s2 Proportion of miRNA features to be included, default at \code{s1 = 0.9}.
+#' @param s2 Proportion of miRNA features to be included, default at \code{s1 = 0.7}.
 #'   \code{s2} needs to be between 0 and 1.
 #' @param NoTrait Logical, default is \code{FALSE}. Whether trait information is
 #'   provided.
@@ -102,7 +102,7 @@ requireNamespace("igraph", quietly = TRUE)
 #'
 #' @export
 getRobustPseudoWeights <- function(X1, X2, Trait, Lambda1, Lambda2,
-                                   s1 = 0.7, s2 = 0.9, NoTrait = FALSE, 
+                                   s1 = 0.7, s2 = 0.7, NoTrait = FALSE, 
                                    FilterByTrait = FALSE, SubsamplingNum = 1000,
                                    CCcoef = NULL, trace = FALSE){
 
@@ -161,7 +161,7 @@ getRobustPseudoWeights <- function(X1, X2, Trait, Lambda1, Lambda2,
 #'   matrix, then each column corresponds to one weight vector.
 #' @param P1 Total number of features for the first omics data type. 
 #' @param FeatureLabel If \code{FeatureLabel = NULL} (default), the feature 
-#'   names will be \eqn{\{Gene_1, \cdots, Gene_{p_1}, Mir_1, \cdots, Mir_{p-p_1}\}}, 
+#'   names will be \eqn{\{TypeI_1, \cdots, TypeI_{p_1}, TypeII_1, \cdots, TypeII_{p-p_1}\}}, 
 #'   where \eqn{p_1 = }\code{P1}, and \eqn{p} is the total number of omics features.
 #' @return A \eqn{p\times p} symmetric non-negative matrix.
 #'
@@ -196,7 +196,8 @@ getAbar <- function(Ws, P1 = NULL, FeatureLabel = NULL){
                     for the first data type P1.")
             }else{
                 p <- ncol(Abar)
-                FeatureLabel <- c(paste0("Gene_", 1:P1), paste0("Mir_", 1:(p-P1)))
+                FeatureLabel <- c(paste0("TypeI_", 1:P1), 
+                                  paste0("TypeII_", 1:(p-P1)))
             }
         }
         colnames(Abar) <- rownames(Abar) <- FeatureLabel
@@ -283,8 +284,8 @@ getMultiOmicsModules <- function(Abar, P1, CutHeight = 1-.1^10, PlotTree = TRUE)
 #'   \code{EdgeCut = 0} (default), then the full module network will be created. 
 #' @param FeatureLabel A \eqn{1\times p} vector indicating feature names. If
 #'   \code{FeatureLabel = NULL} (default), the feature names will be 
-#'   \eqn{\{Gene_1, \cdots, Gene_{p_1}, Mir_1, \cdots, Mir_{p-p_1}\}}, where 
-#'   \eqn{p_1 = }\code{P1}.
+#'   \eqn{\{TypeI_1, \cdots, TypeI_{p_1}, TypeII_1, \cdots, TypeII_{p-p_1}\}}, 
+#'   where \eqn{p_1 = }\code{P1}.
 #' @param AddCorrSign Logical. Whether to add a positive or negative sign to
 #'   each network edge based on pairwise feature correlations.
 #' @param SaveFile A pdf file name for the figure output. 
@@ -325,7 +326,7 @@ plotMultiOmicsNetwork <- function(Abar, CorrMatrix, multiOmicsModule,
 
     p <- ncol(Abar)
     if(is.null(FeatureLabel)){
-        FeatureLabel <- c(paste0("Gene_", 1:P1), paste0("Mir_", 1:(p-P1)))
+        FeatureLabel <- c(paste0("TypeI_", 1:P1), paste0("TypeII_", 1:(p-P1)))
         }
     colnames(Abar) <- rownames(Abar) <- FeatureLabel[1:p]
     colnames(CorrMatrix) <- rownames(CorrMatrix) <- FeatureLabel[1:p]

@@ -6,7 +6,7 @@
 canonical correlation analysis (SmCCA), sparse supervised canonical 
 correlation analysis (SsCCA), or sparse canonical correlation analysis (SCCA).}
 \usage{
-getRobustPseudoWeights(X1, X2, Trait, Lambda1, Lambda2, s1 = 0.7, s2 = 0.9,
+getRobustPseudoWeights(X1, X2, Trait, Lambda1, Lambda2, s1 = 0.7, s2 = 0.7,
   NoTrait = FALSE, FilterByTrait = FALSE, SubsamplingNum = 1000,
   CCcoef = NULL, trace = FALSE)
 }
@@ -28,7 +28,7 @@ to be between 0 and 1.}
 \item{s1}{Proportion of mRNA features to be included, default at \code{s1 = 0.7}.
 \code{s1} needs to be between 0 and 1.}
 
-\item{s2}{Proportion of miRNA features to be included, default at \code{s1 = 0.9}.
+\item{s2}{Proportion of miRNA features to be included, default at \code{s1 = 0.7}.
 \code{s2} needs to be between 0 and 1.}
 
 \item{NoTrait}{Logical, default is \code{FALSE}. Whether trait information is

@@ -32,8 +32,8 @@ strength that passes the threshold are excluded from the figure. If
 
 \item{FeatureLabel}{A \eqn{1\times p} vector indicating feature names. If
 \code{FeatureLabel = NULL} (default), the feature names will be 
-\eqn{\{Gene_1, \cdots, Gene_{p_1}, Mir_1, \cdots, Mir_{p-p_1}\}}, where 
-\eqn{p_1 = }\code{P1}.}
+\eqn{\{TypeI_1, \cdots, TypeI_{p_1}, TypeII_1, \cdots, TypeII_{p-p_1}\}}, 
+where \eqn{p_1 = }\code{P1}.}
 
 \item{AddCorrSign}{Logical. Whether to add a positive or negative sign to
 each network edge based on pairwise feature correlations.}

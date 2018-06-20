@@ -14,7 +14,7 @@ matrix, then each column corresponds to one weight vector.}
 \item{P1}{Total number of features for the first omics data type.}
 
 \item{FeatureLabel}{If \code{FeatureLabel = NULL} (default), the feature 
-names will be \eqn{\{Gene_1, \cdots, Gene_{p_1}, Mir_1, \cdots, Mir_{p-p_1}\}}, 
+names will be \eqn{\{TypeI_1, \cdots, TypeI_{p_1}, TypeII_1, \cdots, TypeII_{p-p_1}\}}, 
 where \eqn{p_1 = }\code{P1}, and \eqn{p} is the total number of omics features.}
 }
 \value{
