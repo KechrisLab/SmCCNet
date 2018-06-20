@@ -31,8 +31,9 @@ strength that passes the threshold are excluded from the figure. If
 \code{EdgeCut = 0} (default), then the full module network will be created.}
 
 \item{FeatureLabel}{A \eqn{1\times p} vector indicating feature names. If
-\code{FeatureLabel = NULL} (default), the feature names will be indices 1
-through \eqn{p}.}
+\code{FeatureLabel = NULL} (default), the feature names will be 
+\eqn{\{Gene_1, \cdots, Gene_{p_1}, Mir_1, \cdots, Mir_{p-p_1}\}}, where 
+\eqn{p_1 = }\code{P1}.}
 
 \item{AddCorrSign}{Logical. Whether to add a positive or negative sign to
 each network edge based on pairwise feature correlations.}
@@ -70,7 +71,7 @@ canonical weights and pairwise feature correlations.
 set.seed(123)
 w <- rnorm(5)
 w <- w/sqrt(sum(w^2))
-abar <- getAbar(w)
+abar <- getAbar(w, P1 = 2, FeatureLabel = NULL)
 modules <- getMultiOmicsModules(abar, P1 = 2, CutHeight = 0.5)
 x <- cbind(X1[ ,1:2], X2[ , 1:3])
 corr <- cor(x)

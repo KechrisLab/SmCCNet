@@ -159,18 +159,20 @@ getRobustPseudoWeights <- function(X1, X2, Trait, Lambda1, Lambda2,
 #'
 #' @param Ws A canonical correlation weight vector or matrix. If \code{Ws} is a
 #'   matrix, then each column corresponds to one weight vector.
-#' @param FeatureLabel A \eqn{1\times p} vector indicating feature names. If 
-#'   \code{FeatureLabel = NULL} (default), the feature names will be indices 
-#'   1 through \eqn{p}, where \eqn{p} is the total number of omics features.
+#' @param P1 Total number of features for the first omics data type. 
+#' @param FeatureLabel If \code{FeatureLabel = NULL} (default), the feature 
+#'   names will be \eqn{\{Gene_1, \cdots, Gene_{p_1}, Mir_1, \cdots, Mir_{p-p_1}\}}, 
+#'   where \eqn{p_1 = }\code{P1}, and \eqn{p} is the total number of omics features.
 #' @return A \eqn{p\times p} symmetric non-negative matrix.
 #'
 #' @examples
 #' w <- matrix(rnorm(6), nrow = 3)
 #' Ws <- apply(w, 2, function(x)return(x/sqrt(sum(x^2))))
-#' abar <- getAbar(Ws)
+#' abar <- getAbar(Ws, P1 = 2, FeatureLabel = NULL)
 #'
 #' @export
-getAbar <- function(Ws, FeatureLabel = NULL){
+getAbar <- function(Ws, P1 = NULL, FeatureLabel = NULL){
+    
 
     if(is.null(dim(Ws))){
         Abar <- Matrix::Matrix(abs(Ws) %o% abs(Ws), sparse = TRUE)
@@ -188,7 +190,15 @@ getAbar <- function(Ws, FeatureLabel = NULL){
     Abar <- Abar/max(Abar)
 
     if(is.null(colnames(Abar))){
-        if(is.null(FeatureLabel)){FeatureLabel <- 1:nrow(Abar)}
+        if(is.null(FeatureLabel)){
+            if(is.null(P1)){
+                stop("Need to provide FeatureLabel or the number of features 
+                    for the first data type P1.")
+            }else{
+                p <- ncol(Abar)
+                FeatureLabel <- c(paste0("Gene_", 1:P1), paste0("Mir_", 1:(p-P1)))
+            }
+        }
         colnames(Abar) <- rownames(Abar) <- FeatureLabel
     }
 
@@ -215,7 +225,7 @@ getAbar <- function(Ws, FeatureLabel = NULL){
 #' set.seed(123)
 #' w <- rnorm(5)
 #' w <- w/sqrt(sum(w^2))
-#' abar <- getAbar(w)
+#' abar <- getAbar(w, P1 = 2, FeatureLabel = NULL)
 #' modules <- getMultiOmicsModules(abar, P1 = 2, CutHeight = 0.5)
 #'
 #' @export
@@ -272,8 +282,9 @@ getMultiOmicsModules <- function(Abar, P1, CutHeight = 1-.1^10, PlotTree = TRUE)
 #'   strength that passes the threshold are excluded from the figure. If 
 #'   \code{EdgeCut = 0} (default), then the full module network will be created. 
 #' @param FeatureLabel A \eqn{1\times p} vector indicating feature names. If
-#'   \code{FeatureLabel = NULL} (default), the feature names will be indices 1
-#'   through \eqn{p}.
+#'   \code{FeatureLabel = NULL} (default), the feature names will be 
+#'   \eqn{\{Gene_1, \cdots, Gene_{p_1}, Mir_1, \cdots, Mir_{p-p_1}\}}, where 
+#'   \eqn{p_1 = }\code{P1}.
 #' @param AddCorrSign Logical. Whether to add a positive or negative sign to
 #'   each network edge based on pairwise feature correlations.
 #' @param SaveFile A pdf file name for the figure output. 
@@ -296,7 +307,7 @@ getMultiOmicsModules <- function(Abar, P1, CutHeight = 1-.1^10, PlotTree = TRUE)
 #' set.seed(123)
 #' w <- rnorm(5)
 #' w <- w/sqrt(sum(w^2))
-#' abar <- getAbar(w)
+#' abar <- getAbar(w, P1 = 2, FeatureLabel = NULL)
 #' modules <- getMultiOmicsModules(abar, P1 = 2, CutHeight = 0.5)
 #' x <- cbind(X1[ ,1:2], X2[ , 1:3])
 #' corr <- cor(x)
@@ -313,7 +324,9 @@ plotMultiOmicsNetwork <- function(Abar, CorrMatrix, multiOmicsModule,
                                VertexLabelCex = 1, VertexSize = 1){
 
     p <- ncol(Abar)
-    if(is.null(FeatureLabel)){FeatureLabel <- 1:p}
+    if(is.null(FeatureLabel)){
+        FeatureLabel <- c(paste0("Gene_", 1:P1), paste0("Mir_", 1:(p-P1)))
+        }
     colnames(Abar) <- rownames(Abar) <- FeatureLabel[1:p]
     colnames(CorrMatrix) <- rownames(CorrMatrix) <- FeatureLabel[1:p]
 
@@ -449,7 +462,7 @@ getCCAout <- function(X1, X2, Trait, Lambda1, Lambda2, CCcoef = NULL,
                               trace = trace)
           }
       }else{
-          xlist <- list(x1 = X1, x2 = X2, y = Trait)
+          xlist <- list(x1 = X1, x2 = X2, y = scale(Trait))
           L1 <- max(1, sqrt(ncol(X1)) * Lambda1)
           L2 <- max(1, sqrt(ncol(X2)) * Lambda2)
           out <- myMultiCCA(xlist, penalty = c(L1, L2, sqrt(ncol(Trait))),

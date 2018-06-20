@@ -27,7 +27,7 @@ modules that contain both omics data types.
 set.seed(123)
 w <- rnorm(5)
 w <- w/sqrt(sum(w^2))
-abar <- getAbar(w)
+abar <- getAbar(w, P1 = 2, FeatureLabel = NULL)
 modules <- getMultiOmicsModules(abar, P1 = 2, CutHeight = 0.5)
 
 }

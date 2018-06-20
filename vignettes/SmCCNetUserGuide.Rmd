@@ -157,11 +157,10 @@ Denote the number of features in $X_1 \& X_2$ as $p_1 \& p_2$ respectively, and 
 p1 <- ncol(X1)
 p2 <- ncol(X2)
 n <- nrow(X1)
-Y.scaled <- scale(Y, center = TRUE, scale = TRUE)
 AbarLabel <- c(colnames(cbind(X1, X2)))
 ```
 
-Although SmCCNet does not require normality, it calculates the Pearson correlation between linear combinations of omics features and the phenotype, which assumes finite variances and finite covariance. It is necessary to include a transformation if the data are skewed. The algorithm also requires the data to be standardizable (scalable). 
+Although SmCCNet does not require normality, it calculates the Pearson correlation between linear combinations of omics features and the phenotype, which assumes finite variances and finite covariance. It is necessary to include a transformation if the data are skewed. 
 
 
 
@@ -203,7 +202,7 @@ dir.create(CVDir)
 ```
 
 ### Create test and training data sets. 
-First, we need to split the data ($X_1, X_2, Y$) into test and training sets (Figure \@ref(fig:CVflow), Step I.1). The data sets will be standardized (centered and scaled) by columns within the algorithm. Since data with zero column variance can not be scaled, we require each column variance to be greater than zero for the test and training sets. To ensure the validability of the data sets, we recommend to check if they are scalable first and save the standardized data under a CV directory.
+First, we need to split the data ($X_1, X_2, Y$) into test and training sets (Figure \@ref(fig:CVflow), Step I.1). All CCA methods require data sets to be standardized (centered and scaled) by columns (e.g. features). We have included the standardization step within the SmCCNet algorithm. However, for the CV procedure, we recommend to standardize the training and test sets upfront, since this helps to choose the number of CV folds $K$. If any data set can not be standardized, we recommend to reduce $K$. In the code below, we show how to create CV data sets and check if all data sets are valid (i.e. standardizable). The standardized training and test data sets will be saved under the CV directory.
 
 ```{r make K-fold, eval = FALSE}
 set.seed(12345) # Set random seed.

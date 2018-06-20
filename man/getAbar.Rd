@@ -5,15 +5,17 @@
 \title{Compute the similarity matrix based on one or more canonical correlation 
 weight vectors.}
 \usage{
-getAbar(Ws, FeatureLabel = NULL)
+getAbar(Ws, P1 = NULL, FeatureLabel = NULL)
 }
 \arguments{
 \item{Ws}{A canonical correlation weight vector or matrix. If \code{Ws} is a
 matrix, then each column corresponds to one weight vector.}
 
-\item{FeatureLabel}{A \eqn{1\times p} vector indicating feature names. If 
-\code{FeatureLabel = NULL} (default), the feature names will be indices 
-1 through \eqn{p}, where \eqn{p} is the total number of omics features.}
+\item{P1}{Total number of features for the first omics data type.}
+
+\item{FeatureLabel}{If \code{FeatureLabel = NULL} (default), the feature 
+names will be \eqn{\{Gene_1, \cdots, Gene_{p_1}, Mir_1, \cdots, Mir_{p-p_1}\}}, 
+where \eqn{p_1 = }\code{P1}, and \eqn{p} is the total number of omics features.}
 }
 \value{
 A \eqn{p\times p} symmetric non-negative matrix.
@@ -25,6 +27,6 @@ canonical correlation weights.
 \examples{
 w <- matrix(rnorm(6), nrow = 3)
 Ws <- apply(w, 2, function(x)return(x/sqrt(sum(x^2))))
-abar <- getAbar(Ws)
+abar <- getAbar(Ws, P1 = 2, FeatureLabel = NULL)
 
 }
