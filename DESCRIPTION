@@ -2,8 +2,8 @@ Package: SmCCNet
 Type: Package
 Title: 
     Sparse multiple canonical correlation network analysis tool
-Version: 0.1.0
-Date: 2018-6-19
+Version: 0.99.0
+Date: 2018-8-6
 Author: 
     W. Jenny Shi [aut, cre],
     Laura Saba [aut],
@@ -15,7 +15,7 @@ Description:
 URL: https://github.com/KechrisLab/SmCCNet
 BugReports: https://github.com/KechrisLab/SmCCNet/issues
 Depends: 
-    R (>= 3.4.4)
+    R (>= 3.5)
 Imports:
     PMA,
     Matrix,
@@ -31,4 +31,5 @@ License:
     GPL-3
 Encoding: UTF-8
 LazyData: true
+biocViews: Network
 RoxygenNote: 6.0.1

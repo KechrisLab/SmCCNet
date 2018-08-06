@@ -100,15 +100,15 @@ myMultiCCA <- function(xlist, penalty=NULL, ws=NULL, niter=25,
     # Initialize weights.
     if(!is.null(ws)){
       makenull <- FALSE
-      for(i in 1:(K-1)){
+      for(i in seq_len(K-1)){
         if(ncol(ws[[i]])<ncomponents) makenull <- TRUE
       }
       if(makenull) ws <- NULL
     }
     if(is.null(ws)){
       ws <- list()
-      for(i in 1:(K-1)){
-        ws[[i]] <- matrix(svd(xlist[[i]])$v[,1:ncomponents], ncol=ncomponents)
+      for(i in seq_len(K-1)){
+        ws[[i]] <- matrix(svd(xlist[[i]])$v[,seq_len(ncomponents)], ncol=ncomponents)
       }
       ws[[K]] <- 1
     }
@@ -118,7 +118,7 @@ myMultiCCA <- function(xlist, penalty=NULL, ws=NULL, niter=25,
     if(is.null(penalty)){
       penalty <- rep(NA, K)
       penalty[type=="standard"] <- 4 # this is the default value of sumabs
-      for(k in 1:(K-1)){
+      for(k in seq_len(K-1)){
         if(type[k]=="ordered"){
           stop("Current version requires all element types to be standard (not ordered).")
         }
@@ -129,7 +129,7 @@ myMultiCCA <- function(xlist, penalty=NULL, ws=NULL, niter=25,
       stop("Cannot constrain sum of absolute values of weights to be less than
            1.")
     }
-    for(i in 1:(K-1)){
+    for(i in seq_len(K-1)){
       if(type[i]=="standard" && penalty[i]>sqrt(ncol(xlist[[i]]))){
         stop("L1 bound of weights should be no more than sqrt of the number of
              columns of the corresponding data set.", fill=TRUE)
@@ -137,13 +137,13 @@ myMultiCCA <- function(xlist, penalty=NULL, ws=NULL, niter=25,
     }
 
     ws.final <- ws.init
-    for(i in 1:(K-1)){
+    for(i in seq_len(K-1)){
       ws.final[[i]] <- matrix(0, nrow=ncol(xlist[[i]]), ncol=ncomponents)
     }
     cors <- NULL
-    for(comp in 1:ncomponents){
+    for(comp in seq_len(ncomponents)){
       ws <- list()
-      for(i in 1:(K-1)) ws[[i]] <- ws.init[[i]][,comp]
+      for(i in seq_len(K-1)) ws[[i]] <- ws.init[[i]][,comp]
       ws[[K]] <- 1
       curiter <- 1
       crit.old <- -10
@@ -157,13 +157,13 @@ myMultiCCA <- function(xlist, penalty=NULL, ws=NULL, niter=25,
         storecrits <- c(storecrits,crit)
         if(trace) cat(curiter, fill=FALSE)
         curiter <- curiter+1
-        for(i in 1:(K-1)){
+        for(i in seq_len(K-1)){
           ws[[i]] <- myUpdateW(xlist, i, K, penalty[i], ws, type[i], ws.final,
                              pair_CC, CCcoef)
         }
       }
 
-      for(i in 1:(K-1)) ws.final[[i]][,comp] <- ws[[i]]
+      for(i in seq_len(K-1)) ws.final[[i]][,comp] <- ws[[i]]
       cors <- c(cors, myGetCors(xlist, ws, pair_CC, CCcoef))
     }
 
@@ -199,7 +199,7 @@ myUpdateW <- function(xlist, i, K, sumabsthis, ws, type="standard", ws.final,
   # CCcoef: Optional coefficients for the pairwise canonical correlations (CC).
 
 
-  tots0 <- sapply(1:length(CCcoef), function(x){
+  tots0 <- vapply(seq_len(length(CCcoef)), function(x){
     pairx <- pair_CC[ , x]
     Xi <- xlist[[i]]
 
@@ -222,7 +222,7 @@ myUpdateW <- function(xlist, i, K, sumabsthis, ws, type="standard", ws.final,
     }
 
     return(y)
-  })
+  }, numeric(ncol(xlist[[i]])))
   tots <- rowSums(tots0)
 
   if(type=="standard"){

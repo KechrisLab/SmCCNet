@@ -106,7 +106,7 @@ knitr::include_graphics("SmCCNetWorkflow.pdf")
 
 The SmCCNet package has the following dependencies: 
 
-```{r, echo = FALSE, results = "hide", warning = FALSE, eval = FALSE}
+```{r, echo = FALSE, results = "hide", warning = FALSE, eval = TRUE}
 suppressPackageStartupMessages({
     library(PMA)
     library(pbapply)
@@ -114,7 +114,7 @@ suppressPackageStartupMessages({
     library(igraph)
 })
 ```
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 library(PMA)
 library(pbapply)
 library(Matrix)
@@ -122,7 +122,7 @@ library(igraph)
 ```
 
 The SmCCNet package consists of two R scripts:
-```{r source, eval = FALSE}
+```{r source, eval = TRUE}
 source("../R/ModifiedPMA.R")
 source("../R/SmCCNetSource.R")
 ```
@@ -153,7 +153,7 @@ head(Y)
 ```
 
 Denote the number of features in $X_1 \& X_2$ as $p_1 \& p_2$ respectively, and the number of subjects as $n$.
-```{r p1p2, eval = FALSE}
+```{r p1p2, eval = TRUE}
 p1 <- ncol(X1)
 p2 <- ncol(X2)
 n <- nrow(X1)

@@ -122,10 +122,10 @@ getRobustPseudoWeights <- function(X1, X2, Trait, Lambda1, Lambda2,
   p1.sub <- ceiling(s1 * p1);   p2.sub <- ceiling(s2 * p2)
   X <- cbind(X1, X2)
 
-  beta <- pbapply::pbsapply(1:SubsamplingNum, function(x){
+  beta <- pbapply::pbsapply(seq_len(SubsamplingNum), function(x){
     # Subsample features
-    samp1 <- sort(sample(1:p1, p1.sub, replace = FALSE))
-    samp2 <- sort(sample(1:p2, p2.sub, replace = FALSE))
+    samp1 <- sort(sample(seq_len(p1), p1.sub, replace = FALSE))
+    samp2 <- sort(sample(seq_len(p2), p2.sub, replace = FALSE))
 
     x1.par <- scale(X1[ , samp1], center = TRUE, scale = TRUE)
     x2.par <- scale(X2[ , samp2], center = TRUE, scale = TRUE)
@@ -179,7 +179,7 @@ getAbar <- function(Ws, P1 = NULL, FeatureLabel = NULL){
     }else{
         b <- nrow(Ws)
         Abar <- matrix(0, nrow = b, ncol = b)
-        for(ind in 1:ncol(Ws)){
+        for(ind in seq_len(ncol(Ws))){
             w <- abs(Ws[ , ind])
             A <- Matrix::Matrix(w %o% w, sparse = TRUE)
             Abar <- Abar + A
@@ -196,8 +196,8 @@ getAbar <- function(Ws, P1 = NULL, FeatureLabel = NULL){
                     for the first data type P1.")
             }else{
                 p <- ncol(Abar)
-                FeatureLabel <- c(paste0("TypeI_", 1:P1), 
-                                  paste0("TypeII_", 1:(p-P1)))
+                FeatureLabel <- c(paste0("TypeI_", seq_len(P1)), 
+                                  paste0("TypeII_", seq_len(p-P1)))
             }
         }
         colnames(Abar) <- rownames(Abar) <- FeatureLabel
@@ -239,7 +239,7 @@ getMultiOmicsModules <- function(Abar, P1, CutHeight = 1-.1^10, PlotTree = TRUE)
 
     grpID <- stats::cutree(hc, h = CutHeight)
     id <- grpID[lower.leaves]
-    M <- lapply(1:length(unique(id)), function(x){
+    M <- lapply(seq_len(length(unique(id))), function(x){
         M.x <- lower.leaves[which(id == unique(id)[x])]
         return(M.x)
     })
@@ -251,7 +251,7 @@ getMultiOmicsModules <- function(Abar, P1, CutHeight = 1-.1^10, PlotTree = TRUE)
     })
 
     if(length(multiOmicsModule) > 1){
-        nullSet <- which(sapply(multiOmicsModule, is.null))
+        nullSet <- which(vapply(multiOmicsModule, is.null, logical(1)))
         if(length(nullSet) > 0){
             multiOmicsModule <- multiOmicsModule[-nullSet]
         }
@@ -310,7 +310,7 @@ getMultiOmicsModules <- function(Abar, P1, CutHeight = 1-.1^10, PlotTree = TRUE)
 #' w <- w/sqrt(sum(w^2))
 #' abar <- getAbar(w, P1 = 2, FeatureLabel = NULL)
 #' modules <- getMultiOmicsModules(abar, P1 = 2, CutHeight = 0.5)
-#' x <- cbind(X1[ ,1:2], X2[ , 1:3])
+#' x <- cbind(X1[ ,seq_len(2)], X2[ , seq_len(3)])
 #' corr <- cor(x)
 #'
 #' plotMultiOmicsNetwork(abar, corr, modules, ModuleIdx = 1, P1 = 2)
@@ -326,10 +326,10 @@ plotMultiOmicsNetwork <- function(Abar, CorrMatrix, multiOmicsModule,
 
     p <- ncol(Abar)
     if(is.null(FeatureLabel)){
-        FeatureLabel <- c(paste0("TypeI_", 1:P1), paste0("TypeII_", 1:(p-P1)))
+        FeatureLabel <- c(paste0("TypeI_", seq_len(P1)), paste0("TypeII_", seq_len(p-P1)))
         }
-    colnames(Abar) <- rownames(Abar) <- FeatureLabel[1:p]
-    colnames(CorrMatrix) <- rownames(CorrMatrix) <- FeatureLabel[1:p]
+    colnames(Abar) <- rownames(Abar) <- FeatureLabel[seq_len(p)]
+    colnames(CorrMatrix) <- rownames(CorrMatrix) <- FeatureLabel[seq_len(p)]
 
     grp <- multiOmicsModule[[ModuleIdx]]
     grp.memb <- colnames(Abar)[grp]
@@ -345,7 +345,7 @@ plotMultiOmicsNetwork <- function(Abar, CorrMatrix, multiOmicsModule,
         print("No edge passes threshold.")
     }else{
         M <- M[newM.node, newM.node]
-        allidx <- matrix(1:p, ncol = 1)
+        allidx <- matrix(seq_len(p), ncol = 1)
         rownames(allidx) <- rownames(Abar)
 
         NodeInfo <- data.frame(id = newM.node, idx = allidx[newM.node, ])
