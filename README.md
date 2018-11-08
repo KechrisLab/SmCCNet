@@ -1,5 +1,5 @@
 # SmCCNet
-SmCCNet is a canonical correlation analysis based method for discovering (quantitative) trait-specific multi-omics networks. The method allows the integration of multiple data types and a quantitaive phenotypic trait. It incorporates a feature subsampling scheme of features to improve the robustness of the canonical weights. 
+SmCCNet is a canonical correlation analysis based method for discovering (quantitative) trait-specific multi-omics networks. The method allows the integration of multiple data types and a quantitative phenotypic trait. It incorporates a feature subsampling scheme to improve the robustness of the canonical weights. 
 
 To install and use the package, you may download the directory or follow the instructions below.
 ```{r, install-and-example}
