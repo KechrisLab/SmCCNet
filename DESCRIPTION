@@ -1,0 +1,57 @@
+Package: SmCCNet
+Type: Package
+Title: Sparse Multiple Canonical Correlation Network Analysis Tool
+Version: 1.1.0
+Date: 2023-4-04
+Author: 
+    Weixuan Liu [aut, cre],
+    Yonghua Zhuang [aut, cre],
+    W. Jenny Shi [aut, cre],
+    Thao Vu [aut],
+    Iain Konigsberg [aut],
+    Katherine Pratte [aut],
+    Laura Saba [aut],
+    Katerina Kechris [aut]
+Maintainer: 
+    Weixuan Liu <weixuan.liu@cuanschutz.edu>
+Description: 
+    A canonical correlation based framework for constructing phenotype-specific multi-omics networks by integrating multiple omics data types and a quantitative phenotype of interest. 
+URL: https://github.com/KechrisLab/SmCCNet
+Depends: R (>= 3.5)
+Imports: 
+    EnvStats,
+    future,
+    pROC,
+    spls,
+    PMA,
+    Matrix,
+    pbapply,
+    igraph,
+    magrittr,
+    WGCNA,
+    rlist,
+    furrr,
+    purrr,
+    pracma
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+biocViews: Network
+RoxygenNote: 7.2.3
+NeedsCompilation: no
+VignetteBuilder: knitr
+Packaged: 2021-08-10 15:16:50 UTC; Weixuan Liu
+Repository: CRAN
+Date/Publication: 2021-08-10 15:16:50 UTC
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    dplyr,
+    reshape2,
+    shadowtext,
+    tidyverse,
+    parallel,
+    mltools,
+    caret,
+Config/testthat/edition: 3

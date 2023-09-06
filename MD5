@@ -1,0 +1,16 @@
+336b8c805662d33e086339f749293cd6 *DESCRIPTION
+df81dbb04c6cf35256a95359cbc28e5a *NAMESPACE
+3109fd6a2b6fdcc66787eba2731337b8 *R/Data.R
+7963663519f29543754c61f291a2c6a2 *R/ModifiedPMA.R
+1d661d1b2da81b84b368b75c4dea5741 *R/SmCCNetSource.R
+b99cc9cffb856bf219bf3abe02ef0adf *data/ExampleData.RData
+5f2ba2fda1561066007a38c4969bb28d *data/datalist
+7f1a7351996d7f2b4b7ebf0e7a955adc *inst/NEWS
+332c37641a549969de43f40c2f8f454f *inst/doc/SmCCNetUserGuide.pdf
+6cc90a621b34d9406bf7f530f42d0d67 *man/geneExpr.Rd
+932e8e74b4862c1541c9bf80f2529def *man/getAbar.Rd
+145b2487d4eb253bb9880af28312c507 *man/getMultiOmicsModules.Rd
+780828118f68a6cd8a3feb928399ab58 *man/getRobustPseudoWeights.Rd
+d81f34466c75f6c6e921b9ee23a48252 *man/mirnaExpr.Rd
+47cec3307e947ea0df5684c5177be74a *man/pheno.Rd
+ab2374d1ee499692a7b8dd2a62fef869 *man/plotMultiOmicsNetwork.Rd
