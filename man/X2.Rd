@@ -4,7 +4,9 @@
 \name{X2}
 \alias{X2}
 \title{A synthetic miRNA expression dataset.}
-\format{An object of class \code{matrix} with 358 rows and 100 columns.}
+\format{
+An object of class \code{matrix} (inherits from \code{array}) with 358 rows and 100 columns.
+}
 \usage{
 X2
 }

@@ -1,35 +1,56 @@
 Package: SmCCNet
-Type: Package
-Title: 
-    Sparse multiple canonical correlation network analysis tool
-Version: 0.99.0
-Date: 2018-8-6
+Title: Sparse Multiple Canonical Correlation Network Analysis Tool
+Version: 2.0.1
+Date: 2023-9-13
 Author: 
+    Weixuan Liu [aut, cre],
+    Yonghua Zhuang [aut, cre],
     W. Jenny Shi [aut, cre],
+    Thao Vu [aut],
+    Iain Konigsberg [aut],
+    Katherine Pratte [aut],
     Laura Saba [aut],
     Katerina Kechris [aut]
 Maintainer: 
-    W. Jenny Shi <wjennyshi@gmail.com>
+    Weixuan Liu <weixuan.liu@cuanschutz.edu>
 Description: 
-    A canonical correlation based framework for constructing phenotype-specific multi-omics networks by integrating multiple omics data types and a quantitative phenotype of interest. 
+   A canonical correlation based framework (SmCCNet) designed for the construction of phenotype-specific multi-omics networks. This framework adeptly integrates single or multiple omics data types along with a quantitative or binary phenotype of interest. It offers a streamlined setup process that can be tailored manually or configured automatically, ensuring a flexible and user-friendly experience.
 URL: https://github.com/KechrisLab/SmCCNet
-BugReports: https://github.com/KechrisLab/SmCCNet/issues
-Depends: 
-    R (>= 3.5)
-Imports:
+Depends: R (>= 3.5)
+Imports: 
+    EnvStats,
+    future,
+    pROC,
+    spls,
     PMA,
     Matrix,
     pbapply,
-    igraph
-Suggests:
-    BiocStyle,
-    knitr,
-    rmarkdown
-VignetteBuilder: 
-    knitr
-License: 
-    GPL-3
+    igraph,
+    magrittr,
+    rlist,
+    furrr,
+    purrr,
+    pracma
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 biocViews: Network
-RoxygenNote: 6.0.1
+RoxygenNote: 7.2.3
+NeedsCompilation: no
+VignetteBuilder: knitr
+Packaged: 2023-09-10 15:16:50 UTC; Weixuan Liu
+Repository: CRAN
+Date/Publication: 2023-09-10 15:16:50 UTC
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    dplyr,
+    reshape2,
+    shadowtext,
+    tidyverse,
+    parallel,
+    mltools,
+    caret, 
+Config/testthat/edition: 3
+
