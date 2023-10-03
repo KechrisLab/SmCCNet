@@ -4,27 +4,23 @@
 \alias{summarizeNetSHy}
 \title{NetSHy Summarization Score}
 \usage{
-summarizeNetSHy(X, A, is_alpha = TRUE, npc = 1)
+summarizeNetSHy(X, A, npc = 1)
 }
 \arguments{
-\item{X}{Data matrix of size N by P, where N is the number of subjects and P is the number 
-of features.}
+\item{X}{An \eqn{n\times m} data matrix  with \eqn{m}
+features and \eqn{n} subjects.}
 
-\item{A}{Corresponding adjacency matrix of size P by P.}
+\item{A}{Corresponding adjacency matrix of size \eqn{p} by \eqn{p}.}
 
-\item{is_alpha}{Whether TOM matrix is considered as part of the network topology, 
-default is set to TRUE}
-
-\item{npc}{Number of principal components used to summarize the network.}
+\item{npc}{Number of principal components used to summarize the network, default is set to 1.}
 }
 \value{
-a list consists of [[1]] Subject-level network summarization score,
-[[2]] Principal component importance information such as percent of variance explained,
-(3) Principal component feature-level loadings.
+A list consists of (1) subject-level network summarization score,
+(2) principal component importance information: standard deviation, percent of variance explained, and cumulative proportion of variance explained, and (3) principal component feature-level loadings.
 }
 \description{
-Implement NetSHy network summarization via a hybrid approach to 
-summarize network by considering the network topology with laplacian matrix (and TOM matrix).
+Implement NetSHy network summarization via a hybrid approach (Vu et al.,) to 
+summarize network by considering the network topology with Laplacian matrix.
 }
 \examples{
 # simulate omics data
@@ -33,11 +29,12 @@ OmicsData <- matrix(rnorm(200,0,1), nrow = 10, ncol = 20)
 set.seed(123)
 w <- rnorm(20)
 w <- w/sqrt(sum(w^2))
-abar <- getAbar(w, P1 = 2, FeatureLabel = NULL)
+featurelabel <- paste0('omics',1:20)
+abar <- getAbar(w, FeatureLabel = featurelabel)
 # extract NetSHy summarization score
 netshy_score <- summarizeNetSHy(OmicsData, abar)
 
 }
 \references{
-Vu, T., Litkowski, E. M., Liu, W., Pratte, K. A., Lange, L., Bowler, R. P., ... & Kechris, K. J. (2023). NetSHy: network summarization via a hybrid approach leveraging topological properties. Bioinformatics, 39(1), btac818.
+Vu, Thao, Elizabeth M. Litkowski, Weixuan Liu, Katherine A. Pratte, Leslie Lange, Russell P. Bowler, Farnoush Banaei-Kashani, and Katerina J. Kechris. "NetSHy: network summarization via a hybrid approach leveraging topological properties." Bioinformatics 39, no. 1 (2023): btac818.
 }

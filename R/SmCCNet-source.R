@@ -1,26 +1,21 @@
-#' Compute the similarity matrix based on one or more canonical correlation
-#' weight vectors.
+#' Calculate similarity matrix based on canonical weights.
 #' 
 #' Compute the similarity matrix based on the outer products of absolute
-#' canonical correlation weights.
+#' canonical correlation weights, can be used for both single and multi-omics setting.
 #' 
 #' 
 #' @param Ws A canonical correlation weight vector or matrix. If \code{Ws} is a
 #' matrix, then each column corresponds to one weight vector.
-#' @param P1 Total number of features for the first omics data type.
-#' @param FeatureLabel If \code{FeatureLabel = NULL} (default), the feature
-#' names will be \eqn{\{TypeI_1, \cdots, TypeI_{p_1}, TypeII_1, \cdots,
-#' TypeII_{p-p_1}\}}, where \eqn{p_1 = }\code{P1}, and \eqn{p} is the total
-#' number of omics features.
+#' @param FeatureLabel A vector of feature labels for each feature in the adjacency matrix
 #' @return A \eqn{p\times p} symmetric non-negative matrix.
 #' @examples
 #' 
 #' w <- matrix(rnorm(6), nrow = 3)
 #' Ws <- apply(w, 2, function(x)return(x/sqrt(sum(x^2))))
-#' abar <- getAbar(Ws, P1 = 2, FeatureLabel = NULL)
+#' abar <- getAbar(Ws,  FeatureLabel = c('omics1', 'omics2', 'omics3'))
 #' 
 #' @export
-getAbar <- function(Ws, P1 = NULL, FeatureLabel = NULL){
+getAbar <- function(Ws, FeatureLabel = NULL){
   # require(Matrix)
   if(is.null(dim(Ws))){
     Abar <- Matrix::Matrix(abs(Ws) %o% abs(Ws), sparse = TRUE)
@@ -34,24 +29,15 @@ getAbar <- function(Ws, P1 = NULL, FeatureLabel = NULL){
       Abar <- Abar + A
     }
   }
-  
+  # set the diagonal of the adjacency matrix to 0
   diag(Abar) <- 0
   Abar <- Abar/max(Abar)
-  
-  if(is.null(colnames(Abar))){
-    if(is.null(FeatureLabel)){
-      if(is.null(P1)){
-        stop("Need to provide FeatureLabel or the number of features 
-                    for the first data type P1.")
-      }else{
-        p <- ncol(Abar)
-        FeatureLabel <- c(paste0("TypeI_", seq_len(P1)), 
-                          paste0("TypeII_", seq_len(p-P1)))
-      }
-    }
-    colnames(Abar) <- rownames(Abar) <- FeatureLabel
+  if(is.null(FeatureLabel)){
+      stop("Need to provide FeatureLabel.")
   }
-  
+  # set feature names in adjacency matrix
+  colnames(Abar) <- rownames(Abar) <- FeatureLabel
+  # return the adjacency matrix
   return(Abar)
 }
 
@@ -60,19 +46,19 @@ getAbar <- function(Ws, P1 = NULL, FeatureLabel = NULL){
 
 
 
-#' preprocess single omics dataset before running single omics SmCCNet
+#' preprocess a omics dataset before running omics SmCCNet
 #' 
-#' Data preprocess pipeline that: (1) cv filtering, (2) center or scale data
+#' Data preprocess pipeline to: (1) filter by coefficient of variation (cv), (2) center or scale data
 #' and (3) adjust for clinical covariates.
 #' 
 #' 
-#' @param X dataframe with the size of nxp.
+#' @param X dataframe with the size of \eqn{n} by \eqn{p}, where \eqn{n} is the sample size and \eqn{p} is the feature size.
 #' @param covariates dataframe with covariates to be adjusted for.
-#' @param is_cv Whether to use coefficient of variation (CV) filter filter
-#' data.
+#' @param is_cv Whether to use coefficient of variation filter (small cv filter out). 
 #' @param cv_quantile CV filtering quantile.
-#' @param center Whether to center the dataset X1.
-#' @param scale Whether to scale the dataset X1.
+#' @param center Whether to center the dataset X.
+#' @param scale Whether to scale the dataset X.
+#' @return Processed omics data with the size of nxp. 
 #' @examples
 #' 
 #' X1 <- as.data.frame(matrix(rnorm(600, 0, 1), nrow = 60))
@@ -185,22 +171,24 @@ getCCAout_single <- function(X1, Trait, Lambda1, trace = FALSE){
 
 
 
-#' One omics SmCCNet when the outcome variable is categorical
+#' Single-omics SmCCA with Binary Phenotype
 #' 
-#' One omics SmCCNet when there is only one omics, and the outcome variable is
-#' categorical, implement SPLS instead of the regular canonical correlation
-#' analysis.
+#' Compute aggregated (SmCCA) canonical weights for single omics data with quantitative phenotype (subampling enabled). 
 #' 
 #' 
 #' @param X1 An \eqn{n\times p_1} data matrix (e.g. mRNA) with \eqn{p_1}
 #' features and \eqn{n} subjects.
-#' @param Trait An \eqn{n\times 1} trait data matrix for the same n subjects.
+#' @param Trait An \eqn{n\times 1} trait (phenotype) data matrix for the same \eqn{n} subjects.
 #' @param Lambda1 LASSO penalty parameter for \code{X1}. \code{Lambda1} needs
 #' to be between 0 and 1.
 #' @param s1 Proportion of mRNA features to be included, default at \code{s1 =
-#' 0.7}. \code{s1} needs to be between 0 and 1.
-#' @param SubsamplingNum The numebr of subsampling used.
-#' @param K Number of hidden components for PLSDA
+#' 0.7}. \code{s1} needs to be between 0 and 1, default is set to 0.7.
+#' @param SubsamplingNum Number of feature subsamples. Default is 1000. Larger
+#' number leads to more accurate results, but at a higher computational cost.
+#' @param K Number of hidden components for PLSDA, default is set to 3.
+#' @return A partial least squared weight matrix with \eqn{p_1} rows. Each
+#' column is the canonical correlation weights based on subsampled \code{X1}
+#' features. The number of columns is \code{SubsamplingNum}.
 #' @examples
 #' 
 #' 
@@ -255,33 +243,24 @@ getRobustWeightsSingleBinary <- function(X1, Trait, Lambda1,
 
 
 
-#' SmCCA Algorithm with Single Omics Data
+#' Single-omics SmCCA with Quantitative Phenotype
 #' 
-#' Calculate the canonical correlation weights based on sparse canonical
-#' correlation analysis (SCCA). Integrate one omics data type (and a
-#' quantitative phenotype), and calculate the absolute canonical correlation
-#' weights for the omics features using SCCA take into account a
-#' phenotype/trait. SCCA maximizes the pairwise canonical correlation weights
-#' between omics data and the trait. It requires the trait to be quantitative.
-#' The algorithm is computed along with an omics feature subsampling scheme.
+#' Compute aggregated (SmCCA) canonical weights for single omics data with quantitative phenotype (subampling enabled). 
 #' 
-#' To choose SmCCA, set \code{NoTrait = FALSE, FilterByTrait = FALSE}.  To
-#' choose SsCCA, set \code{NoTrait = FALSE, FilterByTrait = TRUE}. To choose
-#' SCCA, set \code{Trait = NULL, NoTrait = TRUE}.
 #' 
 #' @param X1 An \eqn{n\times p_1} data matrix (e.g. mRNA) with \eqn{p_1}
 #' features and \eqn{n} subjects.
-#' @param Trait An \eqn{n\times 1} trait data matrix for the same n subjects.
+#' @param Trait An \eqn{n\times 1} trait (phenotype) data matrix for the same \eqn{n} subjects.
 #' @param Lambda1 LASSO penalty parameter for \code{X1}. \code{Lambda1} needs
 #' to be between 0 and 1.
-#' @param s1 Proportion of mRNA features to be included, default at \code{s1 =
-#' 0.7}. \code{s1} needs to be between 0 and 1.
+#' @param s1 Proportion of features in \code{X1} to be included, default at \code{s1 =
+#' 0.7}. \code{s1} needs to be between 0 and 1, default is set to 0.7.
 #' @param SubsamplingNum Number of feature subsamples. Default is 1000. Larger
-#' number leads to more accurate results, but at a higher cost.
-#' @param trace Logical. Whether to display the CCA algorithm trace.
-#' @return A canonical correlation weight matrix with \eqn{p_1+p_2} rows. Each
+#' number leads to more accurate results, but at a higher computational cost.
+#' @param trace Whether to display the CCA algorithm trace, default is set to FALSE.
+#' @return A canonical correlation weight matrix with \eqn{p_1} rows. Each
 #' column is the canonical correlation weights based on subsampled \code{X1}
-#' and \code{X2} features. The number of columns is \code{SubsamplingNum}.
+#' features. The number of columns is \code{SubsamplingNum}.
 #' @examples
 #' 
 #' 
@@ -334,15 +313,16 @@ getRobustWeightsSingle <- function(X1, Trait, Lambda1,
 
 
 
+#' Extract Omics Modules based on Similarity Matrix.
+#' 
 #' Apply hierarchical tree cutting to the similarity matrix and extract multi/single-omics network modules.
 #' 
-#' Extract single-omics modules based on the similarity matrix.
 #' 
 #' 
 #' @param Abar A similary matrix for all features (all omics data types).
 #' @param CutHeight Height threshold for the hierarchical tree cutting. Default
 #' is \eqn{1-0.1^{10}}.
-#' @param PlotTree Logical. Whether to create a hierarchical tree plot.
+#' @param PlotTree Logical. Whether to create a hierarchical tree plot, default is set to \code{TRUE}.
 #' @return A list of multi/single-omics modules.
 #' @examples
 #' 
@@ -350,7 +330,7 @@ getRobustWeightsSingle <- function(X1, Trait, Lambda1,
 #' w <- rnorm(5)
 #' w <- w/sqrt(sum(w^2))
 #' feature_name <- paste0('feature_', 1:5)
-#' abar <- getAbar(w, P1 = 5, FeatureLabel = feature_name)
+#' abar <- getAbar(w, FeatureLabel = feature_name)
 #' modules <- getOmicsModules(abar, CutHeight = 0.5)
 #' @export
 #' 
@@ -388,63 +368,50 @@ getOmicsModules <- function(Abar, CutHeight = 1-.1^10, PlotTree = TRUE){
 
 
 
-#' Extract Network Summarization Result from Sub-network
+#' Prunes Subnetwork and Return Final Pruned Subnetwork Module
 #' 
-#' Extract summarization scores (the first 3 prinicipal components) for
-#' specified network module with given network size. The proteins will be
-#' ranked based on PageRank algorithm, then the top k proteins (where k is the
-#' specified subnetwork size) will be included into the final subnetwork to
-#' generate the summarization score. For the PC score, the correlation with
-#' respect to the phenotype of interest will be calculated and stored. In
-#' addition, the correlation between individual proteins and phenotype of
-#' interest will also be recorded. The final subnetwork adjacency matrix will
-#' be stored into the user-specified working directory of interest.
+#' Prunes subnetworks with network pruning algorithm (see multi-omics vignette for detail), and save the final pruned subnetwork to the user-defined directory.
+#' The final subnetwork is an .Rdata file with a name 'size_m_net_ind.Rdata', where \eqn{m} is the final pruned network size, and ind is the index of the subnetwork module after hierarchical clustering.
 #' 
 #' 
-#' @param Abar Adjacency matrix of size pxp extracted from the SmCCA step
-#' @param CorrMatrix The correlation matrix calculaed based on X1, it should be
-#' pxp as well
-#' @param data the original protein data.
-#' @param Pheno the original phenotype data
-#' @param ModuleIdx the index of the network module that summarization score is
-#' intended to be stored
-#' @param min_mod_size the minimally possible subnetwork size for the given network module,
-#' should be an integer from 1 to the largest possible size of the protein
-#' network
-#' @param max_mod_size the minimally possible subnetwork size for the given network module,
-#' should be an integer from 1 to the largest possible size of the protein
-#' network, and it needs to be greater than the specified minimally possible network size.
+#' @param Abar Adjacency matrix of subnetwork with size \eqn{m^{*}} by \eqn{m^{*}} after hierarchical clustering.
+#' @param CorrMatrix The correlation matrix of features in \code{Abar}, it should be
+#' \eqn{m^{*}} by \eqn{m^{*}} as well.
+#' @param data The omics data for the subnetwork.
+#' @param Pheno The trait (phenotype) data used for network pruning.
+#' @param ModuleIdx The index of the network module that summarization score is
+#' intended to be stored, this is used for naming the subnetwork file in user-defined directory.
+#' @param min_mod_size The minimally possible subnetwork size for the pruned network module,
+#' should be an integer from 1 to the largest possible size of the subnetwork, default is set to 10.
+#' @param max_mod_size the maximally possible subnetwork size for the pruned network module,
+#' should be an integer from 1 to the largest possible size of the subnetwork, and it needs to be greater than the value specified in \code{min_mod_size}.
 #' @param type A vector with length equal to total number of features in the adjacency matrix
-#' indicating the type of data for each feature, for instance, it could be genes, or proteins.
-#' @param damping damping parameter for the pagerank algorithm
-#' @param method Either NetSHy'or 'PCA' indicating which summarization method to use
-#' @param saving_dir Directory where user prefers to store the result
-#' @return a file stored in the local designated directory, which contains the
-#' following: (1) M: subnetwork adjacency matrix. (2) pca_score: a dataframe
-#' contains regular PC scores for the first 3 PCs as well as the phenotype. (3)
-#' rank_value: PageRank score for each individual feature in the subnetwork.\
-#' (4) pca_hybrid: a list that contains: PC score, PC loadings and PC varianace
-#' explained for hybrid PC method. (5) pca_hybrid: a list that contains: PC
-#' score, PC loadings and PC varianace explained for hybrid PC method with
-#' alpha = 0. (6) pc_correlation: Regular PC score's correlation with respect
-#' to phenotype. (7) correlation_hybrid: Hybrid PC score's correlation with
-#' respect to phenotype. (8) correlation_hybrid_zero: Hybrid PC score's
-#' correlation with respect to phenotype with alpha = 0.  (9)
-#' omics_correlation_data: Individual omics feature correlation with respect to
-#' phenotype (10) pc_loading: Regular PC loadings.
+#' indicating the type of data for each feature. For instance, for a subnetwork with 2 genes and a protein, the \code{type} argument should be set to \code{c('gene', 'gene', 'protein')}, see multi-omics vignette for more information.
+#' @param damping damping parameter for the PageRank algorithm, default is set to 0.9, see \code{igraph} package for more detail.
+#' @param method Selection between NetSHy' and 'PCA', specifying the network summarization method used for network pruning, default is set to NetSHy.
+#' @param saving_dir User-defined directory to store pruned subnetwork.
+#' @return A file stored in the user-defined directory, which contains the
+#' following: (1) correlation_sub: correlation matrix for the subnetwork.
+#' (2) M: adjacency matrix for the subnetwork.
+#' (3) omics_corelation_data: individual molecular feature correlation with phenotype.
+#' (4) pc_correlation: first 3 PCs correlation with phenotype.
+#' (5) pc_loading: principal component loadings.
+#' (6) pca_x1_score: principal component score and phenotype data.
+#' (7) mod_size: number of molecular features in the subnetwork.
+#' (8) sub_type: type of feature for each molecular features.
 #' @examples
 #' library(SmCCNet)
 #' set.seed(123)
 #' w <- rnorm(20)
 #' w <- w/sqrt(sum(w^2))
 #' labels <- paste0('feature_', 1:20)
-#' abar <- getAbar(w, P1 = 20, FeatureLabel = labels)
+#' abar <- getAbar(w, FeatureLabel = labels)
 #' modules <- getOmicsModules(abar, CutHeight = 0.1)
 #' x <- X1[ ,seq_len(20)]
 #' corr <- stats::cor(x)
 #' # display only example
-#' # networkPruning(abar, corr, modules, data = x, Pheno = Y,folder = 'My_Example',
-#' # ModuleIdx = 1, pheno_name = 'My_Example', mod_size = 3
+#' # networkPruning(abar, corr, data = x, Pheno = Y,
+#' # ModuleIdx = 1,  min_mod_size = 3, max_mod_size = 10, method = 'NetSHy', saving_dir = 
 #' # )
 #' 
 #' @export
@@ -452,7 +419,7 @@ getOmicsModules <- function(Abar, CutHeight = 1-.1^10, PlotTree = TRUE){
 
 networkPruning <- function(Abar, CorrMatrix, data,
                                              Pheno, type, ModuleIdx,
-                                             min_mod_size, max_mod_size, damping = 0.9,
+                                             min_mod_size = 10, max_mod_size, damping = 0.9,
                                              method = 'NetSHy', saving_dir){
   
   
@@ -500,7 +467,7 @@ networkPruning <- function(Abar, CorrMatrix, data,
                                y = Pheno)
     }else if(method == 'NetSHy'){
       pca_x1_summary <- summarizeNetSHy(X1_PC, M, 
-                                     npc = 3, is_alpha = FALSE)
+                                     npc = 3)
       # Extract the first three PC scores
       pca_x1_pc1 <- data.frame(pc1 = pca_x1_summary[[1]][,1], 
                                pc2 = pca_x1_summary[[1]][,2],
@@ -578,7 +545,7 @@ networkPruning <- function(Abar, CorrMatrix, data,
     pc_loading <- summary_result[["rotation"]]
   }else if(method == 'NetSHy'){
     pca_x1_summary <- summarizeNetSHy(X1_PC, M, 
-                                   npc = 3, is_alpha = FALSE)
+                                   npc = 3)
     # Extract the first three PC scores
     pca_x1_pc1 <- data.frame(pc1 = pca_x1_summary[[1]][,1], 
                              pc2 = pca_x1_summary[[1]][,2],
@@ -612,22 +579,24 @@ networkPruning <- function(Abar, CorrMatrix, data,
 
 
 
-#' Saving cross-validation result as the cross-validation table into the
-#' working directory and provide recommendation on the penalty term selection.
+#' Aggregate and Save Cross-validation Result for Single-omics Analysis
 #' 
-#' Saving cross-validation result as the cross-validation table into the
-#' working directory
+#' Saves cross-validation results in a table with the
+#' user-defined directory and outputs penalty term with the highest testing canonical correlation,
+#' lowest prediction error, and lowest scaled prediction error.
 #' 
 #' 
 #' @param CVDir A directory where the result is stored.
 #' @param SCCAmethod The canonical correlation analysis method that is used in
-#' the model.
+#' the model, used to name cross-validation table file, default is set to 'SmCCA'.
 #' @param K number of folds for cross-validation.
-#' @param NumSubsamp The numebr of subsampling used.
+#' @param NumSubsamp Number of subsampling used.
+#' @return A vector of length 3 with indices of the penalty term that (1) maximize the testing canonical correlation,
+#' (2) minimize the prediction error and (3) minimize the scaled prediction error.
 #' 
 #' @export
 
-aggregateCVSingle <- function(CVDir, SCCAmethod, K = 5, NumSubsamp = 500){
+aggregateCVSingle <- function(CVDir, SCCAmethod = 'SmCCA', K = 5, NumSubsamp = 500){
   plotD <- paste0(CVDir, "Figures/")
   saveD <- paste0(CVDir, "Results/")
   dir.create(plotD); dir.create(saveD)
@@ -660,20 +629,17 @@ aggregateCVSingle <- function(CVDir, SCCAmethod, K = 5, NumSubsamp = 500){
 
 #'@title NetSHy Summarization Score 
 #'
-#'@description Implement NetSHy network summarization via a hybrid approach to 
-#'summarize network by considering the network topology with laplacian matrix (and TOM matrix).
+#'@description Implement NetSHy network summarization via a hybrid approach (Vu et al.,) to 
+#'summarize network by considering the network topology with Laplacian matrix.
 #'
-#'@param X Data matrix of size N by P, where N is the number of subjects and P is the number 
-#'of features.
-#'@param A Corresponding adjacency matrix of size P by P.
-#'@param is_alpha Whether TOM matrix is considered as part of the network topology, 
-#'default is set to TRUE
-#'@param npc Number of principal components used to summarize the network.
+#'@param X An \eqn{n\times m} data matrix  with \eqn{m}
+#' features and \eqn{n} subjects.
+#'@param A Corresponding adjacency matrix of size \eqn{p} by \eqn{p}.
+#'@param npc Number of principal components used to summarize the network, default is set to 1.
 #'
 #'
-#'@return a list consists of [[1]] Subject-level network summarization score,
-#'[[2]] Principal component importance information such as percent of variance explained,
-#'(3) Principal component feature-level loadings.
+#'@return A list consists of (1) subject-level network summarization score,
+#'(2) principal component importance information: standard deviation, percent of variance explained, and cumulative proportion of variance explained, and (3) principal component feature-level loadings.
 #'
 #'@examples 
 #'# simulate omics data
@@ -682,16 +648,17 @@ aggregateCVSingle <- function(CVDir, SCCAmethod, K = 5, NumSubsamp = 500){
 #'set.seed(123)
 #'w <- rnorm(20)
 #'w <- w/sqrt(sum(w^2))
-#'abar <- getAbar(w, P1 = 2, FeatureLabel = NULL)
+#'featurelabel <- paste0('omics',1:20)
+#'abar <- getAbar(w, FeatureLabel = featurelabel)
 #'# extract NetSHy summarization score
 #'netshy_score <- summarizeNetSHy(OmicsData, abar)
 #'
 #'@references 
-#'Vu, T., Litkowski, E. M., Liu, W., Pratte, K. A., Lange, L., Bowler, R. P., ... & Kechris, K. J. (2023). NetSHy: network summarization via a hybrid approach leveraging topological properties. Bioinformatics, 39(1), btac818.
+#'Vu, Thao, Elizabeth M. Litkowski, Weixuan Liu, Katherine A. Pratte, Leslie Lange, Russell P. Bowler, Farnoush Banaei-Kashani, and Katerina J. Kechris. "NetSHy: network summarization via a hybrid approach leveraging topological properties." Bioinformatics 39, no. 1 (2023): btac818.
 #'
 #'@export
 
-summarizeNetSHy = function(X, A, is_alpha = TRUE, npc=1){
+summarizeNetSHy = function(X, A, npc=1){
   #X: data matrix (n, p)
   #A: corresponding adjacency matrix
   #pc_id: PC index
@@ -700,15 +667,13 @@ summarizeNetSHy = function(X, A, is_alpha = TRUE, npc=1){
   L2 <- igraph::graph_from_adjacency_matrix(A, mode = "undirected", weighted = TRUE,diag = FALSE) 
   L2 <- as.matrix(igraph::graph.laplacian(L2, normalized = F))
   # TOM
-  TOM_A = WGCNA::TOMsimilarity(as.matrix(A), verbose = FALSE)
+  # TOM_A = WGCNA::TOMsimilarity(as.matrix(A), verbose = FALSE)
   
   alpha = igraph::graph.density(g)
   X= scale(X, center = TRUE, scale = TRUE)
   # weighted approach
-  if (is_alpha == TRUE)
-    temp  = (1-alpha)*(X %*% L2) + alpha*(X %*% TOM_A)
-  else
-    temp = (X %*% L2)
+  
+  temp = (X %*% L2)
   temp = summary(stats::prcomp(temp))
   h_score = temp$x[,1:npc] 
   importance = temp$importance[,1:npc]
@@ -780,36 +745,35 @@ getCCAout <- function(X1, X2, Trait, Lambda1, Lambda2, CCcoef = NULL,
 }
 
 
-#' @title SmCCA Algorithm with Binary Phenotype
-#' @description SmCCNet algorithm with multi-omics data and binary phenotype. This is a stepwise approach 
-#' that (1) Use SmCCA to identify relationship between omics (exlude phenotype), (2) within highly connected omics features
-#' selected in step 1, identify relationship between these selected omics features and phenotype of interest with 
-#' sparse PLS. Sparse PLS algorithm for binary outcome first compute PLS by assuming outcome is continuous,
-#' and extract multiple latent factors, then use latent factors to fit logistic regression, and weight latent factor by
-#' regression parameters. 
+#' Run Sparse multiple Canonical Correlation Analysis and Obtain Canonical Weights (with Subsampling)
 #' 
-#' @param X A list of training omics data matrix with same set and order of subjects.
-#' @param Y Outcome binary variable, it is recommended that users set the level of this 
+#' SmCCNet algorithm with multi-omics data and binary phenotype. This is a stepwise approach 
+#' (1) use SmCCA to identify relationship between omics (exlude phenotype), (2) within highly connected omics features
+#' selected in step 1, identify relationship between these selected omics features and phenotype of interest with 
+#' sparse PLS. First, it computes PLSDA by assuming outcome is continuous to extract multiple latent factors, then uses latent factors to fit logistic regression, and weight latent factor by
+#' regression parameters. Refer to multi-omics vignette for more detail. 
+#' 
+#' @param X A list of omics data each with n subjects.
+#' @param Y A vector of binary variable, user needs to set the level of this 
 #' variable to 0 and 1.
-#' @param Between_Discriminate_Ratio A vector with length 2 indicating the relative importance
-#' of between-omics relationship and omics-phenotype relationship. For instance a ratio of 1:1
-#' means between-omics relationship and omics-phenotype relationship contribute equally to the canonical weight
-#' construction process.
-#' @param SubsamplingPercent  A vector corresponds to the number of omics data, specifying for each omics data, what is the 
-#' percentage of omics feature being subsampled at each iteration.
-#' @param CCcoef A vector of scaling factors only indicates the relationship between-omics (exclude omics-phenotype).
-#' @param LambdaBetween A vector of sparsity penalty value for each omics data for running the between-omics SmCCA, each 
+#' @param Between_Discriminate_Ratio A vector with length 2 specifying the relative importance
+#' of between-omics relationship and omics-phenotype relationship. For instance a ratio of 1:1 (c(1,1) in the argument)
+#' means between-omics relationship and omics-phenotype relationship contribute equally to the canonical weights extraction.
+#' @param SubsamplingPercent A vector with length equal to the number of omics data (\code{X}), specifying the 
+#' percentage of omics feature being subsampled at each subsampling iteration.
+#' @param CCcoef A vector of scaling factors only for between-omics relationship (exclude omics-phenotype). This 
+#' coefficient vector follows the column order of \code{combn(T, 2)} when there are \code{T} omics data.
+#' @param LambdaBetween A vector of sparsity penalty value for each omics data to run the between-omics SmCCA, each 
 #' penalty term should be within the range of 0 and 1.
-#' @param LambdaPheno A real number between 0 and 1, a penalty term when running the sparse PLS wit phenotype of interest, recommend to set to 0 or lower 
-#' value such as 0.1.
-#' @param SubsamplingNum Total number of subsamples, the more the better in terms of accuracy, but at a cost of 
-#' computation time.
+#' @param LambdaPheno A penalty term when running the sparse PLS with phenotype, penalty term should be within the range of 0 and 1.
+#' @param SubsamplingNum Number of feature subsamples. Default is 1000. Larger
+#' number leads to more accurate results, but at a higher computational cost, default is set to 1000.
 #' @param ncomp_pls Number of latent components for PLS, default set to 3.
-#' @param EvalClassifier Whether algorithm is at the phase of evaluating classification performance or construct network, if
-#' TRUE, latent factors from SPLSDA will be returned, if FALSE, canonical weight will be returned. Default is FALSE. 
-#' @param testData A list of testing omics data matrix with same set and order of subjects, only used when EvalClassifier is set to TRUE.
-#' @return A canonical correlation weight matrix with combining all omics data. Each
-#' column is the canonical correlation weights based on subsampled X features. The number of columns is \code{SubsamplingNum}.
+#' @param EvalClassifier If \code{TRUE}, the algorithm is at the phase of evaluating classification performance, and the latent factors from SPLSDA will be returned; if FALSE, the algorithm is at the phase of constructing multi-omics network, canonical weight will be returned. 
+#' Default is set to \code{FALSE}. 
+#' @param testData A list of testing omics data matrix, should have the exact same order as data list X, only used when EvalClassifier is set to \code{TRUE} for performing cross-validation, refer to multi-omics vignette for detail.
+#' @return If \code{EvalClassifier} is set to \code{FALSE}, a canonical correlation weight matrix is returned with combined omics data. Each
+#' column is the canonical correlation weights based on subsampled X features. The number of columns is \code{SubsamplingNum}. If \code{EvalClassifier} is set to \code{TRUE}, then latent factors from training and testing data will be returned for classifier evaluation. 
 #' @examples
 #' 
 #' 
@@ -819,9 +783,9 @@ getCCAout <- function(X1, X2, Trait, Lambda1, Lambda2, CCcoef = NULL,
 #' X2 <- matrix(rnorm(600,0,1), nrow = 60)
 #' Y_binary <- rbinom(60,1,0.5)
 #' 
-#'  Ws <- getRobustWeightsMultiBinary(list(X1,X2), Y_binary, 
-#'  SubsamplingPercent = c(0.8,0.8), CCcoef = NULL,
-#'  LambdaBetween = c(0.5,0.5), LambdaPheno = 0.1, SubsamplingNum = 10)
+#' Ws <- getRobustWeightsMultiBinary(list(X1,X2), Y_binary, 
+#'       SubsamplingPercent = c(0.8,0.8), CCcoef = NULL,
+#'       LambdaBetween = c(0.5,0.5), LambdaPheno = 0.1, SubsamplingNum = 10)
 #'   
 #' @export
 #' 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/SmCCNet-source.R
 \name{dataPreprocess}
 \alias{dataPreprocess}
-\title{preprocess single omics dataset before running single omics SmCCNet}
+\title{preprocess a omics dataset before running omics SmCCNet}
 \usage{
 dataPreprocess(
   X,
@@ -14,21 +14,23 @@ dataPreprocess(
 )
 }
 \arguments{
-\item{X}{dataframe with the size of nxp.}
+\item{X}{dataframe with the size of \eqn{n} by \eqn{p}, where \eqn{n} is the sample size and \eqn{p} is the feature size.}
 
 \item{covariates}{dataframe with covariates to be adjusted for.}
 
-\item{is_cv}{Whether to use coefficient of variation (CV) filter filter
-data.}
+\item{is_cv}{Whether to use coefficient of variation filter (small cv filter out).}
 
 \item{cv_quantile}{CV filtering quantile.}
 
-\item{center}{Whether to center the dataset X1.}
+\item{center}{Whether to center the dataset X.}
 
-\item{scale}{Whether to scale the dataset X1.}
+\item{scale}{Whether to scale the dataset X.}
+}
+\value{
+Processed omics data with the size of nxp.
 }
 \description{
-Data preprocess pipeline that: (1) cv filtering, (2) center or scale data
+Data preprocess pipeline to: (1) filter by coefficient of variation (cv), (2) center or scale data
 and (3) adjust for clinical covariates.
 }
 \examples{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/SmCCNet-source.R
 \name{getRobustWeightsSingle}
 \alias{getRobustWeightsSingle}
-\title{SmCCA Algorithm with Single Omics Data}
+\title{Single-omics SmCCA with Quantitative Phenotype}
 \usage{
 getRobustWeightsSingle(
   X1,
@@ -17,37 +17,26 @@ getRobustWeightsSingle(
 \item{X1}{An \eqn{n\times p_1} data matrix (e.g. mRNA) with \eqn{p_1}
 features and \eqn{n} subjects.}
 
-\item{Trait}{An \eqn{n\times 1} trait data matrix for the same n subjects.}
+\item{Trait}{An \eqn{n\times 1} trait (phenotype) data matrix for the same \eqn{n} subjects.}
 
 \item{Lambda1}{LASSO penalty parameter for \code{X1}. \code{Lambda1} needs
 to be between 0 and 1.}
 
-\item{s1}{Proportion of mRNA features to be included, default at \code{s1 =
-0.7}. \code{s1} needs to be between 0 and 1.}
+\item{s1}{Proportion of features in \code{X1} to be included, default at \code{s1 =
+0.7}. \code{s1} needs to be between 0 and 1, default is set to 0.7.}
 
 \item{SubsamplingNum}{Number of feature subsamples. Default is 1000. Larger
-number leads to more accurate results, but at a higher cost.}
+number leads to more accurate results, but at a higher computational cost.}
 
-\item{trace}{Logical. Whether to display the CCA algorithm trace.}
+\item{trace}{Whether to display the CCA algorithm trace, default is set to FALSE.}
 }
 \value{
-A canonical correlation weight matrix with \eqn{p_1+p_2} rows. Each
+A canonical correlation weight matrix with \eqn{p_1} rows. Each
 column is the canonical correlation weights based on subsampled \code{X1}
-and \code{X2} features. The number of columns is \code{SubsamplingNum}.
+features. The number of columns is \code{SubsamplingNum}.
 }
 \description{
-Calculate the canonical correlation weights based on sparse canonical
-correlation analysis (SCCA). Integrate one omics data type (and a
-quantitative phenotype), and calculate the absolute canonical correlation
-weights for the omics features using SCCA take into account a
-phenotype/trait. SCCA maximizes the pairwise canonical correlation weights
-between omics data and the trait. It requires the trait to be quantitative.
-The algorithm is computed along with an omics feature subsampling scheme.
-}
-\details{
-To choose SmCCA, set \code{NoTrait = FALSE, FilterByTrait = FALSE}.  To
-choose SsCCA, set \code{NoTrait = FALSE, FilterByTrait = TRUE}. To choose
-SCCA, set \code{Trait = NULL, NoTrait = TRUE}.
+Compute aggregated (SmCCA) canonical weights for single omics data with quantitative phenotype (subampling enabled).
 }
 \examples{
 

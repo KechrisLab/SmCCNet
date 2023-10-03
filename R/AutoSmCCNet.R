@@ -1,15 +1,17 @@
 #' Canonical Correlation Value for SmCCA
 #' 
-#' Get canonical correlation value for SmCCA given canonical weight vectors and scaling factor
+#' Calculate canonical correlation value for SmCCA given canonical weight vectors and scaling factor
 #'
-#'@param X list. A list of data each with n subjects.
-#'@param CCcoef vector. A vector indicating weights for each pairwise canonical correlation.
-#'@param CCWeight list. A list consists of canonical weight vectors corresponds to 
-#'each element of X.
-#'@param Y matrix. A matrix consists of phenotype.
-#'
+#'@param X A list of data each with same number of subjects.
+#'@param CCcoef A vector of scaling factors indicating weights for each pairwise canonical correlation.
+#'@param CCWeight A list of canonical weight vectors corresponds to each data in \eqn{X}.
+#'@param Y A phenotype matrix, should have only one column.
+#'@return A numeric value of the total canonical correlation
 #'@examples 
-#'# getCanCorMulti()
+#'library(SmCCNet)
+#'data("ExampleData")
+#'getCanCorMulti(list(X1,X2), CCcoef = c(1,1,1), 
+#'CCWeight = list(rnorm(500,0,1), rnorm(100,0,1)), Y = Y)
 #'@export
 
 getCanCorMulti <- function(X, CCcoef, CCWeight, Y)
@@ -37,14 +39,14 @@ getCanCorMulti <- function(X, CCcoef, CCWeight, Y)
 }
 
 
-#' @title Scaling Factor Input
+#' @title Scaling Factor Input Prompt
 #' 
 #' @description
-#' Input the vector of the type of dataset, and return prompts that ask the user to supply the scaling 
-#' factor intended for SmCCNet algorithm to prioritize the correlation structure of 
+#' Input the vector of the annotation of each type of dataset in the data list X (e.g., \code{c('gene', 'protein')}), and return prompt ask the user to supply the scaling 
+#' factor for SmCCNet algorithm to prioritize the correlation structures of 
 #' interest. All scaling factor values supplied should be numeric and nonnegative.
-#' @param DataType A vector that contains the the data type of each omics data.
-#' 
+#' @param DataType A character vector that contains the annotation of each type of omics dataset in X.
+#' @return A numeric vector of scaling factors.
 #' @examples
 #' # not run
 #' # scalingFactorInput(c('gene','mirna', 'phenotype'))
@@ -94,17 +96,17 @@ scalingFactorInput <- function(DataType = NULL)
   
 }
 
-#'@title Evaluation of Classifier with Different Evaluation Metrics
-#'@description  evaluate binary classifier's performance with respect to user-selected
-#'metric (accuracy, auc score, precision, recall, f1).
+#'@title Evaluation of Binary Classifier with Different Evaluation Metrics
+#'@description  Evaluate binary classifier's performance with respect to user-selected
+#'metric (accuracy, auc score, precision, recall, f1 score) for binary phenotype.
 #'@param obs Observed phenotype, vector consists of 0, 1.
 #'@param pred Predicted probability of the phenotype, vector consists of any value between 0 and 1
 #'@param EvalMethod Binary classifier evaluation method, should be one of the following:
-#''accuracy', 'auc', 'precision', 'recall', and 'f1', default is set to accuracy.
-#'@param BinarizeThreshold Cutoff thresold used to binarize the predicted probability, default is set 
+#''accuracy' (default), 'auc', 'precision', 'recall', and 'f1'.
+#'@param BinarizeThreshold Cutoff threshold to binarize the predicted probability, default is set 
 #'to 0.5.
-#'@param print_score Whether to print the evaluation score or not, default is set to 0.5.
-#'
+#'@param print_score Whether to print out the evaluation score, default is set to \code{TRUE}.
+#'@return An evaluation score corresponding to the selected metric.
 #'@examples 
 #'# simulate observed binary phenotype
 #'obs <- rbinom(100,1,0.5)
@@ -175,75 +177,83 @@ classifierEval <- function(obs, pred, EvalMethod = 'accuracy',
 }
 
 
-#' @title Automated SmCCNet
+#' @title Automated SmCCNet to Streamline the SmCCNet Pipeline
 #' 
-#' @description Automated SmCCNet that automatically identify project problem (single-omics vs multi-omics),
-#' and analysis method (CCA vs. PLS) based on the input data that is provided.
-#' This method automatically preprocess data, choose scaling factors, subsampling percentage, and optimal penalty 
-#' terms, then run through the complete SmCCNet pipeline without the requirement for
-#' users to provide any information. This function will store all the subnetwork information to local directory 
-#' user is providing, as well as return all the global network and evaluation information.  
+#' @description Automated SmCCNet automatically identifies the project problem (single-omics vs multi-omics), 
+#' and type of analysis (CCA for quantitative phenotype vs. PLS for binary phenotype) 
+#' based on the input data that is provided. This method automatically preprocesses data, 
+#' chooses scaling factors, subsampling percentage, and optimal penalty terms, 
+#' then runs through the complete SmCCNet pipeline without the requirement for users to provide additional information. 
+#' This function will store all the subnetwork information to a user-defined directory, as well as return all the global network and evaluation information. 
+#' Refer to the automated SmCCNet vignette for more information.
 #' 
 #' 
-#' @param X A list of matrices with same set and order of subjects 
-#' @param Y Phenotype variable of either numeric or binary, for binary variable, for binary Y, it should be binarized to 0,1 before running this function.
-#' @param AdjustedCovar A data frame of covariates of interest to be adjusted for through regressing-out approach
-#' @param Kfold Number of folds for cross-validation
-#' @param EvalMethod Selections among 'accuracy', 'auc', 'precision', 'recall', and 'f1', indicating for evaluating binary outcome, what's the metric to use
-#' @param subSampNum Number of subsampling to run, the higher the better in terms of accuracy, but at a cost of computational time
+#' @param X A list of matrices with same set and order of subjects (\eqn{n}). 
+#' @param Y Phenotype variable of either numeric or binary, for binary variable, for binary \eqn{Y}, it should be binarized to 0,1 before running this function.
+#' @param AdjustedCovar A data frame of covariates of interest to be adjusted for through regressing-out approach, argument preprocess need to be set to TRUE if adjusting covariates are supplied.
+#' @param Kfold Number of folds for cross-validation, default is set to 5.
+#' @param EvalMethod The evaluation methods used to selected the optimal penalty parameter(s) when binary phenotype is given. The selections is among 'accuracy', 'auc', 'precision', 'recall', and 'f1', default is set to 'accuracy'.
+#' @param subSampNum Number of subsampling to run, the higher the better in terms of accuracy, but at a cost of computational time, we generally recommend 500-1000 to increase robustness for larger data, default is set to 100.
 #' @param BetweenShrinkage A real number > 0 that helps shrink the importance of omics-omics correlation component, the larger this number
-#' is, the greater the shrinkage it is.
-#' @param ScalingPen A numeric vector of length 2 used as the penalty terms for scaling factor determination method: default set to 0.1, and 
+#' is, the greater the shrinkage it is, default is set to 2.
+#' @param ScalingPen A numeric vector of length 2 used as the penalty terms for scaling factor determination method: default set to 0.1 for both datasets, and 
 #' should be between 0 and 1.
-#' @param DataType A vector indicating what type of data is each element of X, example would be c('gene', 'miRNA')
-#' @param CutHeight A numeric value specifying the cut height for hierarchical clustering, should be between 0 and 1
-#' @param cluster Determine if clustering algorithm should be applied, default is TRUE.
+#' @param DataType A vector indicating annotation of each dataset of \eqn{X}, example would be \code{c('gene', 'miRNA')}.
+#' @param CutHeight A numeric value specifying the cut height for hierarchical clustering, should be between 0 and 1, default is set to 1 - 0.1^10.
 #' @param min_size Minimally possible subnetwork size after network pruning, default set to 10.
 #' @param max_size Maximally possible subnetwork size after network pruning, default set to 100.
 #' @param summarization Summarization method used for network pruning and summarization, should be either 'NetSHy' or 'PCA'.
-#' @param saving_dir Directory where user would like to store the subnetwork results.
-#' @param preprocess Whether the data preprocessing step should be conducted
+#' @param saving_dir Directory where user would like to store the subnetwork results, default is set to the current working directory.
+#' @param preprocess Whether the data preprocessing step should be conducted, default is set to FALSE. If regressing out covariates is needed, provide corresponding covariates to AdjustCovar argument.
 #' @param ncomp_pls Number of components for PLS algorithm, only used when binary phenotype is given, default is set to 3.
 #' @param tuneLength The total number of candidate penalty term values for each omics data, default is set to 5.
 #' @param tuneRangeCCA A vector of length 2 that represents the range of candidate penalty term values for each omics data based on canonical correlation analysis, 
-#' default is set to c(0.1,0.5).
+#' default is set to \code{c(0.1,0.5)}.
 #' @param tuneRangePLS A vector of length 2 that represents the range of candidate penalty term values for each omics data based on partial least squared discriminant analysis, 
-#' default is set to c(0.5,0.9).
+#' default is set to \code{c(0.5,0.9)}.
 #' @param seed Random seed for result reproducibility, default is set to 123.
-#' @return subnetwork modules are stored in local directory specified by user, this function will return the global network information, which 
-#'  include global adjacency matrix, data correlation matrix, hierarchical clustering result, Omics Abundance data, and Cross-Validation Result.  
+#' @return This function returns the global adjacency matrix, omics data details, network clustering outcomes, and cross-validation results. Pruned subnetwork modules are saved in the directory specified by the user.
 #' @examples
 #' 
 #' 
-#' ## For illustration, we only subsample 5 times.
-#' set.seed(123)
-#' X1 <- matrix(rnorm(60000,0,1), nrow = 200)
-#' colnames(X1) <- paste('gene',1:300)
-#' X2 <- matrix(rnorm(60000,0,1), nrow = 200)
-#' colnames(X2) <- paste('protein',1:300)
-#' Y <- matrix(rnorm(200,0,1), nrow = 200)
-#' Y_binary <- rbinom(200,1,0.5)
-#' ### single-omics PLS
-#' # result <- fastAutoSmCCNet(X = list(X1), Y = as.factor(Y_binary), 
-#' # Kfold = 3, subSampNum = 20, DataType = c('Gene'))
-#' ### single-omics CCA
-#' # result <- fastAutoSmCCNet(X = list(X1), Y = Y, Kfold = 3, subSampNum = 20, 
-#' # DataType = c('Gene'))
-#' ### multi-omics PLS
-#' # result <- fastAutoSmCCNet(X = list(X1,X2), Y = as.factor(Y_binary), Kfold = 3, 
-#' # subSampNum = 20, DataType = c('Gene', 'miRNA'), 
-#' # saving_dir = getwd())
-#' ### multi-omics CCA
-#' # result <- fastAutoSmCCNet(X = list(X1,X2), Y = Y, Kfold = 3, subSampNum = 20, 
-#' # DataType = c('Gene', 'miRNA'), saving_dir = getwd())
+#' # library(SmCCNet)
+#' # set.seed(123)
+#' # data("ExampleData")
+#' # Y_binary <- ifelse(Y > quantile(Y, 0.5), 1, 0)
+#' ## single-omics PLS
+#' # result <- fastAutoSmCCNet(X = list(X1), Y = as.factor(Y_binary), Kfold = 3, 
+#' #                          subSampNum = 100, DataType = c('Gene'),
+#' #                          saving_dir = getwd(), EvalMethod = 'auc', 
+#' #                          summarization = 'NetSHy', 
+#' #                          CutHeight = 1 - 0.1^10, ncomp_pls = 5)
+#' ## single-omics CCA
+#' # result <- fastAutoSmCCNet(X = list(X1), Y = Y, Kfold = 3, preprocess = FALSE,
+#' #                           subSampNum = 50, DataType = c('Gene'),
+#' #                           saving_dir = getwd(), summarization = 'NetSHy',
+#' #                           CutHeight = 1 - 0.1^10)
+#' ## multi-omics PLS
+#' # result <- fastAutoSmCCNet(X = list(X1,X2), Y = as.factor(Y_binary), 
+#' #                           Kfold = 3, subSampNum = 50, 
+#' #                           DataType = c('Gene', 'miRNA'), 
+#' #                           CutHeight = 1 - 0.1^10,
+#' #                           saving_dir = getwd(), EvalMethod = 'auc', 
+#' #                           summarization = 'NetSHy',
+#' #                           BetweenShrinkage = 5, ncomp_pls = 3)
+#' ## multi-omics CCA
+#' # result <- fastAutoSmCCNet(X = list(X1,X2), Y = Y, 
+#' #                           K = 3, subSampNum = 50, DataType = c('Gene', 'miRNA'), 
+#' #                           CutHeight = 1 - 0.1^10,
+#' #                           saving_dir = getwd(),  
+#' #                           summarization = 'NetSHy',
+#' #                           BetweenShrinkage = 5)
 #' 
 #' @export
 
 fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfold = 5, 
-                            EvalMethod = 'accuracy', subSampNum, DataType, 
+                            EvalMethod = 'accuracy', subSampNum = 100, DataType, 
                             BetweenShrinkage = 2, ScalingPen = c(0.1,0.1),
                             CutHeight = 1 - 0.1^10,
-                            cluster = TRUE, min_size = 10,
+                            min_size = 10,
                             max_size = 100, summarization = 'NetSHy', saving_dir = getwd(), 
                             ncomp_pls = 3,
                             tuneLength = 5,
@@ -504,7 +514,7 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
       Ws <- getRobustWeightsSingle(X1 = X[[1]], Trait = as.matrix(as.numeric(Y)), Lambda1 = BestPen, 
                                          s1 = SubsamplingPercent, SubsamplingNum = subSampNum)
       # construct global network module
-      Abar <- getAbar(Ws, P1 = ncol(X[[1]]), FeatureLabel = colnames(X[[1]]))
+      Abar <- getAbar(Ws, FeatureLabel = colnames(X[[1]]))
     }
     # case when there is categorical outcome
     if (method == 'PLS')
@@ -641,7 +651,7 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
       Ws <- getRobustWeightsSingleBinary(X1 = X[[1]], Trait = as.numeric(Y) - 1, Lambda1 = BestPen, K = ncomp_pls,
                                          s1 = SubsamplingPercent, SubsamplingNum = subSampNum)
       # construct global network module
-      Abar <- getAbar(Ws, P1 = ncol(X[[1]]), FeatureLabel = colnames(X[[1]]))
+      Abar <- getAbar(Ws, FeatureLabel = colnames(X[[1]]))
       
       
     }
@@ -703,7 +713,7 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
                                    Lambda = BestPen,s = SubsamplingPercent, SubsamplingNum = subSampNum)
       # construct global network
       featurelabel <- unlist(lapply(X, colnames))
-      Abar <- getAbar(Ws, P1 = ncol(X[[1]]), FeatureLabel = featurelabel)
+      Abar <- getAbar(Ws, FeatureLabel = featurelabel)
     }
     # case when there is categorical outcome
     if (method == 'PLS')
@@ -890,7 +900,7 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
       
       # construct global network module
       featurelabel <- unlist(lapply(X, colnames))
-      Abar <- getAbar(Ws, P1 = ncol(X[[1]]), FeatureLabel = featurelabel)
+      Abar <- getAbar(Ws, FeatureLabel = featurelabel)
       
       
     }
@@ -919,14 +929,14 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
   cat(">> Now starting network clustering...\n")
   cat("--------------------------------------------------\n")
   cat("\n")
-  if (cluster == TRUE)
-  {
+  #if (cluster == TRUE)
+  #{
     # run hierarchical clustering algorithm
-    OmicsModule <- getOmicsModules(Abar, CutHeight = CutHeight, PlotTree = FALSE)
-  }else{
-    cat(">> Cluster = FALSE, skip clustering...\n")
-    OmicsModule <- list(1:nrow(Abar))
-  }  
+  OmicsModule <- getOmicsModules(Abar, CutHeight = CutHeight, PlotTree = FALSE)
+  #}else{
+  #  cat(">> Cluster = FALSE, skip clustering...\n")
+  #  OmicsModule <- list(1:nrow(Abar))
+  #}  
   # store feature label
   AbarLabel <- unlist(lapply(X, colnames))
   # calculate correlation matrix
@@ -1007,6 +1017,8 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
   cat("   'a' = network size, 'b' = module number.\n")
   cat("\n")
   cat("3. To prevent overwriting result files across projects, rename the result file after each run.\n")
+  cat("\n")
+  cat("4. Subnetwork visualization can be done through shinyApp or cytoscape, please refer to network visualization section in multi-omics or single-omics vignette for more detail.\n")
   cat("\n")
   cat("************************************\n")
   return(list(AdjacencyMatrix = Abar, Data = X, ClusteringModules = OmicsModule, CVResult = AggregatedCVResult))

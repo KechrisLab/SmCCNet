@@ -7,18 +7,23 @@
 getCanCorMulti(X, CCcoef, CCWeight, Y)
 }
 \arguments{
-\item{X}{list. A list of data each with n subjects.}
+\item{X}{A list of data each with same number of subjects.}
 
-\item{CCcoef}{vector. A vector indicating weights for each pairwise canonical correlation.}
+\item{CCcoef}{A vector of scaling factors indicating weights for each pairwise canonical correlation.}
 
-\item{CCWeight}{list. A list consists of canonical weight vectors corresponds to 
-each element of X.}
+\item{CCWeight}{A list of canonical weight vectors corresponds to each data in \eqn{X}.}
 
-\item{Y}{matrix. A matrix consists of phenotype.}
+\item{Y}{A phenotype matrix, should have only one column.}
+}
+\value{
+A numeric value of the total canonical correlation
 }
 \description{
-Get canonical correlation value for SmCCA given canonical weight vectors and scaling factor
+Calculate canonical correlation value for SmCCA given canonical weight vectors and scaling factor
 }
 \examples{
-# getCanCorMulti()
+library(SmCCNet)
+data("ExampleData")
+getCanCorMulti(list(X1,X2), CCcoef = c(1,1,1), 
+CCWeight = list(rnorm(500,0,1), rnorm(100,0,1)), Y = Y)
 }

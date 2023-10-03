@@ -2,7 +2,7 @@
 % Please edit documentation in R/AutoSmCCNet.R
 \name{classifierEval}
 \alias{classifierEval}
-\title{Evaluation of Classifier with Different Evaluation Metrics}
+\title{Evaluation of Binary Classifier with Different Evaluation Metrics}
 \usage{
 classifierEval(
   obs,
@@ -18,16 +18,19 @@ classifierEval(
 \item{pred}{Predicted probability of the phenotype, vector consists of any value between 0 and 1}
 
 \item{EvalMethod}{Binary classifier evaluation method, should be one of the following:
-'accuracy', 'auc', 'precision', 'recall', and 'f1', default is set to accuracy.}
+'accuracy' (default), 'auc', 'precision', 'recall', and 'f1'.}
 
-\item{BinarizeThreshold}{Cutoff thresold used to binarize the predicted probability, default is set 
+\item{BinarizeThreshold}{Cutoff threshold to binarize the predicted probability, default is set 
 to 0.5.}
 
-\item{print_score}{Whether to print the evaluation score or not, default is set to 0.5.}
+\item{print_score}{Whether to print out the evaluation score, default is set to \code{TRUE}.}
+}
+\value{
+An evaluation score corresponding to the selected metric.
 }
 \description{
-evaluate binary classifier's performance with respect to user-selected
-metric (accuracy, auc score, precision, recall, f1).
+Evaluate binary classifier's performance with respect to user-selected
+metric (accuracy, auc score, precision, recall, f1 score) for binary phenotype.
 }
 \examples{
 # simulate observed binary phenotype

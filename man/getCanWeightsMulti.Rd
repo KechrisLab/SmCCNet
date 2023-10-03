@@ -17,26 +17,36 @@ getCanWeightsMulti(
 \arguments{
 \item{X}{A list of omics data each with n subjects.}
 
-\item{Trait}{An n by k trait data for the same samples (k >=1).}
+\item{Trait}{An \eqn{n} by 1 trait (phenotype) data for the same samples.}
 
-\item{Lambda}{A vector of LASSO pentalty parameters, need to be between 0 and 1,
-should also have the same length as the length of X.}
+\item{Lambda}{Lasso penalty vector with length equals to the number of omics data (\eqn{X}). \code{Lambda} needs
+to be between 0 and 1.}
 
-\item{CCcoef}{A vector indicating weights for each pairwise canonical correlation.}
+\item{CCcoef}{Optional scaling factors for the SmCCA pairwise canonical
+correlations. If \code{CCcoef = NULL} (default), then the objective function
+is the total sum of all pairwise canonical correlations. It follows the column order of \code{combn(T+1, 2)}, where \code{T} is the total number of omics data.}
 
-\item{NoTrait}{Logical. Whether trait information is provided to Trait will be assigned nonzero weights.}
+\item{NoTrait}{Whether or not trait (phenotype) information is provided, default is set to \code{TRUE}.}
 
-\item{trace}{Logical. Whether to display CCA algorithm trace.}
+\item{trace}{Whether to display CCA algorithm trace, default is set to \code{FALSE}.}
 
-\item{TraitWeight}{Logical. Whether to include canonical weight for trait, default is set to FALSE}
+\item{TraitWeight}{Whether to return canonical weight for trait (phenotype), default is set to \code{FALSE}.}
+}
+\value{
+A canonical weight vector with size of \eqn{p} by 1.
 }
 \description{
-Run Sparse Multiple Canonical Correlation Analysis (SmCCA) and return
-canonical weight.
+Run Sparse multiple Canonical Correlation Analysis (SmCCA) and return
+canonical weight vectors.
 }
 \examples{
-# not run
+# This function is typically used as an internal function.
+# It is also used when performing cross-validation,
+# refer to multi-omics vignette for more detail.
 # X <- list(X1,X2)
 # result <- getCanWeightsMulti(X, Trait = as.matrix(Y), Lambda = c(0.5,0.5), NoTrait = FALSE)
 # result <- getCanWeightsMulti(X, Trait = NULL, Lambda = c(0.5,0.5), NoTrait = TRUE)
+# cccoef <- c(1,10,10)
+# result <- getCanWeightsMulti(X, Trait = as.matrix(Y), CCcoef = cccoef, 
+#                              Lambda = c(0.5,0.5), NoTrait = FALSE)
 }

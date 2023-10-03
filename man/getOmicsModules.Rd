@@ -2,7 +2,7 @@
 % Please edit documentation in R/SmCCNet-source.R
 \name{getOmicsModules}
 \alias{getOmicsModules}
-\title{Apply hierarchical tree cutting to the similarity matrix and extract multi/single-omics network modules.}
+\title{Extract Omics Modules based on Similarity Matrix.}
 \usage{
 getOmicsModules(Abar, CutHeight = 1 - 0.1^10, PlotTree = TRUE)
 }
@@ -12,13 +12,13 @@ getOmicsModules(Abar, CutHeight = 1 - 0.1^10, PlotTree = TRUE)
 \item{CutHeight}{Height threshold for the hierarchical tree cutting. Default
 is \eqn{1-0.1^{10}}.}
 
-\item{PlotTree}{Logical. Whether to create a hierarchical tree plot.}
+\item{PlotTree}{Logical. Whether to create a hierarchical tree plot, default is set to \code{TRUE}.}
 }
 \value{
 A list of multi/single-omics modules.
 }
 \description{
-Extract single-omics modules based on the similarity matrix.
+Apply hierarchical tree cutting to the similarity matrix and extract multi/single-omics network modules.
 }
 \examples{
 
@@ -26,6 +26,6 @@ set.seed(123)
 w <- rnorm(5)
 w <- w/sqrt(sum(w^2))
 feature_name <- paste0('feature_', 1:5)
-abar <- getAbar(w, P1 = 5, FeatureLabel = feature_name)
+abar <- getAbar(w, FeatureLabel = feature_name)
 modules <- getOmicsModules(abar, CutHeight = 0.5)
 }

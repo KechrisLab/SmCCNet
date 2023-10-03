@@ -2,16 +2,19 @@
 % Please edit documentation in R/AutoSmCCNet.R
 \name{scalingFactorInput}
 \alias{scalingFactorInput}
-\title{Scaling Factor Input}
+\title{Scaling Factor Input Prompt}
 \usage{
 scalingFactorInput(DataType = NULL)
 }
 \arguments{
-\item{DataType}{A vector that contains the the data type of each omics data.}
+\item{DataType}{A character vector that contains the annotation of each type of omics dataset in X.}
+}
+\value{
+A numeric vector of scaling factors.
 }
 \description{
-Input the vector of the type of dataset, and return prompts that ask the user to supply the scaling 
-factor intended for SmCCNet algorithm to prioritize the correlation structure of 
+Input the vector of the annotation of each type of dataset in the data list X (e.g., \code{c('gene', 'protein')}), and return prompt ask the user to supply the scaling 
+factor for SmCCNet algorithm to prioritize the correlation structures of 
 interest. All scaling factor values supplied should be numeric and nonnegative.
 }
 \examples{
