@@ -1,1 +1,29 @@
-# Package updates
+# SmCCNet 2.0.2 (2022-XX-XX)
+
+## Changes
+
+* **Removed PMA Dependency:** Eliminated the need for the PMA package, streamlining the installation and usage proces.
+* **Updated Workflow:** Enhanced SmCCNet's workflow to support single/multi-omics analysis with both quantitative and binary phenotypes, offering more comprehensive data analysis capabilities.
+
+# SmCCNet 2.0 (2022-XX-XX)
+
+## New Features
+
+* **Automated Pipeline:** Introduced `fastAutoSmCCNet()` for streamlined, efficient multi-omics network analysis.
+* **Enhanced Data Preprocessing:** Added functions for improved handling and preprocessing of omics data.
+* **Expanded Compatibility:** Now accommodates both single and multiple omics data types, as well as quantitative and binary phenotypes.
+* **Network Visualization:** Integrated an online RShiny application (https://smccnet.shinyapps.io/smccnetnetwork/) for advanced network visualization.
+
+## Improvements
+
+* **Computational Efficiency:** Significantly reduced computation time, enhancing user experience.
+* **Flexible Setup:** Provided options for manual or automated setup processes, offering flexibility in pipeline configuration.
+* **Extended Functionality:** Included novel algorithms for handling single/multi-omics data with binary phenotype.
+
+## Bug Fixes
+
+* Addressed and resolved specific issues from the previous version to ensure smoother functionality.
+
+## Availability
+
+* Available on CRAN (https://cran.r-project.org/web/packages/SmCCNet/index.html) and GitHub (https://github.com/KechrisLab/SmCCNet).
