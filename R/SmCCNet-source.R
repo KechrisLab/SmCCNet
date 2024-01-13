@@ -683,66 +683,7 @@ summarizeNetSHy = function(X, A, npc=1){
 }
 
 
-#######################################################
-# Internal functions called by getRobustPseudoWeights #
-#######################################################
 
-
-
-
-getCCAout <- function(X1, X2, Trait, Lambda1, Lambda2, CCcoef = NULL,
-                      NoTrait = FALSE, FilterByTrait = FALSE, trace = FALSE){
-  # Compute CCA weights.
-  #
-  # X1: An n by p1 mRNA expression matrix.
-  # X2: An n by p2 miRNA expression matrix.
-  # Trait: An n by k trait data for the same samples (k >=1).
-  # Lambda1, Lambda2: LASSO pentalty parameters, need to be between 0 and 1.
-  # CCcoef: A 3 by 1 vector indicating weights for each pairwise canonical
-  #   correlation.
-  # NoTrait: Logical. Whether trait information is provided.
-  # FilterByTrait: Logical. Whether only the features with highest correlation
-  #   to Trait will be assigned nonzero weights. The top 80% features are reserved.
-  # trace: Logical. Whether to display CCA algorithm trace.
-  
-  if(abs(Lambda1 - 0.5) > 0.5){
-    stop("Invalid penalty parameter. Lambda1 needs to be between zero and
-           one.")}
-  if(abs(Lambda2 - 0.5) > 0.5){
-    stop("Invalid penalty parameter. Lambda2 needs to be between zero and
-           one.")}
-  if(min(Lambda1, Lambda2) == 0){
-    stop("Invalid penalty parameter. Both Lambda1 and Lambda2 has to be
-           greater than 0.")
-  }
-  
-  k <- ncol(Trait)    
-  if(NoTrait | is.null(k)){
-    out <- PMA::CCA(X1, X2, typex = "standard", typez = "standard", 
-                    penaltyx = Lambda1, penaltyz = Lambda2, K = 1, 
-                    trace = trace)
-  }else{
-    if(FilterByTrait){
-      if(k > 1){
-        stop("'FilterByTrait == TRUE' only allows one trait at a time.")
-      }else{
-        out <- PMA::CCA(X1, X2, outcome = "quantitative", y = Trait,
-                        typex = "standard", typez = "standard", 
-                        penaltyx = Lambda1, penaltyz = Lambda2, K = 1, 
-                        trace = trace)
-      }
-    }else{
-      xlist <- list(x1 = X1, x2 = X2, y = scale(Trait))
-      L1 <- max(1, sqrt(ncol(X1)) * Lambda1)
-      L2 <- max(1, sqrt(ncol(X2)) * Lambda2)
-      out <- myMultiCCA(xlist, penalty = c(L1, L2, sqrt(ncol(Trait))),
-                        CCcoef = CCcoef, trace = trace)
-      out$u <- out$ws[[1]]; out$v <- out$ws[[2]]
-    }
-  }
-  
-  return(out)
-}
 
 
 #' Run Sparse multiple Canonical Correlation Analysis and Obtain Canonical Weights (with Subsampling)

@@ -10,12 +10,7 @@
 #
 ################################################################################
 
-######## Package that we need ########
-# You only need to install once #
-# install.packages("PMA", repos="http://cran.r-project.org")
 
-requireNamespace("PMA", quietly = TRUE)
-# library(PMA)
 
 
 
@@ -64,9 +59,107 @@ myMultiCCA <- function(xlist, penalty=NULL, ws=NULL, niter=25,
   #   column order of combn(K, 2).
   
   if(ncol(xlist[[length(xlist)]]) > 1){
-    out <- PMA::MultiCCA(xlist, penalty=penalty, ws=ws, niter=niter,
-                         type=type, ncomponents=ncomponents, trace=FALSE,
-                         standardize=standardize)
+    # The Kth data set in xlist is a one dimensional phenotype
+    call <- match.call()
+    K <- length(xlist)
+    pair_CC <- utils::combn(K, 2)
+    num_CC <- ncol(utils::combn(K, 2))
+    
+    # Check canonical correlation coefficients.
+    if(is.null(CCcoef)){CCcoef <- rep(1, num_CC)}
+    if(length(CCcoef) != num_CC){
+      stop(paste0("Invalid coefficients for pairwise canonical correlations.
+                  Please provide ", num_CC, " numerical values for CCcoef.
+                  Be sure to match combn(K,2) column order."))
+    }
+    
+    # Check data type.
+    if(length(type)==1){# Expand a single type to a vector of length(xlist).
+      if(type != "standard"){
+        stop("The phenotype data must be continuous and follow the type 'standard'. ")
+      }
+      type <- rep(type, K)}
+    if(length(type)!=K){
+      stop("Type must be a vector of length 1, or length(xlist)")}
+    if(sum(type!="standard")>0){
+      stop("Each element of type must be standard and not ordered.")}
+    
+    # Standardize or not.
+    if(standardize){xlist <- lapply(xlist, scale)}
+    
+    # Initialize weights.
+    if(!is.null(ws)){
+      makenull <- FALSE
+      for(i in seq_len(K)){
+        if(ncol(ws[[i]])<ncomponents) makenull <- TRUE
+      }
+      if(makenull) ws <- NULL
+    }
+    if(is.null(ws)){
+      ws <- list()
+      for(i in seq_len(K)){
+        ws[[i]] <- matrix(svd(xlist[[i]])$v[,seq_len(ncomponents)], ncol=ncomponents)
+      }
+      # ws[[K]] <- 1
+    }
+    ws.init <- ws
+    
+    # Check penalties.
+    if(is.null(penalty)){
+      penalty <- rep(NA, K)
+      penalty[type=="standard"] <- 4 # this is the default value of sumabs
+      for(k in seq_len(K)){
+        if(type[k]=="ordered"){
+          stop("Current version requires all element types to be standard (not ordered).")
+        }
+      }
+    }
+    if(length(penalty)==1) penalty <- rep(penalty, K)
+    if(sum(penalty<1 & type=="standard")){
+      stop("Cannot constrain sum of absolute values of weights to be less than
+           1.")
+    }
+    for(i in seq_len(K)){
+      if(type[i]=="standard" && penalty[i]>sqrt(ncol(xlist[[i]]))){
+        stop("L1 bound of weights should be no more than sqrt of the number of
+             columns of the corresponding data set.", fill=TRUE)
+      }
+    }
+    
+    ws.final <- ws.init
+    for(i in seq_len(K)){
+      ws.final[[i]] <- matrix(0, nrow=ncol(xlist[[i]]), ncol=ncomponents)
+    }
+    cors <- NULL
+    for(comp in seq_len(ncomponents)){
+      ws <- list()
+      for(i in seq_len(K)) ws[[i]] <- ws.init[[i]][,comp]
+      # ws[[K]] <- 1
+      curiter <- 1
+      crit.old <- -10
+      crit <- -20
+      storecrits <- NULL
+      
+      while(curiter<=niter && abs(crit.old-crit)/abs(crit.old)>.001 &&
+            crit.old!=0){
+        crit.old <- crit
+        crit <- myGetCrit(xlist, ws, pair_CC, CCcoef)
+        storecrits <- c(storecrits,crit)
+        if(trace) cat(curiter, fill=FALSE)
+        curiter <- curiter+1
+        for(i in seq_len(K)){
+          ws[[i]] <- myUpdateW(xlist, i, K, penalty[i], ws, type[i], ws.final,
+                               pair_CC, CCcoef)
+        }
+      }
+      
+      for(i in seq_len(K)) ws.final[[i]][,comp] <- ws[[i]]
+      cors <- c(cors, myGetCors(xlist, ws, pair_CC, CCcoef))
+    }
+    
+    out <- list(ws=ws.final, ws.init=ws.init, K=K, call=call, type=type,
+                penalty=penalty, cors=cors)
+    class(out) <- "MultiCCA"
     
   }else{
     # The Kth data set in xlist is a one dimensional phenotype
