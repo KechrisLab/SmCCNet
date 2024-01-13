@@ -16,5 +16,3 @@ In the **vignettes** folder, users can find documentation that illustrates how t
 Visualization can be done in both ways: ShinyApp or Cytoscape. After the subnetwork .Rdata is obtained, the user can upload it to the ShinyApp (https://smccnet.shinyapps.io/smccnetnetwork/) and tune visualization parameters, it will return the subnetwork visualization and the user will be able to download it as a .pdf file.
 
 Please report any issues at https://github.com/KechrisLab/SmCCNet/issues.
-
-
