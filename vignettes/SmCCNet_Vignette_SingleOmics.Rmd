@@ -2,10 +2,8 @@
 title: "Reconstructing Phenotype-Specific Single-Omics Networks with SmCCNet"
 shorttitle: "SmCCNet"
 author: 
-  - Weixuan Liu^1^
-  - Katerina Kechris^1^
-affiliation: 
-  - ^1^University of Colorado Anschutz Medical Campus, Aurora, CO, USA
+  - Weixuan Liu
+  - Katerina Kechris
 date: "`r Sys.Date()`"
 vignette: >
     %\VignetteIndexEntry{Reconstructing Phenotype-Specific Single-Omics Networks with SmCCNet}
@@ -83,14 +81,12 @@ The SmCCNet package has the following dependencies:
 
 ```{r, echo = FALSE, results = "hide", warning = FALSE, eval = TRUE}
 suppressPackageStartupMessages({
-    library(PMA)
     library(pbapply)
     library(Matrix)
     library(igraph)
 })
 ```
 ```{r, eval = TRUE}
-library(PMA)
 library(pbapply)
 library(Matrix)
 library(igraph)

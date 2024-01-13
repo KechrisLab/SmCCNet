@@ -1,16 +1,14 @@
 ---
-title: "Reconstructing phenotype specific multi-omics networks with SmCCNet"
+title: "Reconstructing Phenotype-Specific Multi-Omics Networks with SmCCNet"
 shorttitle: "SmCCNet"
 author: 
-  - Weixuan Liu^1^
-  - Yonghua Zhuang^1^
-  - W. Jenny Shi^1^
-  - Katerina Kechris^1^
-affiliation: 
-  - ^1^University of Colorado Anschutz Medical Campus, Aurora, CO, USA
+  - Weixuan Liu
+  - Yonghua Zhuang
+  - W. Jenny Shi
+  - Katerina Kechris
 date: "`r Sys.Date()`"
 abstract: >
-    Sparse multiple canonical correlation network analysis (SmCCNet) is a machine learning technique for integrating multiple omics data on the same subjects, along with a quantitative phenotype of interest, and reconstructing multi-omics networks that are specific to the phenotype. While the current version integrates two omics data types in addition to a phenotype, the framework can be easily generalized to more than two omics data types and multiple quantitative phenotypes. In this document, we illustrate a standard workflow of SmCCNet with a synthetic miRNA, mRNA expression dataset.
+    Sparse multiple canonical correlation network analysis (SmCCNet) is a machine learning technique for integrating omics data along with a variable of interest (e.g., phenotype of complex disease), and reconstructing multiomics networks that are specific to this variable. We present the second-generation SmCCNet (SmCCNet 2.0) that adeptly integrates single or multiple omics data types along with a quantitative or binary phenotype of interest. In addition, this new package offers a streamlined setup process that can be configured manually or automatically, ensuring a flexible and user-friendly experience.
 vignette: >
     %\VignetteIndexEntry{Reconstructing phenotype-specific multi-omics networks with SmCCNet}
     %\VignetteKeywords{Multi-omics Integration}
@@ -38,20 +36,22 @@ knitr::opts_chunk$set(echo = TRUE)
 # SmCCNet overview
 **Note:** if you use SmCCNet in published research, please cite:
 
-> Shi, W.J., Y. Zhuang, P.H. Russell, B.D. Hobbs, M.M. Parker,P.J. Castaldi, P. Rudra, B. Vestal, C.P. Hersh, L.M. Saba, and K. Kechris, “Unsupervised Discovery of Phenotype Specific Multi-Omics Networks.” Bioinformatics. 2019 Nov 1;35(21):4336-4343. doi: 10.1093/bioinformatics/btz226.
+> Liu, W., Vu, T., Konigsberg, I. R., Pratte, K. A., Zhuang, Y., & Kechris, K. J. (2023). SmCCNet 2.0: an Upgraded R package for Multi-omics Network Inference. bioRxiv, 2023-11.
+
+> Shi, W. J., Zhuang, Y., Russell, P. H., Hobbs, B. D., Parker, M. M., Castaldi, P. J., ... & Kechris, K. (2019). Unsupervised discovery of phenotype-specific multi-omics networks. Bioinformatics, 35(21), 4336-4343.
 
 
 ## Workflow
 
 SmCCNet is a canonical correlation based integration method that reconstructs phenotype-specific multi-omics networks (Shi et al., 2019). The algorithm is based on sparse multiple canonical analysis (SmCCA) for $T$ omics data $X_1, X_2,...X_T$ and a quantitative phenotype $Y$ measured on the same subjects. SmCCA finds the canonical weights $w_1, w_2,...,w_T$ that maximize the (weighted or unweighted) sum of pairwise canonical correlations between $X_1, X_2, ..., X_T$ and $Y$, under some constraints (Equation \ref{eq:smcca2}). In SmCCNet, the sparsity constraint functions $P_t(\cdot), t = 1,2,...,T$, are the least absolute shrinkage and selection operators (LASSO). The weighted version corresponds to $a_{i,j}, b_{i}$ (also called scaling factors), are not all equal; the unweighted version corresponds to $a_{i,j} = b_i = 1$ for all $i,j = 1,2,..., T$.
 
-\begin{eqnarray}
+\begin{equation}
 \begin{split} 
 \label{eq:smcca2}
 & (w_1, w_2,...,w_T)\!  =\! \arg\max_{\tilde w_1, \tilde w_2,..., \tilde w_T} \!\left(\sum_{i<j;i,j=1,2,...,T} \!a_{i,j}\tilde w_i^TX_i^TX_j\tilde w_j\! +\! \sum_{i=1}^{T}b_{i}  \tilde w_i^TX_i^TY\!\right),\\
 &  \hspace{.2in}\text{subject to } \lVert\tilde w_t\rVert^2 = 1, P_t(\tilde w_t) \leq c_t, t = 1,2,...,T.			
 \end{split}
-\end{eqnarray}
+\end{equation}
 
 
 
@@ -67,8 +67,8 @@ The sparsity penalties $c_t$ influence how many features will be included in eac
 
 
 
-```{r flowchart, fig.cap = "SmCCNet workflow overview. X1 and X2 are two omics data types for the same set of n subjects. Y indicates a quantitative phenotype measure for those n subjects. Note that the flowchart demonstrate workflow for two omics data, it is also compatible with more than two omics data.", echo = FALSE,out.width='100%'}
-knitr::include_graphics("figures/SmCCNetWorkflow.pdf")
+```{r flowchart, fig.cap = "SmCCNet workflow overview for Quantitative Phenotype. X1, X2, and X3 are three omics data types for the same set of n subjects. Y indicates a quantitative phenotype measure for those n subjects. Note that the flowchart demonstrate workflow for three omics data, it is also compatible with more than three omics data or two omics data.", echo = FALSE,out.width='100%'}
+knitr::include_graphics("figures/SmCCNet-Quant.jpg")
 ```
 
 
@@ -79,7 +79,6 @@ The SmCCNet package has the following dependencies:
 
 ```{r, echo = FALSE, results = "hide", warning = FALSE, eval = TRUE}
 suppressPackageStartupMessages({
-    library(PMA)
     library(pbapply)
     library(Matrix)
     library(igraph)
@@ -88,7 +87,6 @@ suppressPackageStartupMessages({
 })
 ```
 ```{r, eval = TRUE}
-library(PMA)
 library(pbapply)
 library(Matrix)
 library(igraph)
@@ -175,6 +173,10 @@ processed_data <- lapply(X, function(Xmatrix){
   as.matrix(dataPreprocess(X = as.data.frame(Xmatrix), covariates = NULL, 
                   is_cv = TRUE, cv_quantile = 0.2, center = TRUE, 
                  scale = TRUE))})
+# re-standardize -omics data if regress-out approach is used (covariates != NULL)
+processed_data <- lapply(processed_data, scale)
+# if preprocess feature is used, X need to be overrided with the following code 
+X <- processed_data
 ```
 
 ## Step II: Determine optimal sparsity penalties through cross-validation (optional)
@@ -866,8 +868,12 @@ Ws <- getRobustWeightsMulti(X,
 
 # Multi-Omics SmCCNet with Binary Phenotype
 
+```{r flowchart-binary, fig.cap = "SmCCNet workflow overview for Binary Phenotype. X1, X2, and X3 are three omics data types for the same set of n subjects. Y indicates a Binary phenotype measure for those n subjects. Note that the flowchart demonstrate workflow for three omics data, it is also compatible with more than three omics data or two omics data.", echo = FALSE,out.width='100%'}
+knitr::include_graphics("figures/SmCCNet-Binary.jpg")
+```
 
-Consider $X_1, X_2, ..., X_T$ as $T$ omics datasets, and $Y$ as the phenotype data. The general workflow for multi-omics SmCCNet with binary phenotype is as follows:
+
+Consider $X_1, X_2, ..., X_T$ as $T$ omics datasets, and $Y$ as the phenotype data. The general workflow for multi-omics SmCCNet with binary phenotype is as follows (Figure \ref{fig:flowchart-binary}):
 
 1. **Run Weighted/Unweighted Sparse Multiple Canonical Correlation Analysis (SmCCA)**: This is done on $X_1, X_2, ..., X_T$ (excluding phenotype data). The output is canonical weight vectors (with nonzero entries, zero entries are filtered) $\tilde W_{t} \in \mathbb{R}^{p_t^{(sub)} \times 1}, t = 1,2,...,T$, which represent the omics-omics connections. In this step, we filter out features that have no connections with other features, which helps reduce dimensionality. Note that we tend to set relaxed penalty terms for this step to include as many omics features as possible to increase the performance of the classifier in the next step.
 
