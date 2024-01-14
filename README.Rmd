@@ -73,8 +73,8 @@ The final network generated from SmCCNet can be visualized in two ways:
 ## General Workflow
 
 
-```{r,echo = FALSE,out.width='100%'}
-knitr::include_graphics("vignettes/figures/workflow.png")
+```{r,echo = FALSE,out.width='90%'}
+knitr::include_graphics("vignettes/figures/smccnetworkflow.png")
 ```
 
 

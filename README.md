@@ -95,7 +95,7 @@ The final network generated from SmCCNet can be visualized in two ways:
 
 ## General Workflow
 
-<img src="vignettes/figures/workflow.png" width="100%" />
+<img src="vignettes/figures/smccnetworkflow.png" width="90%" />
 
 ## Multi-Omics SmCCNet with Quantitative Phenotype
 
