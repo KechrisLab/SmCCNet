@@ -84,23 +84,23 @@ The final network generated from SmCCNet can be visualized in two ways:
 
 ## General Workflow
 
-<img src="vignettes/figures/Workflow.png" width="80%" />
+<img src="vignettes/figures/Workflow.png" width="100%" />
 
 ## Multi-Omics SmCCNet with Quantitative Phenotype
 
-<img src="vignettes/figures/SmCCNet-Quant.jpg" width="80%" />
+<img src="vignettes/figures/SmCCNet-Quant.jpg" width="100%" />
 
 ## Multi-Omics SmCCNet with Binary Phenotype
 
-<img src="vignettes/figures/SmCCNet-Binary.jpg" width="80%" />
+<img src="vignettes/figures/SmCCNet-Binary.jpg" width="100%" />
 
 ## Single-Omics SmCCNet
 
-<img src="vignettes/figures/single-omics-smccnet.jpg" width="80%" />
+<img src="vignettes/figures/single-omics-smccnet.jpg" width="100%" />
 
 ## SmCCNet Example Output Product
 
-<img src="vignettes/figures/example_network_continuous.png" width="80%" />
+<img src="vignettes/figures/example_network_continuous.png" width="100%" />
 
 # Package Functions
 
