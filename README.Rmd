@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 options(tibble.print_min = 5, tibble.print_max = 5)
 ```
 
-# SmCCNet: A Comprehensive Tool for Multi-Omics Network Inference <a href="https://liux4283.github.io/SmCCNet"><img src="vignettes/figures/logo.png" align="right" height="138" /></a>
+# SmCCNet: A Comprehensive Tool for Multi-Omics Network Inference <a href="https://liux4283.github.io/SmCCNet"><img src="vignettes/figures/logo.jpg" align="right" height="138" /></a>
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/SmCCNet)](https://cran.r-project.org/web/packages/SmCCNet/index.html)
@@ -74,7 +74,7 @@ The final network generated from SmCCNet can be visualized in two ways:
 
 
 ```{r,echo = FALSE,out.width='90%'}
-knitr::include_graphics("vignettes/figures/smccnetworkflow.png")
+knitr::include_graphics("vignettes/figures/smccnetworkflow.jpg")
 ```
 
 
@@ -100,7 +100,7 @@ knitr::include_graphics("vignettes/figures/single-omics-smccnet.jpg")
 ## SmCCNet Example Output Product 
 
 ```{r,echo = FALSE,out.width='100%'}
-knitr::include_graphics("vignettes/figures/example_network_continuous.png")
+knitr::include_graphics("vignettes/figures/example_network_continuous.jpg")
 ```
 
 # Package Functions

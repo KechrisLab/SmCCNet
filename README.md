@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# SmCCNet: A Comprehensive Tool for Multi-Omics Network Inference <a href="https://liux4283.github.io/SmCCNet"><img src="vignettes/figures/logo.png" align="right" height="138" /></a>
+# SmCCNet: A Comprehensive Tool for Multi-Omics Network Inference <a href="https://liux4283.github.io/SmCCNet"><img src="vignettes/figures/logo.jpg" align="right" height="138" /></a>
 
 <!-- badges: start -->
 
@@ -95,7 +95,7 @@ The final network generated from SmCCNet can be visualized in two ways:
 
 ## General Workflow
 
-<img src="vignettes/figures/smccnetworkflow.png" width="90%" />
+<img src="vignettes/figures/smccnetworkflow.jpg" width="90%" />
 
 ## Multi-Omics SmCCNet with Quantitative Phenotype
 
@@ -111,7 +111,7 @@ The final network generated from SmCCNet can be visualized in two ways:
 
 ## SmCCNet Example Output Product
 
-<img src="vignettes/figures/example_network_continuous.png" width="100%" />
+<img src="vignettes/figures/example_network_continuous.jpg" width="100%" />
 
 # Package Functions
 
