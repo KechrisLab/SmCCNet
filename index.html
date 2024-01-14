@@ -68,7 +68,7 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="smccnet-a-comprehensive-tool-for-multi-omics-network-inference-">SmCCNet: A Comprehensive Tool for Multi-Omics Network Inference <a href="https://liux4283.github.io/SmCCNet" class="external-link"><img src="articles/figures/logo.jpg" align="right" height="138"></a>
+<div class="page-header"><h1 id="smccnet-a-comprehensive-tool-for-multi-omics-network-inference-">SmCCNet: A Comprehensive Tool for Multi-Omics Network Inference <a href=""><img src="articles/figures/logo.jpg" align="right" height="98"></a>
 <a class="anchor" aria-label="anchor" href="#smccnet-a-comprehensive-tool-for-multi-omics-network-inference-"></a>
 </h1></div>
 <!-- badges: start -->
@@ -83,32 +83,36 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>SmCCNet is a framework that adeptly integrates single or multiple omics data types along with a quantitative or binary phenotype of interest. It offers a streamlined setup process that can be tailored manually or configured automatically, ensuring a flexible and user-friendly experience. The algorithm is based on sparse multiple canonical analysis (SmCCA) and is designed for <span class="math inline"><em>T</em></span> omics data types <span class="math inline"><em>X</em><sub>1</sub>, <em>X</em><sub>2</sub>, ..., <em>X</em><sub><em>T</em></sub></span> along with a quantitative phenotype <span class="math inline"><em>Y</em></span>. SmCCA identifies canonical weights <span class="math inline"><em>w</em><sub>1</sub>, <em>w</em><sub>2</sub>, ..., <em>w</em><sub><em>T</em></sub></span> that maximize the sum of pairwise canonical correlations between the omics data and <span class="math inline"><em>Y</em></span>, subject to certain constraints. In SmCCNet, LASSO (Least Absolute Shrinkage and Selection Operator) is used as the sparsity constraint function.</p>
-<p>The algorithm can operate in both weighted and unweighted modes, depending on whether <span class="math inline"><em>a</em><sub><em>i</em>, <em>j</em></sub></span> and <span class="math inline"><em>b</em><sub><em>i</em></sub></span> (scaling factors) are equal or not. When <span class="math inline"><em>a</em><sub><em>i</em>, <em>j</em></sub></span> and <span class="math inline"><em>b</em><sub><em>i</em></sub></span> are not all equal, it corresponds to the weighted version; otherwise, it corresponds to the unweighted version, where <span class="math inline"><em>a</em><sub><em>i</em>, <em>j</em></sub> = <em>b</em><sub><em>i</em></sub> = 1</span> for all <span class="math inline"><em>i</em></span> and <span class="math inline"><em>j</em></span>.</p>
-<p>The sparsity penalties <span class="math inline"><em>c</em><sub><em>t</em></sub></span> determine the number of features included in each subnetwork. SmCCNet follows a workflow that involves creating a network similarity matrix using SmCCA canonical weights from repeated subsampled omics data and the phenotype. It then identifies multi-omics modules relevant to the phenotype. The subsampling scheme enhances network robustness by analyzing a subset of omics features multiple times and aggregating results from each subsampling step.Below are the four steps of SmCCNet workflow</p>
-<ul>
-<li>Step I: Determine SmCCA sparsity penalties <span class="math inline"><em>c</em><sub><em>t</em></sub></span>. The user can select the penalties for omics feature selection based on the study purpose and/or prior knowledge. Alternatively, one can pick sparsity penalties based on a K-fold cross validation (CV) procedure that minimizes the total prediction error. The K-fold CV procedure ensures selected penalties to be generalizable to similar independent data sets and prevents over-fitting.</li>
-<li>Step II: Randomly subsample omics features without replacement, apply SmCCA with chosen penalties, and compute a feature relationship matrix for each subset. Repeat the process many times and define the similarity matrix to be the average of all feature relationship matrices.</li>
-<li>Step III: Apply hierarchical tree cutting to the similarity matrix to find the multi-omics networks. This step simultaneously identifies multiple subnetworks.</li>
-<li>Step Iv: Prune and summarize each network with our network pruning algorithm.</li>
-</ul>
+<p>SmCCNet is a framework designed for integrating one or multiple types of omics data with a quantitative or binary phenotype. It’s based on the concept of sparse multiple canonical analysis (SmCCA) and sparse partial least squared discriminant analysis (SPLSDA) and aims to find relationships between omics data and a specific phenotype. The framework uses LASSO (Least Absolute Shrinkage and Selection Operator) for sparsity constraints, allowing it to identify significant features within the data.</p>
+<p>The algorithm has two modes: weighted and unweighted. In the weighted mode, it uses different scaling factors for each data type, while in the unweighted mode, all scaling factors are equal. The choice of mode affects how the data is analyzed and interpreted.</p>
+<p>SmCCNet’s workflow consists of four main steps:</p>
+<p><strong>Determine Sparsity Penalties</strong>: The user selects sparsity penalties for omics feature selection, either based on study needs, prior knowledge, or through a K-fold cross-validation procedure. This step ensures the selection of features is generalizable and avoids overfitting.</p>
+<p><strong>Subsample and Apply SmCCA</strong>: Omics features are randomly subsampled and analyzed using SmCCA with the chosen penalties. This process is repeated multiple times to create a feature relationship matrix, which is then averaged to form a similarity matrix.</p>
+<p><strong>Identify Multi-Omics Networks</strong>: The similarity matrix is analyzed using hierarchical tree cutting to identify multiple subnetworks that are relevant to the phenotype.</p>
+<p><strong>Prune and Summarize Networks</strong>: Finally, the identified networks are pruned and summarized using a network pruning algorithm, refining the results to highlight the most significant findings.</p>
 </div>
 </div>
 <div class="section level1">
 <h1 id="smccnet-key-features">SmCCNet Key Features<a class="anchor" aria-label="anchor" href="#smccnet-key-features"></a>
 </h1>
+<p>There are three major computational algorithms that are used for difrerent number of datasets and phenotype modalities:</p>
+<ul>
+<li>Sparse Multiple Canonical Correlation Analysis (SmCCA)</li>
+<li>Sparse Partial Least Squared Discriminant Analysis (SPLSDA)</li>
+<li>Sparse Canonical Correlation Analysis (SCCA)</li>
+</ul>
 <p>Unlock the Power of SmCCNet with These Key Features:</p>
 <ul>
 <li>🧬 <strong>Multi-Omics Network Inference</strong>
 <ul>
-<li>With Quantitative Phenotype</li>
-<li>With Binary Phenotype</li>
+<li>With Quantitative Phenotype (SmCCA)</li>
+<li>With Binary Phenotype (SmCCA + SPLSDA)</li>
 </ul>
 </li>
 <li>📊 <strong>Single-Omics Network Inference</strong>
 <ul>
-<li>With Quantitative Phenotype</li>
-<li>With Binary Phenotype</li>
+<li>With Quantitative Phenotype (SCCA)</li>
+<li>With Binary Phenotype (SPLSDA)</li>
 </ul>
 </li>
 <li>🚀 <strong>Automation Simplified</strong>
@@ -133,7 +137,7 @@
 <div class="section level2">
 <h2 id="general-workflow">General Workflow<a class="anchor" aria-label="anchor" href="#general-workflow"></a>
 </h2>
-<p><img src="articles/figures/smccnetworkflow.jpg" width="90%"></p>
+<p><img src="articles/figures/smccnetworkflow.jpg" width="100%"></p>
 </div>
 <div class="section level2">
 <h2 id="multi-omics-smccnet-with-quantitative-phenotype">Multi-Omics SmCCNet with Quantitative Phenotype<a class="anchor" aria-label="anchor" href="#multi-omics-smccnet-with-quantitative-phenotype"></a>
