@@ -16,7 +16,8 @@ Maintainer:
 Description: 
    A canonical correlation based framework (SmCCNet) designed for the construction of phenotype-specific multi-omics networks. This framework adeptly integrates single or multiple omics data types along with a quantitative or binary phenotype of interest. It offers a streamlined setup process that can be tailored manually or configured automatically, ensuring a flexible and user-friendly experience.
 URL: https://github.com/KechrisLab/SmCCNet,
-    https://kechrislab.github.io/SmCCNet/
+    https://kechrislab.github.io/SmCCNet/,
+    https://liux4283.github.io/SmCCNet/
 Depends: R (>= 3.5)
 Imports: 
     EnvStats,
