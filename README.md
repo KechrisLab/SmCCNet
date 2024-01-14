@@ -9,6 +9,17 @@
 status](https://www.r-pkg.org/badges/version/SmCCNet)](https://cran.r-project.org/web/packages/SmCCNet/index.html)
 <!-- badges: end -->
 
+**Note:** if you use SmCCNet in published research, please cite:
+
+> Liu, W., Vu, T., Konigsberg, I. R., Pratte, K. A., Zhuang, Y., &
+> Kechris, K. J. (2023). SmCCNet 2.0: an Upgraded R package for
+> Multi-omics Network Inference. bioRxiv, 2023-11.
+
+> Shi, W. J., Zhuang, Y., Russell, P. H., Hobbs, B. D., Parker, M. M.,
+> Castaldi, P. J., … & Kechris, K. (2019). Unsupervised discovery of
+> phenotype-specific multi-omics networks. Bioinformatics, 35(21),
+> 4336-4343.
+
 ## Overview
 
 SmCCNet is a framework that adeptly integrates single or multiple omics
@@ -81,17 +92,6 @@ The final network generated from SmCCNet can be visualized in two ways:
   [RCy3](https://www.bioconductor.org/packages/release/bioc/html/RCy3.html).
 
 # SmCCNet Workflow
-
-**Note:** if you use SmCCNet in published research, please cite:
-
-> Liu, W., Vu, T., Konigsberg, I. R., Pratte, K. A., Zhuang, Y., &
-> Kechris, K. J. (2023). SmCCNet 2.0: an Upgraded R package for
-> Multi-omics Network Inference. bioRxiv, 2023-11.
-
-> Shi, W. J., Zhuang, Y., Russell, P. H., Hobbs, B. D., Parker, M. M.,
-> Castaldi, P. J., … & Kechris, K. (2019). Unsupervised discovery of
-> phenotype-specific multi-omics networks. Bioinformatics, 35(21),
-> 4336-4343.
 
 ## General Workflow
 
