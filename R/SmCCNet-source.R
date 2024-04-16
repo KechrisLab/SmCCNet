@@ -755,10 +755,10 @@ getRobustWeightsMultiBinary <- function(X, Y, Between_Discriminate_Ratio = c(1,1
     # subset selected features
     X_subset <- X_all[ ,which(BetweenOmicsWeight[,iii] != 0)]
     # run omics-phenotype SmCCA based on selected molecular features
-      Ws_pheno <- getRobustWeightsSingleBinary(X1 = X_subset, Trait = matrix(Y, ncol = 1), Lambda1 = as.numeric(eta), 
+    Ws_pheno <- getRobustWeightsSingleBinary(X1 = X_subset, Trait = matrix(Y, ncol = 1), Lambda1 = as.numeric(eta), 
                                                s1 = 1, SubsamplingNum = 1, K = ncomp_pls)
-      # store omics-phenotype canonical weight
-      OmicsPhenoWeight[which(BetweenOmicsWeight[,iii] != 0),iii] <- as.numeric(Ws_pheno)
+    # store omics-phenotype canonical weight
+    OmicsPhenoWeight[which(BetweenOmicsWeight[,iii] != 0),iii] <- as.numeric(Ws_pheno)
       
    
     
@@ -766,22 +766,29 @@ getRobustWeightsMultiBinary <- function(X, Y, Between_Discriminate_Ratio = c(1,1
     # normalize each data type 
     for (j in 1:length(X))
     {
-      OmicsPhenoWeight[which(type_index == j),iii] <- OmicsPhenoWeight[which(type_index == j),iii]/pracma::Norm(OmicsPhenoWeight[which(type_index == j),iii])
+      if (pracma::Norm(OmicsPhenoWeight[which(type_index == j),iii]) != 0)
+      {
+        OmicsPhenoWeight[which(type_index == j),iii] <- OmicsPhenoWeight[which(type_index == j),iii]/pracma::Norm(OmicsPhenoWeight[which(type_index == j),iii])
+      }  
     }
 
     
   }  
 
   # set part of the between-omics weight to 0
-  BetweenOmicsWeight[OmicsPhenoWeight == 0] <- 0
+  BetweenOmicsWeight[as.vector(OmicsPhenoWeight == 0)] <- 0
   # remove all zero columns
   if (SubsamplingNum > 1)
   {
     # find zero columns and NAN columns
     zero_cols <- which(apply(OmicsPhenoWeight, 2, function(x) all(x == 0) | any(is.nan(x))))
-    # remove all these columns
-    BetweenOmicsWeight <- BetweenOmicsWeight[,-zero_cols]
-    OmicsPhenoWeight <- OmicsPhenoWeight[,-zero_cols]
+    if(length(zero_cols)!=0)
+    {
+      # remove all these columns
+      BetweenOmicsWeight <- BetweenOmicsWeight[,-zero_cols]
+      OmicsPhenoWeight <- OmicsPhenoWeight[,-zero_cols]
+    }
+    
   }  
   # aggregate canonical weight (trade-off: between-omics, omics-phenotype)
   CCWeight <- (Between_Discriminate_Ratio[1]/sum(Between_Discriminate_Ratio)) * BetweenOmicsWeight + 

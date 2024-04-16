@@ -329,7 +329,11 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
     cat("--------------------------------------------------\n")
     cat("\n")
     AllComb <- utils::combn(length(X), 2)
+    DataTypePheno <- c(DataType, 'Phenotype')
     ScalingFactor <- rep(0, ncol(AllComb))
+    names(ScalingFactor) <- apply(AllComb,2, function(x){
+      paste0(DataTypePheno[x[1]],'-',DataTypePheno[x[2]])
+    })
     for (i in 1:ncol(AllComb))
     {
       # define the pair of matrices
@@ -353,6 +357,10 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
     CombPheno <- utils::combn(length(X) + 1,2)
     NonPhenoIndex <- apply(CombPheno, 2, function(x){x[2] != (length(X) + 1)})
     ScalingFactorTemp <- rep(1, ncol(CombPheno))
+    DataTypePheno <- c(DataType, 'Phenotype')
+    names(ScalingFactorTemp) <- apply(CombPheno,2, function(x){
+      paste0(DataTypePheno[x[1]],'-',DataTypePheno[x[2]])
+    })
     ScalingFactorTemp[NonPhenoIndex] <- ScalingFactor
     ScalingFactor <- ScalingFactorTemp
     # if multi-omics PLS is used
@@ -362,7 +370,12 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
     }
     
     cat("\n")
-    cat('The scaling factor selection is: ', ScalingFactor, '\n')
+    cat('The scaling factor selection is: ', '\n')
+    cat("\n")
+    for (i in 1:length(ScalingFactor))
+    {
+      cat(paste0(names(ScalingFactor)[i],": ", ScalingFactor[i]), '\n')
+    }
  
   } else{
     cat('single omics analysis, skip scaling factor.', '\n')
@@ -642,7 +655,7 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
       cat(paste0('\n'))
       for (xx in 1:length(BestPen))
       {  
-        cat(paste0('The best penalty term for omics ', xx, ' after ', Kfold,'-fold cross-validation is: ', BestPen[xx]), '\n')
+        cat(paste0('The best penalty term for ', DataType[xx], ' after ', Kfold,'-fold cross-validation is: ', BestPen[xx]), '\n')
       }
       cat(paste0('with testing ', EvalMethod,' score = ', round(AggregatedCVResult$TestMetric[which.max(AggregatedCVResult$TestMetric)],3)), '\n')
       cat('Now running single-omics PLS with best penalty term on the complete dataset.', '\n')
@@ -702,7 +715,7 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
       cat(paste0('\n'))
       for (xx in 1:length(BestPen))
       {  
-        cat(paste0('The best penalty term for omics ', xx, ' after ', Kfold,'-fold cross-validation is: ', BestPen[xx]), '\n')
+        cat(paste0('The best penalty term for ', DataType[xx], ' after ', Kfold,'-fold cross-validation is: ', BestPen[xx]), '\n')
       }
       cat(paste0('with testing canonical correlation = ', round(AggregatedCVResult$RhoTest[which.min(EvalMetric)],3), 
                  ', and prediction error = ', round(AggregatedCVResult$DeltaCor[which.min(EvalMetric)],3)), '\n')
@@ -880,7 +893,7 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
       cat('\n')
       for (xx in 1:length(X))
       {  
-        cat(paste0('The best penalty term for omics ', xx, ' after ', Kfold,'-fold cross-validation is: ', BestPen[xx]), '\n')
+        cat(paste0('The best penalty term for ', DataType[xx], ' after ', Kfold,'-fold cross-validation is: ', BestPen[xx]), '\n')
       }
       cat(paste0('and the best penalty term on classifier is: ', BestPen[length(X) + 1], '\n'))
       cat(paste0('with testing ', EvalMethod,' score = ', round(AggregatedCVResult$TestMetric[which.max(AggregatedCVResult$TestMetric)],3)), '\n')
@@ -1018,7 +1031,7 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
   cat("\n")
   cat("3. To prevent overwriting result files across projects, rename the result file after each run.\n")
   cat("\n")
-  cat("4. Subnetwork visualization can be done through shinyApp or cytoscape, please refer to network visualization section in multi-omics or single-omics vignette for more detail.\n")
+  cat("4. Subnetwork visualization can be done through shinyApp or cytoscape. Please refer to the network visualization section in the multi-omics or single-omics vignette for more detail. For the Shiny app, visit: https://smccnet.shinyapps.io/smccnetnetwork/\n")
   cat("\n")
   cat("************************************\n")
   return(list(AdjacencyMatrix = Abar, Data = X, ClusteringModules = OmicsModule, CVResult = AggregatedCVResult))
