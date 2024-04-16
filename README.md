@@ -265,6 +265,6 @@ and other discussion, please use
 
 This package is developed by
 [KechrisLab](https://kechrislab.github.io/), for more questions about
-the package, please contact [Dr. Katerina
-Kechris](katerina.kechris@cuanschutz.edu) or [Weixuan
-Liu](weixuan.liu@cuanschutz.edu).
+the package, please contact Dr. Katerina
+Kechris (katerina.kechris@cuanschutz.edu) or Weixuan
+Liu (weixuan.liu@cuanschutz.edu).
