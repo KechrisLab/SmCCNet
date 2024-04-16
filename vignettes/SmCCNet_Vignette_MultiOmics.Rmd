@@ -558,7 +558,7 @@ Figure \ref{fig:loadings1} is the visualization of the PC loadings that contribu
 
 ## Step VI: Visualize network module
 
-The initial approach to network visualization is facilitated through our SmCCNet shinyApp, accessible at [https://smccnet.shinyapps.io/smccnetnetwork/](https://smccnet.shinyapps.io/smccnetnetwork/). Upon obtaining a subnetwork file named 'size_a_net_b.Rdata', users can upload it to the shinyApp. The platform provides various adjustable visualization parameters, enabling users to tailor the network visualization to their preferences.
+The initial approach to network visualization is facilitated through our SmCCNet shinyApp, accessible at [https://smccnet.shinyapps.io/smccnetnetwork/](https://smccnet.shinyapps.io/smccnetnetwork/). Upon obtaining a subnetwork file named 'size_a_net_b.Rdata', users can upload it to the shinyApp. The platform provides various adjustable visualization parameters, enabling users to tailor the network visualization to their preferences. In addition, the Shiny application provides other visualization for the subnetworks in addition to the network, which includes principal component loading visualization, correlation heatmap, and subject-level 3D graph.
 
 An alternative way to visualize the final network module, we need to download the Cytoscape software (Shannon et al., 2003), and use the package RCy3 to visualize the subnetwork generated from the network pruning step. In general, since the network obtained through the PageRank pruning algorithm is densely connected, and some of the edges may be false positive (meaning that two nodes are not associated, but with higher edge values in the adjacency matrix). Therefore, we use the correlation matrix to filter out those weak network edges.
 

@@ -312,7 +312,7 @@ With a pre-selected penalty term, we apply SmCCA to subsampled features of $X_1$
 process to generate a robust similarity matrix (Figure 1). As
 for the number of subsample, a larger number of subsamples leads to more stable results, while a smaller number of subsample is faster computationally. We use 50 in this example. Below is the setup and description of the subsampling parameters:
 
-- $s1$: Proportions of feature subsampling from $X_1, X_2$. Default values are $s_1 = 0.7, s_2 = 0.9.$
+- $s1$: Proportions of feature subsampling from $X_1$. Default values are $s_1 = 0.7$.
 - $SubsamplingNum$: Number of subsamples.
 
 
@@ -473,7 +473,7 @@ Figure \ref{fig:loadings1} the visualization of the PC loadings that represents 
 
 ## Step VI: Visualize network module
 
-The initial approach to network visualization is facilitated through our SmCCNet shinyApp, accessible at [https://smccnet.shinyapps.io/smccnetnetwork/](https://smccnet.shinyapps.io/smccnetnetwork/). Upon obtaining a subnetwork file named 'size_a_net_b.Rdata', users can upload it to the shinyApp. The platform provides various adjustable visualization parameters, enabling users to tailor the network visualization to their preferences.
+The initial approach to network visualization is facilitated through our SmCCNet shinyApp, accessible at [https://smccnet.shinyapps.io/smccnetnetwork/](https://smccnet.shinyapps.io/smccnetnetwork/). Upon obtaining a subnetwork file named 'size_a_net_b.Rdata', users can upload it to the shinyApp. The platform provides various adjustable visualization parameters, enabling users to tailor the network visualization to their preferences. In addition, the Shiny application provides other visualization for the subnetworks in addition to the network, which includes principal component loading visualization, correlation heatmap, and subject-level 3D graph.
 
 An alternative way to visualize the final network module, we need to download the Cytoscape software, and use the package RCy3 to visualize the subnetwork generated from the network trimming step. In general, since the network obtained through the PageRank trimming algorithm is densely connected, and some of the edges may be false positive (meaning that two nodes are not associated, but with higher edge values in the adjacency matrix). Therefore, we use the correlation matrix to filter out those weak network edges.
 
