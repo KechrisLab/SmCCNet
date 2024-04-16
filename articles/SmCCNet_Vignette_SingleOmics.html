@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">SmCCNet</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -342,10 +342,8 @@ parameters:</p>
 <ul>
 <li>
 <span class="math inline">\(s1\)</span>: Proportions of feature
-subsampling from <span class="math inline">\(X_1, X_2\)</span>. Default
-values are <span class="math inline">\(s_1 = 0.7, s_2 =
-0.9.\)</span>
-</li>
+subsampling from <span class="math inline">\(X_1\)</span>. Default
+values are <span class="math inline">\(s_1 = 0.7\)</span>.</li>
 <li>
 <span class="math inline">\(SubsamplingNum\)</span>: Number of
 subsamples.</li>
@@ -590,7 +588,10 @@ our SmCCNet shinyApp, accessible at <a href="https://smccnet.shinyapps.io/smccne
 Upon obtaining a subnetwork file named ‘size_a_net_b.Rdata’, users can
 upload it to the shinyApp. The platform provides various adjustable
 visualization parameters, enabling users to tailor the network
-visualization to their preferences.</p>
+visualization to their preferences. In addition, the Shiny application
+provides other visualization for the subnetworks in addition to the
+network, which includes principal component loading visualization,
+correlation heatmap, and subject-level 3D graph.</p>
 <p>An alternative way to visualize the final network module, we need to
 download the Cytoscape software, and use the package RCy3 to visualize
 the subnetwork generated from the network trimming step. In general,
@@ -900,7 +901,7 @@ single-omics quantitative phenotype example, refer to section 1.4 and
 <span><span class="co">##  [1] reshape2_1.4.4   shadowtext_0.1.3 lubridate_1.9.3  forcats_1.0.0   </span></span>
 <span><span class="co">##  [5] stringr_1.5.1    dplyr_1.1.4      purrr_1.0.2      readr_2.1.5     </span></span>
 <span><span class="co">##  [9] tidyr_1.3.1      tibble_3.2.1     ggplot2_3.5.0    tidyverse_2.0.0 </span></span>
-<span><span class="co">## [13] SmCCNet_2.0.2    igraph_2.0.3     Matrix_1.6-5     pbapply_1.7-2   </span></span>
+<span><span class="co">## [13] SmCCNet_2.0.3    igraph_2.0.3     Matrix_1.6-5     pbapply_1.7-2   </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>
 <span><span class="co">##  [1] sass_0.4.9        utf8_1.2.4        generics_0.1.3    stringi_1.8.3    </span></span>
