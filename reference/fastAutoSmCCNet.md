@@ -29,12 +29,13 @@ fastAutoSmCCNet(
   min_size = 10,
   max_size = 100,
   summarization = "NetSHy",
-  saving_dir = getwd(),
+  saving_dir = tempdir(),
   ncomp_pls = 3,
   tuneLength = 5,
   tuneRangeCCA = c(0.1, 0.5),
   tuneRangePLS = c(0.5, 0.9),
-  seed = 123
+  seed = 123,
+  verbose = FALSE
 )
 ```
 
@@ -148,6 +149,11 @@ fastAutoSmCCNet(
 
   Random seed for result reproducibility, default is set to 123.
 
+- verbose:
+
+  Logical; if TRUE, print progress messages during execution, otherwise
+  run silently.
+
 ## Value
 
 This function returns the global adjacency matrix, omics data details,
@@ -158,35 +164,183 @@ subnetwork modules are saved in the directory specified by the user.
 
 ``` r
 
-
-# library(SmCCNet)
-# set.seed(123)
-# data("ExampleData")
-# Y_binary <- ifelse(Y > quantile(Y, 0.5), 1, 0)
-## single-omics PLS
-# result <- fastAutoSmCCNet(X = list(X1), Y = as.factor(Y_binary), Kfold = 3, 
-#                          subSampNum = 100, DataType = c('Gene'),
-#                          saving_dir = getwd(), EvalMethod = 'auc', 
-#                          summarization = 'NetSHy', 
-#                          CutHeight = 1 - 0.1^10, ncomp_pls = 5)
-## single-omics CCA
-# result <- fastAutoSmCCNet(X = list(X1), Y = Y, Kfold = 3, preprocess = FALSE,
-#                           subSampNum = 50, DataType = c('Gene'),
-#                           saving_dir = getwd(), summarization = 'NetSHy',
-#                           CutHeight = 1 - 0.1^10)
-## multi-omics PLS
-# result <- fastAutoSmCCNet(X = list(X1,X2), Y = as.factor(Y_binary), 
-#                           Kfold = 3, subSampNum = 50, 
-#                           DataType = c('Gene', 'miRNA'), 
-#                           CutHeight = 1 - 0.1^10,
-#                           saving_dir = getwd(), EvalMethod = 'auc', 
-#                           summarization = 'NetSHy',
-#                           BetweenShrinkage = 5, ncomp_pls = 3)
-## multi-omics CCA
-# result <- fastAutoSmCCNet(X = list(X1,X2), Y = Y, 
-#                           K = 3, subSampNum = 50, DataType = c('Gene', 'miRNA'), 
-#                           CutHeight = 1 - 0.1^10,
-#                           saving_dir = getwd(),  
-#                           summarization = 'NetSHy',
-#                           BetweenShrinkage = 5)
+# \donttest{
+ library(SmCCNet)
+ set.seed(123)
+ Y <- rnorm(50)
+ X1 <- matrix(rnorm(2500), nrow = 50, ncol = 50)
+ colnames(X1) <- paste0("Gene_", 1:50)
+ X1[, 1:10] <- X1[, 1:10] + matrix(rep(Y, 10), ncol = 10)
+ X2 <- matrix(rnorm(1000), nrow = 50, ncol = 20)
+ colnames(X2) <- paste0("miRNA_", 1:20)
+ X2[, 1:5] <- X2[, 1:5] + matrix(rep(Y, 5), ncol = 5)
+ Y_binary <- ifelse(Y > median(Y), 1, 0)
+ ## single-omics CCA
+ result <- fastAutoSmCCNet(X = list(X1), Y = Y,
+                           Kfold = 3, preprocess = FALSE,
+                           subSampNum = 10,
+                           DataType = c('Gene'),
+                           saving_dir = tempdir(),
+                           summarization = 'NetSHy',
+                           CutHeight = 1 - 0.1^10,
+                           min_size = 5)
+#> Warning: data length is not a multiple of split variable
+ ## single-omics PLS
+ result <- fastAutoSmCCNet(X = list(X1),
+                           Y = as.factor(Y_binary),
+                           Kfold = 3, subSampNum = 10,
+                           DataType = c('Gene'),
+                           saving_dir = tempdir(),
+                           EvalMethod = 'auc',
+                           summarization = 'NetSHy',
+                           CutHeight = 1 - 0.1^10,
+                           min_size = 5, ncomp_pls = 3)
+#> Warning: data length is not a multiple of split variable
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Setting levels: control = 0, case = 1
+#> Setting direction: controls < cases
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: algorithm did not converge
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+# }
 ```

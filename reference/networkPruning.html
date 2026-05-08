@@ -9,7 +9,7 @@ The final subnetwork is an .Rdata file with a name 'size_m_net_ind.Rdata', where
 
     <a class="navbar-brand me-2" href="../index.html">SmCCNet</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +58,8 @@ The final subnetwork is an .Rdata file with a name 'size_m_net_ind.Rdata', where
 <span>  <span class="va">max_mod_size</span>,</span>
 <span>  damping <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"NetSHy"</span>,</span>
-<span>  <span class="va">saving_dir</span></span>
+<span>  saving_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -114,6 +115,10 @@ should be an integer from 1 to the largest possible size of the subnetwork, and 
 <dt id="arg-saving-dir">saving_dir<a class="anchor" aria-label="anchor" href="#arg-saving-dir"></a></dt>
 <dd><p>User-defined directory to store pruned subnetwork.</p></dd>
 
+
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>Logical; if TRUE, print progress messages during execution, otherwise run silently.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -130,20 +135,25 @@ following: (1) correlation_sub: correlation matrix for the subnetwork.
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/KechrisLab/SmCCNet" class="external-link">SmCCNet</a></span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/KechrisLab/SmCCNet" class="external-link">SmCCNet</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="va">w</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">w</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">X1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1000</span>,<span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>,nrow <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">50</span>,<span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>,nrow <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">'feature_'</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">X1</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">labels</span></span></span>
 <span class="r-in"><span><span class="va">abar</span> <span class="op">&lt;-</span> <span class="fu"><a href="getAbar.html">getAbar</a></span><span class="op">(</span><span class="va">w</span>, FeatureLabel <span class="op">=</span> <span class="va">labels</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">modules</span> <span class="op">&lt;-</span> <span class="fu"><a href="getOmicsModules.html">getOmicsModules</a></span><span class="op">(</span><span class="va">abar</span>, CutHeight <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="networkPruning-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="va">X1</span><span class="op">[</span> ,<span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="va">X1</span></span></span>
 <span class="r-in"><span><span class="va">corr</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">20</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># display only example</span></span></span>
-<span class="r-in"><span><span class="co"># networkPruning(abar, corr, data = x, Pheno = Y,</span></span></span>
-<span class="r-in"><span><span class="co"># ModuleIdx = 1,  min_mod_size = 3, max_mod_size = 10, method = 'NetSHy', saving_dir = </span></span></span>
-<span class="r-in"><span><span class="co"># )</span></span></span>
+<span class="r-in"><span><span class="fu">networkPruning</span><span class="op">(</span><span class="va">abar</span>, <span class="va">corr</span>, data <span class="op">=</span> <span class="va">x</span>, Pheno <span class="op">=</span> <span class="va">Y</span>, type <span class="op">=</span> <span class="va">type</span>,</span></span>
+<span class="r-in"><span> ModuleIdx <span class="op">=</span> <span class="fl">1</span>,  min_mod_size <span class="op">=</span> <span class="fl">3</span>, max_mod_size <span class="op">=</span> <span class="fl">10</span>, method <span class="op">=</span> <span class="st">'NetSHy'</span>, saving_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
@@ -152,7 +162,7 @@ following: (1) correlation_sub: correlation matrix for the subnetwork.
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Weixuan Liu.</p>
+  <p>Developed by Abhinav Pundir, Weixuan Liu, Yonghua Zhuang, W. Jenny Shi, Thao Vu, Iain Konigsberg, Katherine Pratte, Laura Saba, Katerina Kechris.</p>
 </div>
 
 <div class="pkgdown-footer-right">

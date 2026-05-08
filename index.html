@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Sparse Multiple Canonical Correlation Network Analysis Tool • SmCCNet</title>
+<title>Sparse Multiple Canonical Correlation Network Analysis Tool (SmCCNet) • SmCCNet</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Sparse Multiple Canonical Correlation Network Analysis Tool">
-<meta name="description" content="A canonical correlation based framework (SmCCNet) designed for the construction of phenotype-specific multi-omics networks. This framework adeptly integrates single or multiple omics data types along with a quantitative or binary phenotype of interest. It offers a streamlined setup process that can be tailored manually or configured automatically, ensuring a flexible and user-friendly experience.">
-<meta property="og:description" content="A canonical correlation based framework (SmCCNet) designed for the construction of phenotype-specific multi-omics networks. This framework adeptly integrates single or multiple omics data types along with a quantitative or binary phenotype of interest. It offers a streamlined setup process that can be tailored manually or configured automatically, ensuring a flexible and user-friendly experience.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Sparse Multiple Canonical Correlation Network Analysis Tool (SmCCNet)">
+<meta name="description" content='A canonical correlation based framework (SmCCNet) designed for the construction of phenotype-specific multi-omics networks. This framework adeptly integrates single or multiple omics data types along with a quantitative or binary phenotype of interest. It offers a streamlined setup process that can be tailored manually or configured automatically, ensuring a flexible and user-friendly experience. Methods are described in Shi et al. (2019) "Unsupervised discovery of phenotype-specific multi-omics networks" &lt;doi:10.1093/bioinformatics/btz226&gt;.'>
+<meta property="og:description" content='A canonical correlation based framework (SmCCNet) designed for the construction of phenotype-specific multi-omics networks. This framework adeptly integrates single or multiple omics data types along with a quantitative or binary phenotype of interest. It offers a streamlined setup process that can be tailored manually or configured automatically, ensuring a flexible and user-friendly experience. Methods are described in Shi et al. (2019) "Unsupervised discovery of phenotype-specific multi-omics networks" &lt;doi:10.1093/bioinformatics/btz226&gt;.'>
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">SmCCNet</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -61,7 +61,7 @@
 
 <p><strong>Note:</strong> if you use SmCCNet in published research, please cite:</p>
 <blockquote>
-<p>Liu, W., Vu, T., Konigsberg, I. R., Pratte, K. A., Zhuang, Y., &amp; Kechris, K. J. (2023). SmCCNet 2.0: an Upgraded R package for Multi-omics Network Inference. bioRxiv, 2023-11.</p>
+<p>Liu, W., Vu, T., R. Konigsberg, I., Pratte, K., Zhuang Y., &amp; Kechris, K. (2024) Smccnet 2.0: A Comprehensive Tool for Multi-omics Network Inference with Shiny Visualization. BMC Bioinformatics 25, 276.</p>
 </blockquote>
 <blockquote>
 <p>Shi, W. J., Zhuang, Y., Russell, P. H., Hobbs, B. D., Parker, M. M., Castaldi, P. J., … &amp; Kechris, K. (2019). Unsupervised discovery of phenotype-specific multi-omics networks. Bioinformatics, 35(21), 4336-4343.</p>
@@ -113,7 +113,7 @@
 </h1>
 <p>The final network generated from SmCCNet can be visualized in two ways:</p>
 <ul>
-<li>Shiny Application simply by uploading the final .Rdata to <a href="https://smccnet.shinyapps.io/smccnetnetwork/" class="external-link">SmCCNet Visualization Application</a>.</li>
+<li>Shiny Application simply by uplooding the final .Rdata to <a href="https://smccnet.shinyapps.io/smccnetnetwork/" class="external-link">SmCCNet Visualization Application</a>.</li>
 <li>Cytoscape Software <a href="https://cytoscape.org/" class="external-link">Cytoscape</a> through R package <a href="https://www.bioconductor.org/packages/release/bioc/html/RCy3.html" class="external-link">RCy3</a>.</li>
 </ul>
 </div>
@@ -248,7 +248,7 @@
 </h2>
 <p>If you encounter a bug, please file an issue with a reproducible example on <a href="https://github.com/KechrisLab/SmCCNet/issues" class="external-link">GitHub</a>. For questions and other discussion, please use <a href="https://community.rstudio.com/" class="external-link">community.rstudio.com</a>.</p>
 <hr>
-<p>This package is developed by <a href="https://kechrislab.github.io/" class="external-link">KechrisLab</a>, for more questions about the package, please contact Dr. Katerina Kechris (<a href="mailto:katerina.kechris@cuanschutz.edu" class="email">katerina.kechris@cuanschutz.edu</a>) or Weixuan Liu (<a href="mailto:weixuan.liu@cuanschutz.edu" class="email">weixuan.liu@cuanschutz.edu</a>).</p>
+<p>This package is developed by <a href="https://kechrislab.github.io/" class="external-link">KechrisLab</a>, for more questions about the package, please contact <a href="katerina.kechris@cuanschutz.edu">Dr. Katerina Kechris</a> or <a href="weixuan.liu@cuanschutz.edu">Weixuan Liu</a>.</p>
 </div>
 </div>
 
@@ -278,7 +278,15 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Weixuan Liu <br><small class="roles"> Maintainer </small>   </li>
+<li>Abhinav Pundir <br><small class="roles"> Maintainer </small>   </li>
+<li>Weixuan Liu <br><small class="roles"> Author </small>   </li>
+<li>Yonghua Zhuang <br><small class="roles"> Author </small>   </li>
+<li>W. Jenny Shi <br><small class="roles"> Author </small>   </li>
+<li>Thao Vu <br><small class="roles"> Author </small>   </li>
+<li>Iain Konigsberg <br><small class="roles"> Author </small>   </li>
+<li>Katherine Pratte <br><small class="roles"> Author </small>   </li>
+<li>Laura Saba <br><small class="roles"> Author </small>   </li>
+<li>Katerina Kechris <br><small class="roles"> Author </small>   </li>
 </ul>
 </div>
 
@@ -294,7 +302,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Weixuan Liu.</p>
+  <p>Developed by Abhinav Pundir, Weixuan Liu, Yonghua Zhuang, W. Jenny Shi, Thao Vu, Iain Konigsberg, Katherine Pratte, Laura Saba, Katerina Kechris.</p>
 </div>
 
 <div class="pkgdown-footer-right">

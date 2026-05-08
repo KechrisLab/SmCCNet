@@ -15,7 +15,7 @@ regression parameters. Refer to multi-omics vignette for more detail."></head><b
 
     <a class="navbar-brand me-2" href="../index.html">SmCCNet</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,8 @@ regression parameters. Refer to multi-omics vignette for more detail.</p>
 <span>  SubsamplingNum <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  ncomp_pls <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  EvalClassifier <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  testData <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  testData <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -86,75 +87,56 @@ variable to 0 and 1.</p></dd>
 
 <dt id="arg-between-discriminate-ratio">Between_Discriminate_Ratio<a class="anchor" aria-label="anchor" href="#arg-between-discriminate-ratio"></a></dt>
 <dd><p>A vector with length 2 specifying the relative importance
-of between-omics relationship and omics-phenotype relationship. For instance a ratio of 1:1 (c(1,1) in the argument)
-means between-omics relationship and omics-phenotype relationship contribute equally to the canonical weights extraction.</p></dd>
+of between-omics relationship and omics-phenotype relationship.</p></dd>
 
 
 <dt id="arg-subsamplingpercent">SubsamplingPercent<a class="anchor" aria-label="anchor" href="#arg-subsamplingpercent"></a></dt>
-<dd><p>A vector with length equal to the number of omics data (<code>X</code>), specifying the
-percentage of omics feature being subsampled at each subsampling iteration.</p></dd>
+<dd><p>A vector with length equal to the number of omics data (<code>X</code>).</p></dd>
 
 
 <dt id="arg-cccoef">CCcoef<a class="anchor" aria-label="anchor" href="#arg-cccoef"></a></dt>
-<dd><p>A vector of scaling factors only for between-omics relationship (exclude omics-phenotype). This
-coefficient vector follows the column order of <code>combn(T, 2)</code> when there are <code>T</code> omics data.</p></dd>
+<dd><p>A vector of scaling factors only for between-omics relationship.</p></dd>
 
 
 <dt id="arg-lambdabetween">LambdaBetween<a class="anchor" aria-label="anchor" href="#arg-lambdabetween"></a></dt>
-<dd><p>A vector of sparsity penalty value for each omics data to run the between-omics SmCCA, each
-penalty term should be within the range of 0 and 1.</p></dd>
+<dd><p>A vector of sparsity penalty value for each omics data.</p></dd>
 
 
 <dt id="arg-lambdapheno">LambdaPheno<a class="anchor" aria-label="anchor" href="#arg-lambdapheno"></a></dt>
-<dd><p>A penalty term when running the sparse PLS with phenotype, penalty term should be within the range of 0 and 1.</p></dd>
+<dd><p>A penalty term when running the sparse PLS with phenotype.</p></dd>
 
 
 <dt id="arg-subsamplingnum">SubsamplingNum<a class="anchor" aria-label="anchor" href="#arg-subsamplingnum"></a></dt>
-<dd><p>Number of feature subsamples. Default is 1000. Larger
-number leads to more accurate results, but at a higher computational cost, default is set to 1000.</p></dd>
+<dd><p>Number of feature subsamples.</p></dd>
 
 
 <dt id="arg-ncomp-pls">ncomp_pls<a class="anchor" aria-label="anchor" href="#arg-ncomp-pls"></a></dt>
-<dd><p>Number of latent components for PLS, default set to 3.</p></dd>
+<dd><p>Number of latent components for PLS.</p></dd>
 
 
 <dt id="arg-evalclassifier">EvalClassifier<a class="anchor" aria-label="anchor" href="#arg-evalclassifier"></a></dt>
-<dd><p>If <code>TRUE</code>, the algorithm is at the phase of evaluating classification performance, and the latent factors from SPLSDA will be returned; if FALSE, the algorithm is at the phase of constructing multi-omics network, canonical weight will be returned.
-Default is set to <code>FALSE</code>.</p></dd>
+<dd><p>If TRUE, return latent factors for classification.</p></dd>
 
 
 <dt id="arg-testdata">testData<a class="anchor" aria-label="anchor" href="#arg-testdata"></a></dt>
-<dd><p>A list of testing omics data matrix, should have the exact same order as data list X, only used when EvalClassifier is set to <code>TRUE</code> for performing cross-validation, refer to multi-omics vignette for detail.</p></dd>
+<dd><p>A list of testing omics data matrix.</p></dd>
+
+
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>Logical; if TRUE, print progress/error messages, otherwise run silently.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>If <code>EvalClassifier</code> is set to <code>FALSE</code>, a canonical correlation weight matrix is returned with combined omics data. Each
-column is the canonical correlation weights based on subsampled X features. The number of columns is <code>SubsamplingNum</code>. If <code>EvalClassifier</code> is set to <code>TRUE</code>, then latent factors from training and testing data will be returned for classifier evaluation.</p>
+    <p>Canonical weight matrix or latent projections depending on EvalClassifier.</p>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## For illustration, we only subsample 5 times.</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">X1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">600</span>,<span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">60</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">X2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">600</span>,<span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">60</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">Y_binary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="fl">60</span>,<span class="fl">1</span>,<span class="fl">0.5</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">Ws</span> <span class="op">&lt;-</span> <span class="fu">getRobustWeightsMultiBinary</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">X1</span>,<span class="va">X2</span><span class="op">)</span>, <span class="va">Y_binary</span>, </span></span>
-<span class="r-in"><span>      SubsamplingPercent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.8</span>,<span class="fl">0.8</span><span class="op">)</span>, CCcoef <span class="op">=</span> <span class="cn">NULL</span>,</span></span>
-<span class="r-in"><span>      LambdaBetween <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>,<span class="fl">0.5</span><span class="op">)</span>, LambdaPheno <span class="op">=</span> <span class="fl">0.1</span>, SubsamplingNum <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  </span></span>
-</code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Weixuan Liu.</p>
+  <p>Developed by Abhinav Pundir, Weixuan Liu, Yonghua Zhuang, W. Jenny Shi, Thao Vu, Iain Konigsberg, Katherine Pratte, Laura Saba, Katerina Kechris.</p>
 </div>
 
 <div class="pkgdown-footer-right">

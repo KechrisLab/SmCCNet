@@ -2,9 +2,9 @@
 
 **Note:** if you use SmCCNet in published research, please cite:
 
-> Liu, W., Vu, T., Konigsberg, I. R., Pratte, K. A., Zhuang, Y., &
-> Kechris, K. J. (2023). SmCCNet 2.0: an Upgraded R package for
-> Multi-omics Network Inference. bioRxiv, 2023-11.
+> Liu, W., Vu, T., R. Konigsberg, I., Pratte, K., Zhuang Y., & Kechris,
+> K. (2024) Smccnet 2.0: A Comprehensive Tool for Multi-omics Network
+> Inference with Shiny Visualization. BMC Bioinformatics 25, 276.
 
 > Shi, W. J., Zhuang, Y., Russell, P. H., Hobbs, B. D., Parker, M. M.,
 > Castaldi, P. J., … & Kechris, K. (2019). Unsupervised discovery of
@@ -72,7 +72,7 @@ Unlock the Power of SmCCNet with These Key Features:
 
 The final network generated from SmCCNet can be visualized in two ways:
 
-- Shiny Application simply by uploading the final .Rdata to [SmCCNet
+- Shiny Application simply by uplooding the final .Rdata to [SmCCNet
   Visualization
   Application](https://smccnet.shinyapps.io/smccnetnetwork/).
 - Cytoscape Software [Cytoscape](https://cytoscape.org/) through R
@@ -258,6 +258,7 @@ and other discussion, please use
 
 This package is developed by
 [KechrisLab](https://kechrislab.github.io/), for more questions about
-the package, please contact Dr. Katerina Kechris
-(<katerina.kechris@cuanschutz.edu>) or Weixuan Liu
-(<weixuan.liu@cuanschutz.edu>).
+the package, please contact [Dr. Katerina
+Kechris](https://kechrislab.github.io/SmCCNet/katerina.kechris@cuanschutz.edu)
+or [Weixuan
+Liu](https://kechrislab.github.io/SmCCNet/weixuan.liu@cuanschutz.edu).

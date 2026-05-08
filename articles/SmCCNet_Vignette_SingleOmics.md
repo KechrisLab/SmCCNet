@@ -125,9 +125,9 @@ subSamp <- 50 # number of subsamples (will be described in later section).
 pen1 <- seq(.05, .3, by = .05)
 
 # set a CV directory.
-CVDir <- "Example3foldCV/" 
 pheno <- "Example3foldCV"
-dir.create(CVDir)
+CVDir <- file.path(tempdir(),"Example3foldCV")
+dir.create(CVDir,showWarnings = FALSE)
 ```
 
 #### Create test and training data sets.
@@ -388,7 +388,7 @@ for(i in 1:length(network_modules))
                  data = X1[,network_modules[[i]]],      
               Pheno = Y, ModuleIdx = i, min_mod_size = 10, 
                           max_mod_size = 100, method = 'PCA', 
-                          saving_dir = getwd())
+                          saving_dir = tempdir())
   cat("\n")
 }
 ```
@@ -436,20 +436,20 @@ features.](SmCCNet_Vignette_SingleOmics_files/figure-html/corheatmap-1.png)
 
 Correlation heatmap for subnetwork features.
 
-![Adjacency matrix heatmap for subnetwork
+![Similarity matrix heatmap for subnetwork
 features.](SmCCNet_Vignette_SingleOmics_files/figure-html/adjheatmap-1.png)
 
-Adjacency matrix heatmap for subnetwork features.
+Similarity matrix heatmap for subnetwork features.
 
 Figure the visualization of the PC loadings that represents the
 contribution of each molecular features to the first NetSHy PC. In
 addition, there are two network heatmaps based on (1) correlation matrix
-(Figure ), and (2) adjacency matrix (Figure ). Based on the
+(Figure ), and (2) similarity matrix (Figure ). Based on the
 summarization table, genes 1,2,6, and 7 have relatively high correlation
 with respect to phenotype. The PC loadings also confirm that genes
 1,2,5,6,and 7 generally have PC contribution. From the correlation
 heatmap, we do not observe associations between molecular features, but
-for the adjacency matrix heatmap, we observe the higher connections
+for the similarity matrix heatmap, we observe the higher connections
 between genes 1,2,6, and 7.
 
 ### Step VI: Visualize network module
@@ -509,8 +509,7 @@ createNetworkFromIgraph(graph,"single_omics_network")
 
 ![Trimmed module 1. The strength of the node connections is indicated by
 the thickness of edges. Red edges and blue edges are for negative and
-positive connections
-respectively.](../articles/example_network_cont.png)
+positive connections respectively.](example_network_cont.png)
 
 Trimmed module 1. The strength of the node connections is indicated by
 the thickness of edges. Red edges and blue edges are for negative and
@@ -611,9 +610,9 @@ metric <- 'auc' # evaluation metric to be used.
 pen1 <- seq(.1, .9, by = .1)
 
 # set a CV directory.
-CVDir <- "Example3foldCV_Binary/" 
 pheno <- "Example3foldCV_Binary"
-dir.create(CVDir)
+CVDir <- file.path(tempdir(),"Example3foldCV_Binary")
+dir.create(CVDir,showWarnings = FALSE)
 
 Y <- ifelse(Y > median(Y), 1, 0)
 ```
@@ -803,27 +802,27 @@ sessionInfo()
     ##  [1] reshape2_1.4.5   shadowtext_0.1.6 lubridate_1.9.5  forcats_1.0.1   
     ##  [5] stringr_1.6.0    dplyr_1.2.1      purrr_1.2.2      readr_2.2.0     
     ##  [9] tidyr_1.3.2      tibble_3.3.1     ggplot2_4.0.3    tidyverse_2.0.0 
-    ## [13] SmCCNet_2.0.3    igraph_2.3.1     Matrix_1.7-5     pbapply_1.7-4   
+    ## [13] SmCCNet_2.0.7    igraph_2.3.1     Matrix_1.7-5     pbapply_1.7-4   
     ## 
     ## loaded via a namespace (and not attached):
     ##  [1] sass_0.4.10             generics_0.1.4          fontLiberation_0.1.0   
     ##  [4] stringi_1.8.7           lattice_0.22-9          hms_1.1.4              
     ##  [7] digest_0.6.39           magrittr_2.0.5          timechange_0.4.0       
-    ## [10] evaluate_1.0.5          RColorBrewer_1.1-3      fastmap_1.2.0          
-    ## [13] plyr_1.8.9              jsonlite_2.0.0          scales_1.4.0           
-    ## [16] fontBitstreamVera_0.1.1 textshaping_1.0.5       jquerylib_0.1.4        
-    ## [19] cli_3.6.6               fontquiver_0.2.1        rlang_1.2.0            
-    ## [22] withr_3.0.2             cachem_1.1.0            yaml_2.3.12            
-    ## [25] gdtools_0.5.0           tools_4.6.0             tzdb_0.5.0             
-    ## [28] vctrs_0.7.3             R6_2.6.1                lifecycle_1.0.5        
-    ## [31] fs_2.1.0                htmlwidgets_1.6.4       MASS_7.3-65            
-    ## [34] ragg_1.5.2              pkgconfig_2.0.3         desc_1.4.3             
-    ## [37] pkgdown_2.2.0           bslib_0.10.0            pillar_1.11.1          
-    ## [40] gtable_0.3.6            Rcpp_1.1.1-1.1          glue_1.8.1             
-    ## [43] systemfonts_1.3.2       xfun_0.57               tidyselect_1.2.1       
-    ## [46] ggiraph_0.9.6           knitr_1.51              farver_2.1.2           
-    ## [49] htmltools_0.5.9         labeling_0.4.3          rmarkdown_2.31         
-    ## [52] compiler_4.6.0          S7_0.2.2
+    ## [10] evaluate_1.0.5          RColorBrewer_1.1-3      bookdown_0.46          
+    ## [13] fastmap_1.2.0           plyr_1.8.9              jsonlite_2.0.0         
+    ## [16] scales_1.4.0            fontBitstreamVera_0.1.1 textshaping_1.0.5      
+    ## [19] jquerylib_0.1.4         cli_3.6.6               fontquiver_0.2.1       
+    ## [22] rlang_1.2.0             withr_3.0.2             cachem_1.1.0           
+    ## [25] yaml_2.3.12             gdtools_0.5.0           tools_4.6.0            
+    ## [28] tzdb_0.5.0              vctrs_0.7.3             R6_2.6.1               
+    ## [31] lifecycle_1.0.5         fs_2.1.0                htmlwidgets_1.6.4      
+    ## [34] MASS_7.3-65             ragg_1.5.2              pkgconfig_2.0.3        
+    ## [37] desc_1.4.3              pkgdown_2.2.0           bslib_0.10.0           
+    ## [40] pillar_1.11.1           gtable_0.3.6            Rcpp_1.1.1-1.1         
+    ## [43] glue_1.8.1              systemfonts_1.3.2       xfun_0.57              
+    ## [46] tidyselect_1.2.1        ggiraph_0.9.6           knitr_1.51             
+    ## [49] farver_2.1.2            htmltools_0.5.9         labeling_0.4.3         
+    ## [52] rmarkdown_2.31          compiler_4.6.0          S7_0.2.2
 
 ``` r
 

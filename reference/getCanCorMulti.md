@@ -39,5 +39,5 @@ library(SmCCNet)
 data("ExampleData")
 getCanCorMulti(list(X1,X2), CCcoef = c(1,1,1), 
 CCWeight = list(rnorm(500,0,1), rnorm(100,0,1)), Y = Y)
-#> [1] 0.4186895
+#> [1] -0.1966403
 ```

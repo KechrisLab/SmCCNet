@@ -8,7 +8,13 @@ error.
 ## Usage
 
 ``` r
-aggregateCVSingle(CVDir, SCCAmethod = "SmCCA", K = 5, NumSubsamp = 500)
+aggregateCVSingle(
+  CVDir,
+  SCCAmethod = "SmCCA",
+  K = 5,
+  NumSubsamp = 500,
+  verbose = FALSE
+)
 ```
 
 ## Arguments
@@ -29,6 +35,11 @@ aggregateCVSingle(CVDir, SCCAmethod = "SmCCA", K = 5, NumSubsamp = 500)
 - NumSubsamp:
 
   Number of subsampling used.
+
+- verbose:
+
+  Logical; if TRUE, print progress messages during execution, otherwise
+  run silently.
 
 ## Value
 

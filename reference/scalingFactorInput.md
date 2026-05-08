@@ -26,6 +26,5 @@ A numeric vector of scaling factors.
 ## Examples
 
 ``` r
-# not run
-# scalingFactorInput(c('gene','mirna', 'phenotype'))
+if(interactive()){scalingFactorInput(c('gene','mirna', 'phenotype'))}
 ```

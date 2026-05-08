@@ -19,7 +19,7 @@ Refer to the automated SmCCNet vignette for more information."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">SmCCNet</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -77,12 +77,13 @@ Refer to the automated SmCCNet vignette for more information.</p>
 <span>  min_size <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  max_size <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  summarization <span class="op">=</span> <span class="st">"NetSHy"</span>,</span>
-<span>  saving_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  saving_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  ncomp_pls <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  tuneLength <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  tuneRangeCCA <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
 <span>  tuneRangePLS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">0.9</span><span class="op">)</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
+<span>  seed <span class="op">=</span> <span class="fl">123</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -173,6 +174,10 @@ default is set to <code>c(0.5,0.9)</code>.</p></dd>
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Random seed for result reproducibility, default is set to 123.</p></dd>
 
+
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>Logical; if TRUE, print progress messages during execution, otherwise run silently.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -182,38 +187,185 @@ default is set to <code>c(0.5,0.9)</code>.</p></dd>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># library(SmCCNet)</span></span></span>
-<span class="r-in"><span><span class="co"># set.seed(123)</span></span></span>
-<span class="r-in"><span><span class="co"># data("ExampleData")</span></span></span>
-<span class="r-in"><span><span class="co"># Y_binary &lt;- ifelse(Y &gt; quantile(Y, 0.5), 1, 0)</span></span></span>
-<span class="r-in"><span><span class="co">## single-omics PLS</span></span></span>
-<span class="r-in"><span><span class="co"># result &lt;- fastAutoSmCCNet(X = list(X1), Y = as.factor(Y_binary), Kfold = 3, </span></span></span>
-<span class="r-in"><span><span class="co">#                          subSampNum = 100, DataType = c('Gene'),</span></span></span>
-<span class="r-in"><span><span class="co">#                          saving_dir = getwd(), EvalMethod = 'auc', </span></span></span>
-<span class="r-in"><span><span class="co">#                          summarization = 'NetSHy', </span></span></span>
-<span class="r-in"><span><span class="co">#                          CutHeight = 1 - 0.1^10, ncomp_pls = 5)</span></span></span>
-<span class="r-in"><span><span class="co">## single-omics CCA</span></span></span>
-<span class="r-in"><span><span class="co"># result &lt;- fastAutoSmCCNet(X = list(X1), Y = Y, Kfold = 3, preprocess = FALSE,</span></span></span>
-<span class="r-in"><span><span class="co">#                           subSampNum = 50, DataType = c('Gene'),</span></span></span>
-<span class="r-in"><span><span class="co">#                           saving_dir = getwd(), summarization = 'NetSHy',</span></span></span>
-<span class="r-in"><span><span class="co">#                           CutHeight = 1 - 0.1^10)</span></span></span>
-<span class="r-in"><span><span class="co">## multi-omics PLS</span></span></span>
-<span class="r-in"><span><span class="co"># result &lt;- fastAutoSmCCNet(X = list(X1,X2), Y = as.factor(Y_binary), </span></span></span>
-<span class="r-in"><span><span class="co">#                           Kfold = 3, subSampNum = 50, </span></span></span>
-<span class="r-in"><span><span class="co">#                           DataType = c('Gene', 'miRNA'), </span></span></span>
-<span class="r-in"><span><span class="co">#                           CutHeight = 1 - 0.1^10,</span></span></span>
-<span class="r-in"><span><span class="co">#                           saving_dir = getwd(), EvalMethod = 'auc', </span></span></span>
-<span class="r-in"><span><span class="co">#                           summarization = 'NetSHy',</span></span></span>
-<span class="r-in"><span><span class="co">#                           BetweenShrinkage = 5, ncomp_pls = 3)</span></span></span>
-<span class="r-in"><span><span class="co">## multi-omics CCA</span></span></span>
-<span class="r-in"><span><span class="co"># result &lt;- fastAutoSmCCNet(X = list(X1,X2), Y = Y, </span></span></span>
-<span class="r-in"><span><span class="co">#                           K = 3, subSampNum = 50, DataType = c('Gene', 'miRNA'), </span></span></span>
-<span class="r-in"><span><span class="co">#                           CutHeight = 1 - 0.1^10,</span></span></span>
-<span class="r-in"><span><span class="co">#                           saving_dir = getwd(),  </span></span></span>
-<span class="r-in"><span><span class="co">#                           summarization = 'NetSHy',</span></span></span>
-<span class="r-in"><span><span class="co">#                           BetweenShrinkage = 5)</span></span></span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span> <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/KechrisLab/SmCCNet" class="external-link">SmCCNet</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">50</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="va">X1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">2500</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">50</span>, ncol <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">X1</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Gene_"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">50</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="va">X1</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">X1</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">Y</span>, <span class="fl">10</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="va">X2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">50</span>, ncol <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">X2</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"miRNA_"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="va">X2</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">X2</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">Y</span>, <span class="fl">5</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="va">Y_binary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">&gt;</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="co">## single-omics CCA</span></span></span>
+<span class="r-in"><span> <span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">fastAutoSmCCNet</span><span class="op">(</span>X <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">X1</span><span class="op">)</span>, Y <span class="op">=</span> <span class="va">Y</span>,</span></span>
+<span class="r-in"><span>                           Kfold <span class="op">=</span> <span class="fl">3</span>, preprocess <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>                           subSampNum <span class="op">=</span> <span class="fl">10</span>,</span></span>
+<span class="r-in"><span>                           DataType <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Gene'</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                           saving_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                           summarization <span class="op">=</span> <span class="st">'NetSHy'</span>,</span></span>
+<span class="r-in"><span>                           CutHeight <span class="op">=</span> <span class="fl">1</span> <span class="op">-</span> <span class="fl">0.1</span><span class="op">^</span><span class="fl">10</span>,</span></span>
+<span class="r-in"><span>                           min_size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>data length is not a multiple of split variable</span>
+<span class="r-in"><span> <span class="co">## single-omics PLS</span></span></span>
+<span class="r-in"><span> <span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">fastAutoSmCCNet</span><span class="op">(</span>X <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">X1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                           Y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">Y_binary</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                           Kfold <span class="op">=</span> <span class="fl">3</span>, subSampNum <span class="op">=</span> <span class="fl">10</span>,</span></span>
+<span class="r-in"><span>                           DataType <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Gene'</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                           saving_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                           EvalMethod <span class="op">=</span> <span class="st">'auc'</span>,</span></span>
+<span class="r-in"><span>                           summarization <span class="op">=</span> <span class="st">'NetSHy'</span>,</span></span>
+<span class="r-in"><span>                           CutHeight <span class="op">=</span> <span class="fl">1</span> <span class="op">-</span> <span class="fl">0.1</span><span class="op">^</span><span class="fl">10</span>,</span></span>
+<span class="r-in"><span>                           min_size <span class="op">=</span> <span class="fl">5</span>, ncomp_pls <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>data length is not a multiple of split variable</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: algorithm did not converge</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -221,7 +373,7 @@ default is set to <code>c(0.5,0.9)</code>.</p></dd>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Weixuan Liu.</p>
+  <p>Developed by Abhinav Pundir, Weixuan Liu, Yonghua Zhuang, W. Jenny Shi, Thao Vu, Iain Konigsberg, Katherine Pratte, Laura Saba, Katerina Kechris.</p>
 </div>
 
 <div class="pkgdown-footer-right">

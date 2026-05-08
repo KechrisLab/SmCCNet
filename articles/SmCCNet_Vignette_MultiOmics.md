@@ -366,8 +366,8 @@ list_cols <- as.list(as.data.frame(penSelect))
 PenExpand <- do.call(expand.grid, list_cols)
 
 # set a CV directory.
-CVDir <- "Example3foldCV/" 
-dir.create(CVDir)
+CVDir <- file.path(tempdir(),"Example3foldCV")
+dir.create(CVDir,showWarnings = FALSE)
 ```
 
 #### Create test and training data sets.
@@ -792,20 +792,20 @@ features.](SmCCNet_Vignette_MultiOmics_files/figure-html/corheatmap-1.png)
 
 Correlation heatmap for subnetwork features.
 
-![Adjacency matrix heatmap for subnetwork
+![Similarity matrix heatmap for subnetwork
 features.](SmCCNet_Vignette_MultiOmics_files/figure-html/adjheatmap-1.png)
 
-Adjacency matrix heatmap for subnetwork features.
+Similarity matrix heatmap for subnetwork features.
 
 Figure is the visualization of the PC loadings that contribution of each
 molecular features to the first NetSHy PC. In addition, there are two
 network heatmaps based on (1) correlation matrix (Figure ), and (2)
-adjacency matrix (Figure ). Based on the summarization table, genes
+similarity matrix (Figure ). Based on the summarization table, genes
 1,2,6,7, and miRNA 2 have relatively high correlation with respect to
 phenotype. The PC loadings also confirm that genes 6,7, and miRNA 2 and
 generally have higher PC contribution. From the correlation heatmap, we
 do not observe associations between molecular features, but for the
-adjacency matrix heatmap, we observe the higher connections between
+similarity matrix heatmap, we observe the higher connections between
 genes 6,7 and miRNA 2. We also recommend experimenting more PCs (up to
 3) with Figure to demonstrate the contribution of molecular features to
 each PC.
@@ -868,7 +868,7 @@ createNetworkFromIgraph(graph,"multi_omics_network")
 ![Pruned module 1. The strength of the node connections is indicated by
 the thickness of edges. Red edges and blue edges are for negative and
 positive connections respectively. Red node represents genes, and blue
-node represent miRNAs.](../articles/figures/MultiOmicsNet.png)
+node represent miRNAs.](figures/MultiOmicsNet.png)
 
 Pruned module 1. The strength of the node connections is indicated by
 the thickness of edges. Red edges and blue edges are for negative and
@@ -969,8 +969,8 @@ list_cols <- as.list(as.data.frame(penSelect))
 PenExpand <- do.call(expand.grid, list_cols)
 
 # set a CV directory.
-CVDir <- "Example3foldCVTune/" 
-dir.create(CVDir)
+CVDir <- file.path(tempdir(),"Example3foldCVTune")
+dir.create(CVDir,showWarnings = FALSE)
 ```
 
 Same as above, we split the original data into K different folds for
@@ -1149,7 +1149,7 @@ the criterion is set to be:
 \begin{eqnarray}
 \begin{split}
 \label{eq:scaling}
-& (a_{1,2}, b_1, b_2)\!  =\! \arg\max_{\tilde a_{1,2}, \tilde b_1, \tilde c_2} \frac{|trainCC - testCC|}{|testCC|}  \end{split}
+& (a_{1,2}, b_1, b_2)\!  =\! \arg\min_{\tilde a_{1,2}, \tilde b_1, \tilde b_2} \frac{|trainCC - testCC|}{|testCC|}  \end{split}
 \end{eqnarray}
 ```
 
@@ -1378,8 +1378,8 @@ list_cols <- as.list(as.data.frame(penSelect))
 PenExpand <- do.call(expand.grid, list_cols)
 
 # set a CV directory.
-CVDir <- "Example3foldCVBinary/" 
-dir.create(CVDir)
+CVDir <- file.path(tempdir(),"Example3foldCVBinary")
+dir.create(CVDir,showWarnings = FALSE)
 ```
 
 #### Create test and training data sets.
@@ -1637,7 +1637,7 @@ sessionInfo()
     ##  [1] reshape2_1.4.5   shadowtext_0.1.6 lubridate_1.9.5  forcats_1.0.1   
     ##  [5] stringr_1.6.0    dplyr_1.2.1      purrr_1.2.2      readr_2.2.0     
     ##  [9] tidyr_1.3.2      tibble_3.3.1     ggplot2_4.0.3    tidyverse_2.0.0 
-    ## [13] SmCCNet_2.0.3    furrr_0.4.0      future_1.70.0    igraph_2.3.1    
+    ## [13] SmCCNet_2.0.7    furrr_0.4.0      future_1.70.0    igraph_2.3.1    
     ## [17] Matrix_1.7-5     pbapply_1.7-4   
     ## 
     ## loaded via a namespace (and not attached):
@@ -1650,17 +1650,17 @@ sessionInfo()
     ## [19] codetools_0.2-20        fontLiberation_0.1.0    fontquiver_0.2.1       
     ## [22] htmltools_0.5.9         sass_0.4.10             yaml_2.3.12            
     ## [25] pillar_1.11.1           pkgdown_2.2.0           jquerylib_0.1.4        
-    ## [28] MASS_7.3-65             cachem_1.1.0            parallelly_1.47.0      
-    ## [31] fontBitstreamVera_0.1.1 tidyselect_1.2.1        digest_0.6.39          
-    ## [34] stringi_1.8.7           listenv_0.10.1          labeling_0.4.3         
-    ## [37] fastmap_1.2.0           cli_3.6.6               magrittr_2.0.5         
-    ## [40] withr_3.0.2             gdtools_0.5.0           scales_1.4.0           
-    ## [43] timechange_0.4.0        rmarkdown_2.31          globals_0.19.1         
-    ## [46] ragg_1.5.2              hms_1.1.4               evaluate_1.0.5         
-    ## [49] knitr_1.51              rlang_1.2.0             ggiraph_0.9.6          
-    ## [52] Rcpp_1.1.1-1.1          glue_1.8.1              jsonlite_2.0.0         
-    ## [55] plyr_1.8.9              R6_2.6.1                systemfonts_1.3.2      
-    ## [58] fs_2.1.0
+    ## [28] MASS_7.3-65             cachem_1.1.0            fontBitstreamVera_0.1.1
+    ## [31] parallelly_1.47.0       tidyselect_1.2.1        digest_0.6.39          
+    ## [34] stringi_1.8.7           bookdown_0.46           listenv_0.10.1         
+    ## [37] labeling_0.4.3          fastmap_1.2.0           cli_3.6.6              
+    ## [40] magrittr_2.0.5          withr_3.0.2             gdtools_0.5.0          
+    ## [43] scales_1.4.0            timechange_0.4.0        rmarkdown_2.31         
+    ## [46] globals_0.19.1          ragg_1.5.2              hms_1.1.4              
+    ## [49] evaluate_1.0.5          knitr_1.51              rlang_1.2.0            
+    ## [52] ggiraph_0.9.6           Rcpp_1.1.1-1.1          glue_1.8.1             
+    ## [55] jsonlite_2.0.0          plyr_1.8.9              R6_2.6.1               
+    ## [58] systemfonts_1.3.2       fs_2.1.0
 
 ``` r
 

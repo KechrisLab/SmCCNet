@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SmCCNet</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -209,31 +209,31 @@ details.</p>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fastAutoSmCCNet.html">fastAutoSmCCNet</a></span><span class="op">(</span>X <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">X1</span><span class="op">)</span>, Y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">Y_binary</span><span class="op">)</span>, </span>
 <span>                          Kfold <span class="op">=</span> <span class="fl">3</span>, </span>
 <span>                          subSampNum <span class="op">=</span> <span class="fl">100</span>, DataType <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Gene'</span><span class="op">)</span>,</span>
-<span>                          saving_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>, EvalMethod <span class="op">=</span> <span class="st">'auc'</span>, </span>
+<span>                          saving_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, EvalMethod <span class="op">=</span> <span class="st">'auc'</span>, </span>
 <span>                          summarization <span class="op">=</span> <span class="st">'NetSHy'</span>, </span>
 <span>                          CutHeight <span class="op">=</span> <span class="fl">1</span> <span class="op">-</span> <span class="fl">0.1</span><span class="op">^</span><span class="fl">10</span>, ncomp_pls <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="co"># single-omics CCA</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fastAutoSmCCNet.html">fastAutoSmCCNet</a></span><span class="op">(</span>X <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">X1</span><span class="op">)</span>, Y <span class="op">=</span> <span class="va">Y</span>, Kfold <span class="op">=</span> <span class="fl">3</span>, </span>
 <span>                          preprocess <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                          subSampNum <span class="op">=</span> <span class="fl">50</span>, DataType <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Gene'</span><span class="op">)</span>,</span>
-<span>                          saving_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>, summarization <span class="op">=</span> <span class="st">'NetSHy'</span>,</span>
+<span>                          saving_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, summarization <span class="op">=</span> <span class="st">'NetSHy'</span>,</span>
 <span>                          CutHeight <span class="op">=</span> <span class="fl">1</span> <span class="op">-</span> <span class="fl">0.1</span><span class="op">^</span><span class="fl">10</span><span class="op">)</span></span>
 <span><span class="co"># multi-omics PLS</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fastAutoSmCCNet.html">fastAutoSmCCNet</a></span><span class="op">(</span>X <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">X1</span>,<span class="va">X2</span><span class="op">)</span>, Y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">Y_binary</span><span class="op">)</span>, </span>
-<span>                          Kfold <span class="op">=</span> <span class="fl">3</span>, subSampNum <span class="op">=</span> <span class="fl">50</span>, </span>
+<span>                          Kfold <span class="op">=</span> <span class="fl">3</span>, subSampNum <span class="op">=</span> <span class="fl">500</span>, </span>
 <span>                          DataType <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Gene'</span>, <span class="st">'miRNA'</span><span class="op">)</span>, </span>
 <span>                          CutHeight <span class="op">=</span> <span class="fl">1</span> <span class="op">-</span> <span class="fl">0.1</span><span class="op">^</span><span class="fl">10</span>,</span>
-<span>                          saving_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>, </span>
+<span>                          saving_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, </span>
 <span>                          EvalMethod <span class="op">=</span> <span class="st">'auc'</span>, </span>
 <span>                          summarization <span class="op">=</span> <span class="st">'NetSHy'</span>,</span>
 <span>                          BetweenShrinkage <span class="op">=</span> <span class="fl">5</span>, </span>
-<span>                          ncomp_pls <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span>                          ncomp_pls <span class="op">=</span> <span class="fl">3</span>, seed <span class="op">=</span> <span class="fl">12345</span><span class="op">)</span></span>
 <span><span class="co"># multi-omics CCA</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fastAutoSmCCNet.html">fastAutoSmCCNet</a></span><span class="op">(</span>X <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">X1</span>,<span class="va">X2</span><span class="op">)</span>, Y <span class="op">=</span> <span class="va">Y</span>, </span>
 <span>                          K <span class="op">=</span> <span class="fl">3</span>, subSampNum <span class="op">=</span> <span class="fl">50</span>, </span>
 <span>                          DataType <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Gene'</span>, <span class="st">'miRNA'</span><span class="op">)</span>, </span>
 <span>                          CutHeight <span class="op">=</span> <span class="fl">1</span> <span class="op">-</span> <span class="fl">0.1</span><span class="op">^</span><span class="fl">10</span>,</span>
-<span>                          saving_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>,  </span>
+<span>                          saving_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,  </span>
 <span>                          summarization <span class="op">=</span> <span class="st">'NetSHy'</span>,</span>
 <span>                          BetweenShrinkage <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
 <p>Global network information will be stored in object ‘result’, and
@@ -248,7 +248,7 @@ please refer back to the multi-omics vignette section 3.1.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Weixuan Liu.</p>
+  <p>Developed by Abhinav Pundir, Weixuan Liu, Yonghua Zhuang, W. Jenny Shi, Thao Vu, Iain Konigsberg, Katherine Pratte, Laura Saba, Katerina Kechris.</p>
 </div>
 
 <div class="pkgdown-footer-right">
