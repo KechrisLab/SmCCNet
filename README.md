@@ -81,7 +81,7 @@ Unlock the Power of SmCCNet with These Key Features:
 
 The final network generated from SmCCNet can be visualized in two ways:
 
-- Shiny Application simply by uplooding the final .Rdata to [SmCCNet
+- Shiny Application simply by uploading the final .Rdata to [SmCCNet
   Visualization
   Application](https://smccnet.shinyapps.io/smccnetnetwork/).
 - Cytoscape Software [Cytoscape](https://cytoscape.org/) through R
