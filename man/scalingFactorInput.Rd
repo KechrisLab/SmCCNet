@@ -18,7 +18,6 @@ factor for SmCCNet algorithm to prioritize the correlation structures of
 interest. All scaling factor values supplied should be numeric and nonnegative.
 }
 \examples{
-# not run
-# scalingFactorInput(c('gene','mirna', 'phenotype'))
+if(interactive()){scalingFactorInput(c('gene','mirna', 'phenotype'))}
 
 }

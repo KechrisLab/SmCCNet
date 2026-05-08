@@ -390,6 +390,7 @@ getOmicsModules <- function(Abar, CutHeight = 1-.1^10, PlotTree = TRUE){
 #' @param damping damping parameter for the PageRank algorithm, default is set to 0.9, see \code{igraph} package for more detail.
 #' @param method Selection between NetSHy' and 'PCA', specifying the network summarization method used for network pruning, default is set to NetSHy.
 #' @param saving_dir User-defined directory to store pruned subnetwork.
+#' @param verbose Logical; if TRUE, print progress messages during execution, otherwise run silently.
 #' @return A file stored in the user-defined directory, which contains the
 #' following: (1) correlation_sub: correlation matrix for the subnetwork.
 #' (2) M: adjacency matrix for the subnetwork.
@@ -400,178 +401,177 @@ getOmicsModules <- function(Abar, CutHeight = 1-.1^10, PlotTree = TRUE){
 #' (7) mod_size: number of molecular features in the subnetwork.
 #' (8) sub_type: type of feature for each molecular features.
 #' @examples
-#' library(SmCCNet)
+#' 
+#' \donttest{library(SmCCNet)
 #' set.seed(123)
 #' w <- rnorm(20)
 #' w <- w/sqrt(sum(w^2))
+#' X1 <- matrix(rnorm(1000,0,1),nrow = 50)
+#' Y <- matrix(rnorm(50,0,1),nrow = 50)
 #' labels <- paste0('feature_', 1:20)
+#' colnames(X1) <- labels
 #' abar <- getAbar(w, FeatureLabel = labels)
 #' modules <- getOmicsModules(abar, CutHeight = 0.1)
-#' x <- X1[ ,seq_len(20)]
+#' x <- X1
 #' corr <- stats::cor(x)
+#' type <- c(rep(1,20))
 #' # display only example
-#' # networkPruning(abar, corr, data = x, Pheno = Y,
-#' # ModuleIdx = 1,  min_mod_size = 3, max_mod_size = 10, method = 'NetSHy', saving_dir = 
-#' # )
+#' networkPruning(abar, corr, data = x, Pheno = Y, type = type,
+#'  ModuleIdx = 1,  min_mod_size = 3, max_mod_size = 10, method = 'NetSHy', saving_dir = tempdir()
+#'  )}
 #' 
 #' @export
 #' 
 
+#' @param verbose Logical; if TRUE, print progress messages during execution, otherwise run silently.
+
 networkPruning <- function(Abar, CorrMatrix, data,
-                                             Pheno, type, ModuleIdx,
-                                             min_mod_size = 10, max_mod_size, damping = 0.9,
-                                             method = 'NetSHy', saving_dir){
+                           Pheno, type, ModuleIdx,
+                           min_mod_size = 10, max_mod_size, damping = 0.9,
+                           method = 'NetSHy', saving_dir = tempdir(),
+                           verbose = FALSE){
   
-  
+  # verbose wrapper
+  vcat <- function(...) {
+    if (isTRUE(verbose)) cat(..., "\n")
+  }
   
   P1 <- p <- ncol(Abar)
+  
   # Trim module by PPR
   net_ppr <- igraph::graph_from_adjacency_matrix(Abar, weighted = TRUE,
                                                  diag = FALSE, mode = "undirected")
   igraph::set_vertex_attr(net_ppr, "type", index = igraph::V(net_ppr), as.factor(type))
-  # All parameter setups are based on the recommendation
+  
   ranking <- igraph::page_rank(net_ppr, directed = FALSE, damping = damping, 
-                               options = list(niter = 10^5,eps = 1e-06))
-  # Obtain ranked protein names
+                               options = list(niter = 10^5, eps = 1e-06))
+  
   rank_names <- names(sort(ranking$vector, decreasing = TRUE))
   rank_value <- sort(ranking$vector, decreasing = TRUE)
   names(rank_value) <- rank_names
-  # Choose to include only the top proteins as we desired
+  
   summary_correlation <- c()
+  
   if (max_mod_size > nrow(Abar))
     max_mod_size <- nrow(Abar)
   
-  for (i in min_mod_size : max_mod_size)
+  for (i in min_mod_size:max_mod_size)
   { 
-    # print(paste0('iteration:', i))
+    # optional progress print
+    # vcat(paste0("iteration: ", i))
+    
     newM.node <- which(colnames(Abar) %in% rank_names[1:i])
     M <- Abar[newM.node, newM.node]
     
-    ###### section for principal component analysis
-    X1_PC <- data[,which(colnames(data) %in% rank_names[1:i])]
-    #print(X1_PC)
-    # calculate individual protein correlation
+    X1_PC <- data[, which(colnames(data) %in% rank_names[1:i])]
+    
     protein_correlation <- stats::cor(X1_PC, Pheno)
     protein_correlation_data <- data.frame(name = colnames(X1_PC), correlation = protein_correlation)
-    # PCA function
+    
     if (method == 'PCA')
     {
-      # run pca
       pca_x1_summary <- stats::prcomp(X1_PC)
-      # Obtain summary
       summary_result <- summary(pca_x1_summary)
-      # Extract the first three PC scores
       pca_x1_pc1 <- data.frame(pc1 = pca_x1_summary$x[,1], 
                                pc2 = pca_x1_summary$x[,2],
                                pc3 = pca_x1_summary$x[,3],
                                y = Pheno)
-    }else if(method == 'NetSHy'){
-      pca_x1_summary <- summarizeNetSHy(X1_PC, M, 
-                                     npc = 3)
-      # Extract the first three PC scores
+    } else if (method == 'NetSHy') {
+      pca_x1_summary <- summarizeNetSHy(X1_PC, M, npc = 3)
       pca_x1_pc1 <- data.frame(pc1 = pca_x1_summary[[1]][,1], 
                                pc2 = pca_x1_summary[[1]][,2],
                                pc3 = pca_x1_summary[[1]][,3],
                                y = Pheno)
-      
-    }else{
+    } else {
       stop('Either method of PCA or NetSHy should be provided.')
     } 
     
-    
     pc_correlation <- stats::cor(pca_x1_pc1[,1:3], pca_x1_pc1[,4])
     summary_correlation <- c(summary_correlation, pc_correlation[1])
-    #cor_index <- which.max(abs(cor(pca_x1_pc1, Y)))
-    #if (i == min_mod_size)
-     # score_frame <- data.frame(pca_x1_pc1$pc1)
-    #else
-      #score_frame = cbind(score_frame, pca_x1_pc1$pc1)
     
     if (i == min_mod_size)
     {
       temp_cor <- abs(stats::cor(pca_x1_pc1[,1:3], pca_x1_pc1[,4]))
-      score_frame <- data.frame(pca_x1_pc1[,which.max(temp_cor)])
-    } else
-    {  
+      score_frame <- data.frame(pca_x1_pc1[, which.max(temp_cor)])
+    } else {  
       temp_cor <- abs(stats::cor(pca_x1_pc1[,1:3], pca_x1_pc1[,4]))
-      score_frame = cbind(score_frame, pca_x1_pc1[,which.max(temp_cor)])
+      score_frame <- cbind(score_frame, pca_x1_pc1[, which.max(temp_cor)])
     }  
   }
   
   corr_pheno <- abs(stats::cor(score_frame, Pheno))
   
-  # selecting the optimal network size
-  # candidate_size_1 <- min(which(corr_pheno > (0.9 * max(corr_pheno))))
   candidate_size_1 <- min(which.max(corr_pheno))
-  cormat <-  abs(round(x = stats::cor(score_frame[,candidate_size_1],score_frame[,candidate_size_1:(max_mod_size - min_mod_size + 1)]), digits = 2))
+  cormat <- abs(round(
+    x = stats::cor(score_frame[, candidate_size_1],
+                   score_frame[, candidate_size_1:(max_mod_size - min_mod_size + 1)]),
+    digits = 2))
   candidate_size_2 <- max(which(cormat > 0.8))
-  #print(candidate_size_2)
-  candidate_size_3 <- max(which(corr_pheno[candidate_size_1: (candidate_size_1 + candidate_size_2 - 1)] > (0.9 * max(corr_pheno))))
-  mod_size <- candidate_size_3 + candidate_size_1 - 2 + min_mod_size
-  #print(c(candidate_size_1, candidate_size_2, candidate_size_3))
+  candidate_size_3 <- max(which(
+    corr_pheno[candidate_size_1:(candidate_size_1 + candidate_size_2 - 1)] > 
+      (0.9 * max(corr_pheno))
+  ))
   
-  # finally calculate the optimal network size 
-  #  mod_size <- selection(cormat[,1], summary_correlation,cor_cut = 0.8, default_size = min_mod_size, network_preference = network_preference)
-  # print(mod_size)
+  mod_size <- candidate_size_3 + candidate_size_1 - 2 + min_mod_size
+  
   # obtain optimal result
   newM.node <- which(colnames(Abar) %in% rank_names[1:mod_size])
   sub_type <- type[newM.node]
   M <- Abar[newM.node, newM.node]
   
-  # print(corr_pheno)
+  X1_PC <- data[, which(colnames(data) %in% rank_names[1:mod_size])]
   
-  
-  ###### section for principal component analysis
-  X1_PC <- data[,which(colnames(data) %in% rank_names[1:mod_size])]
-  # calculate individual protein correlation
   protein_correlation <- stats::cor(X1_PC, Pheno)
   protein_correlation_test <- rep(0, ncol(X1_PC))
+  
   for (i in 1:ncol(X1_PC))
   {
-    protein_correlation_test[i] <- stats::cor.test(X1_PC[,i], Pheno)$p.value
+    protein_correlation_test[i] <- stats::cor.test(X1_PC[, i], Pheno)$p.value
   }
-  omics_correlation_data <- data.frame(name = colnames(X1_PC), correlation = protein_correlation, p = protein_correlation_test)
+  
+  omics_correlation_data <- data.frame(
+    name = colnames(X1_PC),
+    correlation = protein_correlation,
+    p = protein_correlation_test
+  )
+  
   if (method == 'PCA')
   {
-    # run pca
     pca_x1_summary <- stats::prcomp(X1_PC)
-    # Obtain summary
     summary_result <- summary(pca_x1_summary)
-    # Extract the first three PC scores
     pca_x1_pc1 <- data.frame(pc1 = pca_x1_summary$x[,1], 
                              pc2 = pca_x1_summary$x[,2],
                              pc3 = pca_x1_summary$x[,3],
                              y = Pheno)
     pc_loading <- summary_result[["rotation"]]
-  }else if(method == 'NetSHy'){
-    pca_x1_summary <- summarizeNetSHy(X1_PC, M, 
-                                   npc = 3)
-    # Extract the first three PC scores
+  } else if (method == 'NetSHy') {
+    pca_x1_summary <- summarizeNetSHy(X1_PC, M, npc = 3)
     pca_x1_pc1 <- data.frame(pc1 = pca_x1_summary[[1]][,1], 
                              pc2 = pca_x1_summary[[1]][,2],
                              pc3 = pca_x1_summary[[1]][,3],
                              y = Pheno)
     pc_loading <- pca_x1_summary[[3]]
-    
-  } 
+  }
+  
   pc_correlation <- stats::cor(pca_x1_pc1[,1:3], pca_x1_pc1[,4])
   summary_correlation <- c(summary_correlation, pc_correlation[1])
   
   correlation_sub <- CorrMatrix[newM.node, newM.node]
   
-  
-  
-  
-  
-  # Save all the cc results into a same data file
-  save(M = M, pca_score = pca_x1_pc1,pc_loading, rank_value = rank_value, pc_correlation, omics_correlation_data,
+  # Save results
+  save(M = M, pca_score = pca_x1_pc1, pc_loading, rank_value = rank_value,
+       pc_correlation, omics_correlation_data,
        mod_size, sub_type, summary_correlation, correlation_sub,
-       file = paste0(saving_dir, "/size_", mod_size,"_net_",ModuleIdx,".Rdata"))
+       file = paste0(saving_dir, "/size_", mod_size, "_net_", ModuleIdx, ".Rdata"))
+  
   max_cor_index <- which.max(abs(pc_correlation))
-  cat(paste0('The final network size is: ', nrow(M), ' with maximum PC correlation w.r.t. phenotype to be: ', round(pc_correlation[max_cor_index], 3)))
-  #return(c(nrow(M),pc_correlation))
+  
+  vcat(paste0(
+    'The final network size is: ', nrow(M),
+    ' with maximum PC correlation w.r.t. phenotype to be: ',
+    round(pc_correlation[max_cor_index], 3)
+  ))
 }
-
 
 
 
@@ -585,21 +585,30 @@ networkPruning <- function(Abar, CorrMatrix, data,
 #' user-defined directory and outputs penalty term with the highest testing canonical correlation,
 #' lowest prediction error, and lowest scaled prediction error.
 #' 
-#' 
 #' @param CVDir A directory where the result is stored.
 #' @param SCCAmethod The canonical correlation analysis method that is used in
 #' the model, used to name cross-validation table file, default is set to 'SmCCA'.
 #' @param K number of folds for cross-validation.
 #' @param NumSubsamp Number of subsampling used.
+#' @param verbose Logical; if TRUE, print progress messages during execution, otherwise run silently.
 #' @return A vector of length 3 with indices of the penalty term that (1) maximize the testing canonical correlation,
 #' (2) minimize the prediction error and (3) minimize the scaled prediction error.
 #' 
 #' @export
 
-aggregateCVSingle <- function(CVDir, SCCAmethod = 'SmCCA', K = 5, NumSubsamp = 500){
+aggregateCVSingle <- function(CVDir, SCCAmethod = 'SmCCA', K = 5, NumSubsamp = 500,
+                              verbose = FALSE){
+  
+  vcat <- function(...) {
+    if (isTRUE(verbose)) cat(..., "\n")
+  }
+  
   plotD <- paste0(CVDir, "Figures/")
   saveD <- paste0(CVDir, "Results/")
-  dir.create(plotD); dir.create(saveD)
+  dir.create(plotD)
+  dir.create(saveD)
+  
+  vcat("Reading cross-validation results...")
   
   testCC <- predError <- NULL
   for(j in 1:K){
@@ -612,15 +621,21 @@ aggregateCVSingle <- function(CVDir, SCCAmethod = 'SmCCA', K = 5, NumSubsamp = 5
   
   S1 <- rowMeans(testCC)
   S2 <- rowMeans(predError)
-  S3 <- abs(S2/abs(S1))
-  T12 <- dCorT[ , -2]; T12[ , 2] <- S1; T12[ , 3] <- S2
+  S3 <- abs(S2 / abs(S1))
+  T12 <- dCorT[ , -2]
+  T12[ , 2] <- S1
+  T12[ , 3] <- S2
+  
   utils::write.csv(T12, file = paste0(saveD, SCCAmethod, "CVmeanDeltaCors.csv"))
   
-  print(paste0("testCC choice: ", which(S1 == max(S1))))
-  print(paste0("CC Pred. Error choice: ", which(S2 == min(S2))))
+  vcat(paste0("testCC choice: ", which(S1 == max(S1))))
+  vcat(paste0("CC Pred. Error choice: ", which(S2 == min(S2))))
+  vcat(paste0("Scaled Pred. Error choice: ", which(S3 == min(S3))))
+  
   choices <- c(which(S1 == max(S1)), which(S2 == min(S2)), which(S3 == min(S3)))
   names(choices) <- c('test.cc', 'pred.error', 'scaled.pred.error')
-  return(c(which(S1 == max(S1)), which(S2 == min(S2)), which(S3 == min(S3))))
+  
+  return(choices)
 }
 
 
@@ -698,139 +713,142 @@ summarizeNetSHy = function(X, A, npc=1){
 #' @param Y A vector of binary variable, user needs to set the level of this 
 #' variable to 0 and 1.
 #' @param Between_Discriminate_Ratio A vector with length 2 specifying the relative importance
-#' of between-omics relationship and omics-phenotype relationship. For instance a ratio of 1:1 (c(1,1) in the argument)
-#' means between-omics relationship and omics-phenotype relationship contribute equally to the canonical weights extraction.
-#' @param SubsamplingPercent A vector with length equal to the number of omics data (\code{X}), specifying the 
-#' percentage of omics feature being subsampled at each subsampling iteration.
-#' @param CCcoef A vector of scaling factors only for between-omics relationship (exclude omics-phenotype). This 
-#' coefficient vector follows the column order of \code{combn(T, 2)} when there are \code{T} omics data.
-#' @param LambdaBetween A vector of sparsity penalty value for each omics data to run the between-omics SmCCA, each 
-#' penalty term should be within the range of 0 and 1.
-#' @param LambdaPheno A penalty term when running the sparse PLS with phenotype, penalty term should be within the range of 0 and 1.
-#' @param SubsamplingNum Number of feature subsamples. Default is 1000. Larger
-#' number leads to more accurate results, but at a higher computational cost, default is set to 1000.
-#' @param ncomp_pls Number of latent components for PLS, default set to 3.
-#' @param EvalClassifier If \code{TRUE}, the algorithm is at the phase of evaluating classification performance, and the latent factors from SPLSDA will be returned; if FALSE, the algorithm is at the phase of constructing multi-omics network, canonical weight will be returned. 
-#' Default is set to \code{FALSE}. 
-#' @param testData A list of testing omics data matrix, should have the exact same order as data list X, only used when EvalClassifier is set to \code{TRUE} for performing cross-validation, refer to multi-omics vignette for detail.
-#' @return If \code{EvalClassifier} is set to \code{FALSE}, a canonical correlation weight matrix is returned with combined omics data. Each
-#' column is the canonical correlation weights based on subsampled X features. The number of columns is \code{SubsamplingNum}. If \code{EvalClassifier} is set to \code{TRUE}, then latent factors from training and testing data will be returned for classifier evaluation. 
-#' @examples
-#' 
-#' 
-#' ## For illustration, we only subsample 5 times.
-#' set.seed(123)
-#' X1 <- matrix(rnorm(600,0,1), nrow = 60)
-#' X2 <- matrix(rnorm(600,0,1), nrow = 60)
-#' Y_binary <- rbinom(60,1,0.5)
-#' 
-#' Ws <- getRobustWeightsMultiBinary(list(X1,X2), Y_binary, 
-#'       SubsamplingPercent = c(0.8,0.8), CCcoef = NULL,
-#'       LambdaBetween = c(0.5,0.5), LambdaPheno = 0.1, SubsamplingNum = 10)
-#'   
+#' of between-omics relationship and omics-phenotype relationship.
+#' @param SubsamplingPercent A vector with length equal to the number of omics data (\code{X}).
+#' @param CCcoef A vector of scaling factors only for between-omics relationship.
+#' @param LambdaBetween A vector of sparsity penalty value for each omics data.
+#' @param LambdaPheno A penalty term when running the sparse PLS with phenotype.
+#' @param SubsamplingNum Number of feature subsamples.
+#' @param ncomp_pls Number of latent components for PLS.
+#' @param EvalClassifier If TRUE, return latent factors for classification.
+#' @param testData A list of testing omics data matrix.
+#' @param verbose Logical; if TRUE, print progress/error messages, otherwise run silently.
+#' @return Canonical weight matrix or latent projections depending on EvalClassifier.
 #' @export
-#' 
 
 getRobustWeightsMultiBinary <- function(X, Y, Between_Discriminate_Ratio = c(1,1),
-                                              SubsamplingPercent = NULL, CCcoef = NULL, LambdaBetween, LambdaPheno = NULL,
-                                              SubsamplingNum = 1000, ncomp_pls = 3, EvalClassifier = FALSE, testData = NULL)
+                                        SubsamplingPercent = NULL, CCcoef = NULL, 
+                                        LambdaBetween, LambdaPheno = NULL,
+                                        SubsamplingNum = 1000, ncomp_pls = 3, 
+                                        EvalClassifier = FALSE, testData = NULL,
+                                        verbose = FALSE)
 {
+  # verbose wrapper
+  vcat <- function(...) {
+    if (isTRUE(verbose)) cat(..., "\n")
+  }
+  
   eta <- LambdaPheno
+  
   # run between-omics SmCCA
-  BetweenOmicsWeight <- getRobustWeightsMulti(X, Trait = NULL, NoTrait = TRUE, CCcoef = CCcoef,
-                                         Lambda = LambdaBetween, s = SubsamplingPercent, SubsamplingNum = SubsamplingNum)
+  BetweenOmicsWeight <- getRobustWeightsMulti(
+    X, Trait = NULL, NoTrait = TRUE, CCcoef = CCcoef,
+    Lambda = LambdaBetween, s = SubsamplingPercent, SubsamplingNum = SubsamplingNum
+  )
+  
   # column bind all data
   X_all <- rlist::list.cbind(X)
+  
   # Feature type index
   type_index <- unlist(purrr::map(1:length(X), function(h){
     rep(h, ncol(X[[h]]))
   }))
+  
   if (EvalClassifier == FALSE)
   {  
-  # create empty matrix to store the omics-phenotype weight
-  OmicsPhenoWeight <- matrix(0, nrow = nrow(BetweenOmicsWeight), ncol = ncol(BetweenOmicsWeight))
-  # run omics-phenotype PLS  
-  for (iii in 1:ncol(BetweenOmicsWeight))
-  {
-    # subset selected features
-    X_subset <- X_all[ ,which(BetweenOmicsWeight[,iii] != 0)]
-    # run omics-phenotype SmCCA based on selected molecular features
-    Ws_pheno <- getRobustWeightsSingleBinary(X1 = X_subset, Trait = matrix(Y, ncol = 1), Lambda1 = as.numeric(eta), 
-                                               s1 = 1, SubsamplingNum = 1, K = ncomp_pls)
-    # store omics-phenotype canonical weight
-    OmicsPhenoWeight[which(BetweenOmicsWeight[,iii] != 0),iii] <- as.numeric(Ws_pheno)
+    # create empty matrix to store the omics-phenotype weight
+    OmicsPhenoWeight <- matrix(0, nrow = nrow(BetweenOmicsWeight), ncol = ncol(BetweenOmicsWeight))
+    
+    # run omics-phenotype PLS  
+    for (iii in 1:ncol(BetweenOmicsWeight))
+    {
+      # subset selected features
+      X_subset <- X_all[, which(BetweenOmicsWeight[, iii] != 0)]
       
-   
-    
-
-    # normalize each data type 
-    for (j in 1:length(X))
-    {
-      if (pracma::Norm(OmicsPhenoWeight[which(type_index == j),iii]) != 0)
+      # run omics-phenotype SmCCA
+      Ws_pheno <- getRobustWeightsSingleBinary(
+        X1 = X_subset, Trait = matrix(Y, ncol = 1), 
+        Lambda1 = as.numeric(eta), s1 = 1, SubsamplingNum = 1, K = ncomp_pls
+      )
+      
+      # store omics-phenotype canonical weight
+      OmicsPhenoWeight[which(BetweenOmicsWeight[, iii] != 0), iii] <- as.numeric(Ws_pheno)
+      
+      # normalize each data type 
+      for (j in 1:length(X))
       {
-        OmicsPhenoWeight[which(type_index == j),iii] <- OmicsPhenoWeight[which(type_index == j),iii]/pracma::Norm(OmicsPhenoWeight[which(type_index == j),iii])
-      }  
-    }
-
+        if (pracma::Norm(OmicsPhenoWeight[which(type_index == j), iii]) != 0)
+        {
+          OmicsPhenoWeight[which(type_index == j), iii] <- 
+            OmicsPhenoWeight[which(type_index == j), iii] /
+            pracma::Norm(OmicsPhenoWeight[which(type_index == j), iii])
+        }  
+      }
+    }  
     
-  }  
-
-  # set part of the between-omics weight to 0
-  BetweenOmicsWeight[as.vector(OmicsPhenoWeight == 0)] <- 0
-  # remove all zero columns
-  if (SubsamplingNum > 1)
-  {
-    # find zero columns and NAN columns
-    zero_cols <- which(apply(OmicsPhenoWeight, 2, function(x) all(x == 0) | any(is.nan(x))))
-    if(length(zero_cols)!=0)
+    # set part of the between-omics weight to 0
+    BetweenOmicsWeight[as.vector(OmicsPhenoWeight == 0)] <- 0
+    
+    # remove all zero columns
+    if (SubsamplingNum > 1)
     {
-      # remove all these columns
-      BetweenOmicsWeight <- BetweenOmicsWeight[,-zero_cols]
-      OmicsPhenoWeight <- OmicsPhenoWeight[,-zero_cols]
-    }
+      zero_cols <- which(apply(OmicsPhenoWeight, 2, function(x) all(x == 0) | any(is.nan(x))))
+      if(length(zero_cols) != 0)
+      {
+        BetweenOmicsWeight <- BetweenOmicsWeight[, -zero_cols]
+        OmicsPhenoWeight <- OmicsPhenoWeight[, -zero_cols]
+      }
+    }  
     
-  }  
-  # aggregate canonical weight (trade-off: between-omics, omics-phenotype)
-  CCWeight <- (Between_Discriminate_Ratio[1]/sum(Between_Discriminate_Ratio)) * BetweenOmicsWeight + 
-    (Between_Discriminate_Ratio[2]/sum(Between_Discriminate_Ratio)) * OmicsPhenoWeight
-  # set row names
-  row.names(CCWeight) <- colnames(X_all)
-  
-  return(CCWeight)
-  }else{
+    # aggregate canonical weight
+    CCWeight <- (Between_Discriminate_Ratio[1] / sum(Between_Discriminate_Ratio)) * BetweenOmicsWeight + 
+      (Between_Discriminate_Ratio[2] / sum(Between_Discriminate_Ratio)) * OmicsPhenoWeight
+    
+    row.names(CCWeight) <- colnames(X_all)
+    
+    return(CCWeight)
+    
+  } else {
+    
     if (SubsamplingNum != 1)
       stop('Supsampling number must be 1 when evaluating the classifier.')
     
     # subset selected features
-    X_subset <- X_all[ ,which(BetweenOmicsWeight[,1] != 0)]
-    # run omics-phenotype SmCCA based on selected molecular features
+    X_subset <- X_all[, which(BetweenOmicsWeight[, 1] != 0)]
+    
     has_error <- FALSE
+    
     tryCatch({
-      # run omics-phenotype SmCCA based on selected molecular features
-      out <- spls::splsda(x = X_subset, y = as.matrix(Y), K = ncomp_pls, eta = LambdaPheno, kappa=0.5,
-                          classifier = 'logistic', scale.x=TRUE)
+      out <- spls::splsda(
+        x = X_subset, y = as.matrix(Y), K = ncomp_pls, eta = LambdaPheno, kappa = 0.5,
+        classifier = 'logistic', scale.x = TRUE
+      )
+      
       # define testing data
       X_all_test <- rlist::list.cbind(testData)
-      X_subset_test <- X_all_test[ ,which(BetweenOmicsWeight[,1] != 0)]
+      X_subset_test <- X_all_test[, which(BetweenOmicsWeight[, 1] != 0)]
+      
       out.data <- matrix(0, nrow = ncol(X_subset), ncol = ncomp_pls)
       out.data[out[["spls.fit"]][["A"]], ] <- out[["W"]]
+      
       out.test <- as.matrix(X_subset_test) %*% out.data
+      
       colnames(out[['T']]) <- colnames(out.test) <- paste0('lat', 1:ncomp_pls)
+      
       return(list(out.train = out[['T']], out.test = out.test))
+      
     },
     error = function(e) {
-      cat("Caught an error:", e$message, "on iteration", "\n")
+      vcat("Caught an error:", e$message)
       has_error <- TRUE
     })
-    # skip current iteration if error occurs
+    
+    # fallback if error
     if (has_error) {
       out.train <- matrix(0, nrow = nrow(X_all), ncol = ncomp_pls)
-      out.test <- matrix(0, nrow = nrow(X_all), ncol = ncomp_pls)
+      out.test  <- matrix(0, nrow = nrow(X_all), ncol = ncomp_pls)
       return(list(out.train, out.test))
     }
-    
   }
-  
-  
-}  
+}
 

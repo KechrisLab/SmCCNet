@@ -49,7 +49,7 @@ vignette: >
 #   year: 2019
 #   month: Nov
 output: 
-  rmarkdown::pdf_document:
+  bookdown::pdf_document2:
     toc: true
     toc_depth: 2
     number_sections: true
@@ -178,9 +178,9 @@ subSamp <- 50 # number of subsamples (will be described in later section).
 pen1 <- seq(.05, .3, by = .05)
 
 # set a CV directory.
-CVDir <- "Example3foldCV/" 
 pheno <- "Example3foldCV"
-dir.create(CVDir)
+CVDir <- file.path(tempdir(),"Example3foldCV")
+dir.create(CVDir,showWarnings = FALSE)
 ```
 
 
@@ -417,7 +417,7 @@ for(i in 1:length(network_modules))
                  data = X1[,network_modules[[i]]],      
 			  Pheno = Y, ModuleIdx = i, min_mod_size = 10, 
                           max_mod_size = 100, method = 'PCA', 
-                          saving_dir = getwd())
+                          saving_dir = tempdir())
   cat("\n")
 }
 ```
@@ -459,17 +459,17 @@ ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) +
   theme(plot.title.position = "plot")
 ```
 
-```{r adjheatmap, echo = FALSE, warning = FALSE, message = FALSE, out.width="100%", fig.cap = "Adjacency matrix heatmap for subnetwork features."}
+```{r adjheatmap, echo = FALSE, warning = FALSE, message = FALSE, out.width="100%", fig.cap = "Similarity matrix heatmap for subnetwork features."}
 ###### Correlation heatmap
 melted_cormat <- melt(as.matrix(M))
 ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
   geom_tile() +
-   labs(title = "Adjacency Matrix Heatmap of Network Features") + 
+   labs(title = "Similarity Matrix Heatmap of Network Features") + 
   theme(plot.title.position = "plot")
 
 ```
 
-Figure \ref{fig:loadings1} the visualization of the PC loadings that represents the contribution of each molecular features to the first NetSHy PC. In addition, there are two network heatmaps based on (1) correlation matrix (Figure \ref{fig:corheatmap}), and (2) adjacency matrix (Figure \ref{fig:adjheatmap}). Based on the summarization table, genes 1,2,6, and 7 have relatively high correlation with respect to phenotype. The PC loadings also confirm that genes 1,2,5,6,and 7 generally have PC contribution. From the correlation heatmap, we do not observe associations between molecular features, but for the adjacency matrix heatmap, we observe the higher connections between genes 1,2,6, and 7.
+Figure \ref{fig:loadings1} the visualization of the PC loadings that represents the contribution of each molecular features to the first NetSHy PC. In addition, there are two network heatmaps based on (1) correlation matrix (Figure \ref{fig:corheatmap}), and (2) similarity matrix (Figure \ref{fig:adjheatmap}). Based on the summarization table, genes 1,2,6, and 7 have relatively high correlation with respect to phenotype. The PC loadings also confirm that genes 1,2,5,6,and 7 generally have PC contribution. From the correlation heatmap, we do not observe associations between molecular features, but for the similarity matrix heatmap, we observe the higher connections between genes 1,2,6, and 7.
 
 ## Step VI: Visualize network module
 
@@ -508,7 +508,7 @@ createNetworkFromIgraph(graph,"single_omics_network")
 ```
 
 ```{r netPlot, out.width="100%", fig.cap = "Trimmed module 1. The strength of the node connections is indicated by the thickness of edges. Red edges and blue edges are for negative and positive connections respectively.", echo = FALSE}
-knitr::include_graphics("../vignettes/example_network_cont.png")
+knitr::include_graphics("example_network_cont.png")
 ```
 
 
@@ -557,9 +557,9 @@ metric <- 'auc' # evaluation metric to be used.
 pen1 <- seq(.1, .9, by = .1)
 
 # set a CV directory.
-CVDir <- "Example3foldCV_Binary/" 
 pheno <- "Example3foldCV_Binary"
-dir.create(CVDir)
+CVDir <- file.path(tempdir(),"Example3foldCV_Binary")
+dir.create(CVDir,showWarnings = FALSE)
 
 Y <- ifelse(Y > median(Y), 1, 0)
 ```

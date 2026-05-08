@@ -4,7 +4,13 @@
 \alias{aggregateCVSingle}
 \title{Aggregate and Save Cross-validation Result for Single-omics Analysis}
 \usage{
-aggregateCVSingle(CVDir, SCCAmethod = "SmCCA", K = 5, NumSubsamp = 500)
+aggregateCVSingle(
+  CVDir,
+  SCCAmethod = "SmCCA",
+  K = 5,
+  NumSubsamp = 500,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{CVDir}{A directory where the result is stored.}
@@ -15,6 +21,8 @@ the model, used to name cross-validation table file, default is set to 'SmCCA'.}
 \item{K}{number of folds for cross-validation.}
 
 \item{NumSubsamp}{Number of subsampling used.}
+
+\item{verbose}{Logical; if TRUE, print progress messages during execution, otherwise run silently.}
 }
 \value{
 A vector of length 3 with indices of the penalty term that (1) maximize the testing canonical correlation,

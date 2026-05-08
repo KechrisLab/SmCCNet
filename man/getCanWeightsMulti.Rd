@@ -40,13 +40,15 @@ Run Sparse multiple Canonical Correlation Analysis (SmCCA) and return
 canonical weight vectors.
 }
 \examples{
-# This function is typically used as an internal function.
-# It is also used when performing cross-validation,
-# refer to multi-omics vignette for more detail.
-# X <- list(X1,X2)
-# result <- getCanWeightsMulti(X, Trait = as.matrix(Y), Lambda = c(0.5,0.5), NoTrait = FALSE)
-# result <- getCanWeightsMulti(X, Trait = NULL, Lambda = c(0.5,0.5), NoTrait = TRUE)
-# cccoef <- c(1,10,10)
-# result <- getCanWeightsMulti(X, Trait = as.matrix(Y), CCcoef = cccoef, 
-#                              Lambda = c(0.5,0.5), NoTrait = FALSE)
+ \donttest{
+ x1 <- matrix(rnorm(1000), nrow = 50)
+ x2 <- matrix(rnorm(1000), nrow = 50)
+ y <- matrix(rnorm(50), nrow = 50)
+ X <- list(x1,x2)
+ result <- getCanWeightsMulti(X, Trait = y, Lambda = c(0.5,0.5), NoTrait = FALSE)
+ result <- getCanWeightsMulti(X, Trait = NULL, Lambda = c(0.5,0.5), NoTrait = TRUE)
+ cccoef <- c(1,10,10)
+ result <- getCanWeightsMulti(X, Trait = y, CCcoef = cccoef, 
+                              Lambda = c(0.5,0.5), NoTrait = FALSE)
+                              }
 }

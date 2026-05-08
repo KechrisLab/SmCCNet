@@ -48,8 +48,7 @@ getCanCorMulti <- function(X, CCcoef, CCWeight, Y)
 #' @param DataType A character vector that contains the annotation of each type of omics dataset in X.
 #' @return A numeric vector of scaling factors.
 #' @examples
-#' # not run
-#' # scalingFactorInput(c('gene','mirna', 'phenotype'))
+#' if(interactive()){scalingFactorInput(c('gene','mirna', 'phenotype'))}
 #' 
 #' @export
 #' 
@@ -76,10 +75,10 @@ scalingFactorInput <- function(DataType = NULL)
         if (as.numeric(input) >= 0) {
           satisfied <- TRUE  # Set condition to satisfied
         } else {
-          cat("Invalid input. Please enter a nonnegative number.\n")
+          message("Invalid input. Please enter a nonnegative number")
         }
       } else {
-        cat("Invalid input. Please enter a number.\n")
+        message("Invalid input. Please enter a number")
       }
     })
     scalingfactors[i] <- as.numeric(input)
@@ -88,9 +87,9 @@ scalingFactorInput <- function(DataType = NULL)
   
   for (j in 1:ncol(combs))
   {
-    cat( paste0("The scaling factor value for correlation between ",
+    message( paste0("The scaling factor value for correlation between ",
                 DataType[combs[1,j]], ' and ',DataType[combs[2,j]], " is: ", 
-                scalingfactors[j], '\n'))
+                scalingfactors[j]))
   }
   return(scalingfactors)
   
@@ -171,7 +170,7 @@ classifierEval <- function(obs, pred, EvalMethod = 'accuracy',
   }
   # print out the evaluation score
   if (print_score == TRUE)
-    cat(paste0('The ', EvalMethod, ' score is: ', eval_score, '\n'))
+    message(paste0('The ', EvalMethod, ' score is: ', eval_score))
   # return the score
   return(eval_score)
 }
@@ -212,41 +211,42 @@ classifierEval <- function(obs, pred, EvalMethod = 'accuracy',
 #' @param tuneRangePLS A vector of length 2 that represents the range of candidate penalty term values for each omics data based on partial least squared discriminant analysis, 
 #' default is set to \code{c(0.5,0.9)}.
 #' @param seed Random seed for result reproducibility, default is set to 123.
+#' @param verbose Logical; if TRUE, print progress messages during execution, otherwise run silently.
+#' 
 #' @return This function returns the global adjacency matrix, omics data details, network clustering outcomes, and cross-validation results. Pruned subnetwork modules are saved in the directory specified by the user.
 #' @examples
 #' 
-#' 
-#' # library(SmCCNet)
-#' # set.seed(123)
-#' # data("ExampleData")
-#' # Y_binary <- ifelse(Y > quantile(Y, 0.5), 1, 0)
-#' ## single-omics PLS
-#' # result <- fastAutoSmCCNet(X = list(X1), Y = as.factor(Y_binary), Kfold = 3, 
-#' #                          subSampNum = 100, DataType = c('Gene'),
-#' #                          saving_dir = getwd(), EvalMethod = 'auc', 
-#' #                          summarization = 'NetSHy', 
-#' #                          CutHeight = 1 - 0.1^10, ncomp_pls = 5)
-#' ## single-omics CCA
-#' # result <- fastAutoSmCCNet(X = list(X1), Y = Y, Kfold = 3, preprocess = FALSE,
-#' #                           subSampNum = 50, DataType = c('Gene'),
-#' #                           saving_dir = getwd(), summarization = 'NetSHy',
-#' #                           CutHeight = 1 - 0.1^10)
-#' ## multi-omics PLS
-#' # result <- fastAutoSmCCNet(X = list(X1,X2), Y = as.factor(Y_binary), 
-#' #                           Kfold = 3, subSampNum = 50, 
-#' #                           DataType = c('Gene', 'miRNA'), 
-#' #                           CutHeight = 1 - 0.1^10,
-#' #                           saving_dir = getwd(), EvalMethod = 'auc', 
-#' #                           summarization = 'NetSHy',
-#' #                           BetweenShrinkage = 5, ncomp_pls = 3)
-#' ## multi-omics CCA
-#' # result <- fastAutoSmCCNet(X = list(X1,X2), Y = Y, 
-#' #                           K = 3, subSampNum = 50, DataType = c('Gene', 'miRNA'), 
-#' #                           CutHeight = 1 - 0.1^10,
-#' #                           saving_dir = getwd(),  
-#' #                           summarization = 'NetSHy',
-#' #                           BetweenShrinkage = 5)
-#' 
+#' \donttest{
+#'  library(SmCCNet)
+#'  set.seed(123)
+#'  Y <- rnorm(50)
+#'  X1 <- matrix(rnorm(2500), nrow = 50, ncol = 50)
+#'  colnames(X1) <- paste0("Gene_", 1:50)
+#'  X1[, 1:10] <- X1[, 1:10] + matrix(rep(Y, 10), ncol = 10)
+#'  X2 <- matrix(rnorm(1000), nrow = 50, ncol = 20)
+#'  colnames(X2) <- paste0("miRNA_", 1:20)
+#'  X2[, 1:5] <- X2[, 1:5] + matrix(rep(Y, 5), ncol = 5)
+#'  Y_binary <- ifelse(Y > median(Y), 1, 0)
+#'  ## single-omics CCA
+#'  result <- fastAutoSmCCNet(X = list(X1), Y = Y,
+#'                            Kfold = 3, preprocess = FALSE,
+#'                            subSampNum = 10,
+#'                            DataType = c('Gene'),
+#'                            saving_dir = tempdir(),
+#'                            summarization = 'NetSHy',
+#'                            CutHeight = 1 - 0.1^10,
+#'                            min_size = 5)
+#'  ## single-omics PLS
+#'  result <- fastAutoSmCCNet(X = list(X1),
+#'                            Y = as.factor(Y_binary),
+#'                            Kfold = 3, subSampNum = 10,
+#'                            DataType = c('Gene'),
+#'                            saving_dir = tempdir(),
+#'                            EvalMethod = 'auc',
+#'                            summarization = 'NetSHy',
+#'                            CutHeight = 1 - 0.1^10,
+#'                            min_size = 5, ncomp_pls = 3)
+#' }
 #' @export
 
 fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfold = 5, 
@@ -254,51 +254,75 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
                             BetweenShrinkage = 2, ScalingPen = c(0.1,0.1),
                             CutHeight = 1 - 0.1^10,
                             min_size = 10,
-                            max_size = 100, summarization = 'NetSHy', saving_dir = getwd(), 
+                            max_size = 100, summarization = 'NetSHy', saving_dir = tempdir(), 
                             ncomp_pls = 3,
                             tuneLength = 5,
                             tuneRangeCCA = c(0.1,0.5),
                             tuneRangePLS = c(0.5,0.9),
-                            seed = 123)
+                            seed = 123,
+                            verbose = FALSE)
 {
   
   # set random seed
-  seed <- set.seed(seed)
-  cat("\n")
-  cat("**********************************\n")
-  cat("* Welcome to Automated SmCCNet! *\n")
-  cat("**********************************\n")
-  cat("\n")
+  set.seed(seed)
+  
+  # verbose print wrapper
+  vcat <- function(...) {
+    if (isTRUE(verbose)) cat(...)
+  }
+  
+  # ---- added only for future plan cleanup ----
+  old_plan <- future::plan()
+  on.exit(future::plan(old_plan), add = TRUE)
+  
+  set_future_plan <- function(workers) {
+    in_check <- nzchar(Sys.getenv("_R_CHECK_PACKAGE_NAME_")) ||
+      identical(Sys.getenv("NOT_CRAN"), "false")
+    
+    if (in_check) {
+      future::plan(future::sequential)
+    } else {
+      future::plan(future::multisession, workers = workers)
+    }
+  }
+  # -------------------------------------------
+  
+  vcat("\n")
+  vcat("**********************************\n")
+  vcat("* Welcome to Automated SmCCNet! *\n")
+  vcat("**********************************\n")
+  vcat("\n")
   
   # Preprocess?
   if (preprocess == TRUE)
   {
-    cat("\n")
-    cat("--------------------------------------------------\n")
-    cat(">> Starting data preprocessing...\n")
-    cat("--------------------------------------------------\n")
-    cat("\n")
+    vcat("\n")
+    vcat("--------------------------------------------------\n")
+    vcat(">> Starting data preprocessing...\n")
+    vcat("--------------------------------------------------\n")
+    vcat("\n")
     if (!is.null(AdjustedCovar))
     {
-      cat('Covariate(s) are provided, now regressing out covariate effects from omics data.', '\n')
+      vcat('Covariate(s) are provided, now regressing out covariate effects from omics data.', '\n')
       AdjustedCovar <- as.data.frame(AdjustedCovar)
     }
     # preprocess data
     X <- purrr::map(1:length(X), function(xx){
       dataPreprocess(X = as.data.frame(X[[xx]]), covariates = AdjustedCovar, is_cv = FALSE, 
-      center = TRUE, scale = TRUE)
+                     center = TRUE, scale = TRUE)
     })
     X <- lapply(X, as.matrix)
   }
+  
   # Define problem: Single-Omics? Multi-Omics? Categorical (Binary? MultiLevel?)? Continuous?
   if (length(X) > 1)
   {
     AnalysisType <- 'multiomics'
-  }else{
+  } else {
     if (length(X) == 1)
     {
       AnalysisType <- 'singleomics'
-    }else{
+    } else {
       stop('User must provide a list of dataframe.')
     }
   }
@@ -307,7 +331,7 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
   if (ncol(as.matrix(Y)) > 1)
   {
     method <- 'CCA'
-  }else{
+  } else {
     if (is.factor(Y))
     {
       method <- 'PLS'
@@ -317,78 +341,81 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
       method <- 'CCA'
     }
   }
-  cat(paste0('This project uses ', AnalysisType, ' ', method), '\n')
- 
+  vcat(paste0('This project uses ', AnalysisType, ' ', method), '\n')
+  
   
   # Automatically set CC coefficients: check pairwise canonical correlation
   if (AnalysisType == 'multiomics')
   {
-    cat("\n")
-    cat("--------------------------------------------------\n")
-    cat(">> Now determining the scaling factor for multi-omics analysis...\n")
-    cat("--------------------------------------------------\n")
-    cat("\n")
+    vcat("\n")
+    vcat("--------------------------------------------------\n")
+    vcat(">> Now determining the scaling factor for multi-omics analysis...\n")
+    vcat("--------------------------------------------------\n")
+    vcat("\n")
+    
     AllComb <- utils::combn(length(X), 2)
     DataTypePheno <- c(DataType, 'Phenotype')
     ScalingFactor <- rep(0, ncol(AllComb))
-    names(ScalingFactor) <- apply(AllComb,2, function(x){
-      paste0(DataTypePheno[x[1]],'-',DataTypePheno[x[2]])
+    names(ScalingFactor) <- apply(AllComb, 2, function(x){
+      paste0(DataTypePheno[x[1]], '-', DataTypePheno[x[2]])
     })
+    
     for (i in 1:ncol(AllComb))
     {
       # define the pair of matrices
-      X_pair <- X[AllComb[,i]]
+      X_pair <- X[AllComb[, i]]
       # extract canonical weight
       CC_weight <- getCanWeightsMulti(X_pair, Trait = NULL, Lambda = ScalingPen, NoTrait = TRUE)
       # define scaling factor
-      ScalingFactor[i] <- abs(stats::cor(X_pair[[1]]%*% CC_weight[[1]], X_pair[[2]]%*% CC_weight[[2]]))
-      
+      ScalingFactor[i] <- abs(stats::cor(X_pair[[1]] %*% CC_weight[[1]], X_pair[[2]] %*% CC_weight[[2]]))
     }
+    
     # shrink between-omics scaling factor based on shrinkage parameter
-    ScalingFactor <- ScalingFactor/BetweenShrinkage
+    ScalingFactor <- ScalingFactor / BetweenShrinkage
+    
     if (method == 'PLS')
     {
       # set between-discriminated ratio
       BDRatio <- c(mean(ScalingFactor), 1)
-      cat('The between-omics and omics-phenotype importance ratio is: ', BDRatio[1], ':', BDRatio[2], '\n')
+      vcat('The between-omics and omics-phenotype importance ratio is: ', BDRatio[1], ':', BDRatio[2], '\n')
     }
+    
     # include scaling factors for multi-omics-phenotype relationship
     ScalingFactorCC <- c(ScalingFactor, rep(1, length(X)))
-    CombPheno <- utils::combn(length(X) + 1,2)
-    NonPhenoIndex <- apply(CombPheno, 2, function(x){x[2] != (length(X) + 1)})
+    CombPheno <- utils::combn(length(X) + 1, 2)
+    NonPhenoIndex <- apply(CombPheno, 2, function(x){ x[2] != (length(X) + 1) })
     ScalingFactorTemp <- rep(1, ncol(CombPheno))
     DataTypePheno <- c(DataType, 'Phenotype')
-    names(ScalingFactorTemp) <- apply(CombPheno,2, function(x){
-      paste0(DataTypePheno[x[1]],'-',DataTypePheno[x[2]])
+    names(ScalingFactorTemp) <- apply(CombPheno, 2, function(x){
+      paste0(DataTypePheno[x[1]], '-', DataTypePheno[x[2]])
     })
     ScalingFactorTemp[NonPhenoIndex] <- ScalingFactor
     ScalingFactor <- ScalingFactorTemp
+    
     # if multi-omics PLS is used
     if (method == 'PLS')
     {
       ScalingFactor <- ScalingFactor[NonPhenoIndex]
     }
     
-    cat("\n")
-    cat('The scaling factor selection is: ', '\n')
-    cat("\n")
+    vcat("\n")
+    vcat('The scaling factor selection is: ', '\n')
+    vcat("\n")
     for (i in 1:length(ScalingFactor))
     {
-      cat(paste0(names(ScalingFactor)[i],": ", ScalingFactor[i]), '\n')
+      vcat(paste0(names(ScalingFactor)[i], ": ", ScalingFactor[i]), '\n')
     }
- 
-  } else{
-    cat('single omics analysis, skip scaling factor.', '\n')
+    
+  } else {
+    vcat('single omics analysis, skip scaling factor.', '\n')
   }
   
+  vcat("\n")
+  vcat("--------------------------------------------------\n")
+  vcat(">> Determining the best penalty selection through cross-validation...\n")
+  vcat("--------------------------------------------------\n")
+  vcat("\n")
   
-  
-  
-  cat("\n")
-  cat("--------------------------------------------------\n")
-  cat(">> Determining the best penalty selection through cross-validation...\n")
-  cat("--------------------------------------------------\n")
-  cat("\n")
   # Automatically select a penalty candidates 
   if (method == 'CCA')
   {
@@ -397,15 +424,16 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
     # fill in penalty candidate
     for (i in 1:ncol(pen))
     {
-      pen[,i] <- seq(from = tuneRangeCCA[1], 
-                             to = tuneRangeCCA[2], 
-                             length.out = tuneLength)
+      pen[, i] <- seq(from = tuneRangeCCA[1], 
+                      to = tuneRangeCCA[2], 
+                      length.out = tuneLength)
     }
     # convert matrix to a list of columns
     list_cols <- as.list(as.data.frame(pen))
     # generate all possible combinations
     PenComb <- do.call(expand.grid, list_cols)
   }
+  
   if (method == 'PLS')
   {
     # check if single-omics or multiomics
@@ -422,9 +450,9 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
       # fill in penalty candidate
       for (i in 1:ncol(pen))
       {
-        pen[,i] <- seq(from = tuneRangePLS[1], 
-                       to = tuneRangePLS[2], 
-                       length.out = tuneLength)
+        pen[, i] <- seq(from = tuneRangePLS[1], 
+                        to = tuneRangePLS[2], 
+                        length.out = tuneLength)
       }
       # convert matrix to a list of columns
       list_cols <- as.list(as.data.frame(pen))
@@ -437,17 +465,17 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
   SubsamplingPercent <- rep(0, length(X))
   for (i in 1:length(X))
   {
-    if(ncol(X[[i]]) < 300)
+    if (ncol(X[[i]]) < 300)
     {
       SubsamplingPercent[i] <- 0.9
-    }else{
+    } else {
       SubsamplingPercent[i] <- 0.7
     }
   }
   
-  
   # split data into folds
   X <- lapply(X, scale)
+  
   # check to see whether Y need to be scaled or not
   if (method == 'CCA')
   {
@@ -462,18 +490,18 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
     X_test <- list()
     Y_train <- list()
     Y_test <- list()
+    
     for (i in 1:length(X))
     {
-      X_train[[i]] <- X[[i]][-foldIdx[[x]],]
-      X_test[[i]] <- X[[i]][foldIdx[[x]],]
+      X_train[[i]] <- X[[i]][-foldIdx[[x]], ]
+      X_test[[i]] <- X[[i]][ foldIdx[[x]], ]
     }
-    Y_train <- Y[-foldIdx[[x]],]
-    Y_test <- Y[foldIdx[[x]],]
-    return(list(X_train = X_train, X_test = X_test,Y_train = Y_train, Y_test = Y_test))
+    Y_train <- Y[-foldIdx[[x]], ]
+    Y_test <- Y[ foldIdx[[x]], ]
+    
+    return(list(X_train = X_train, X_test = X_test, Y_train = Y_train, Y_test = Y_test))
   })
   names(folddata) <- paste0('fold_', 1:Kfold)
-  
-  
   
   # Run SmCCNet (for single-omics)
   if (AnalysisType == 'singleomics')
@@ -483,52 +511,51 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
     if (method == 'CCA')
     {
       # define parallel computing multisession
-      future::plan(future::multisession, workers = Kfold)
+      set_future_plan(Kfold)
       CVResult <- furrr::future_map(1:Kfold, function(xx) {
         # select the kth fold
         omicsdata <- folddata[[xx]]
-        PenComb <- PenComb[,1]
+        PenComb <- PenComb[, 1]
         RhoTrain <- rep(0, length(PenComb))
         RhoTest <- rep(0, length(PenComb))
         DeltaCor <- rep(0, length(PenComb))
-        for(idx in 1:length(PenComb)){
+        
+        for (idx in 1:length(PenComb)) {
           # choose the penalty term
           l1 <- PenComb[idx]
           # run single omics SmCCA with continuous outcome
           Ws <- getRobustWeightsSingle(omicsdata[[1]][[1]], as.matrix(omicsdata[[3]]), l1, 1,
-                                             SubsamplingNum = 1)
-          rho.train <-  stats::cor(omicsdata[[1]][[1]] %*% Ws, as.matrix(omicsdata[[3]]))
-          
-          rho.test <-  stats::cor(omicsdata[[2]][[1]] %*% Ws, as.matrix(omicsdata[[4]]))
+                                       SubsamplingNum = 1)
+          rho.train <- stats::cor(omicsdata[[1]][[1]] %*% Ws, as.matrix(omicsdata[[3]]))
+          rho.test  <- stats::cor(omicsdata[[2]][[1]] %*% Ws, as.matrix(omicsdata[[4]]))
           
           # store cross-validation result
           RhoTrain[idx] <- round(rho.train, digits = 5)
-          RhoTest[idx] <- round(rho.test, digits = 5)
+          RhoTest[idx]  <- round(rho.test, digits = 5)
           DeltaCor[idx] <- abs(rho.train - rho.test)
-          
-          
-          
         }
+        
         # combine cross-validation result
         CVResult <- as.data.frame(cbind(RhoTrain, RhoTest, DeltaCor))
         return(CVResult)
-      },.progress = TRUE,.options = furrr::furrr_options(seed = TRUE))
+      }, .progress = TRUE, .options = furrr::furrr_options(seed = TRUE))
       
       # aggregate CV result and select the best penalty term
       AggregatedCVResult <- Reduce("+", CVResult) / length(CVResult)
-      EvalMetric <- apply(AggregatedCVResult, 1, function(x) {x[3]/abs(x[2])})
-      BestPen <- PenComb[which.min(EvalMetric),1]
-      cat(paste0('\n','The best penalty term after ', Kfold,'-fold cross-validation is: ', BestPen), '\n')
-      cat(paste0('with testing canonical correlation = ', round(AggregatedCVResult$RhoTest[which.min(EvalMetric)],3), 
-                 ', and prediction error = ', round(AggregatedCVResult$DeltaCor[which.min(EvalMetric)],3)), '\n')
+      EvalMetric <- apply(AggregatedCVResult, 1, function(x) { x[3] / abs(x[2]) })
+      BestPen <- PenComb[which.min(EvalMetric), 1]
+      vcat(paste0('\n', 'The best penalty term after ', Kfold, '-fold cross-validation is: ', BestPen), '\n')
+      vcat(paste0('with testing canonical correlation = ', round(AggregatedCVResult$RhoTest[which.min(EvalMetric)], 3), 
+                  ', and prediction error = ', round(AggregatedCVResult$DeltaCor[which.min(EvalMetric)], 3)), '\n')
       
-      cat('Now running single-omics CCA with best penalty term on the complete dataset.', '\n')
+      vcat('Now running single-omics CCA with best penalty term on the complete dataset.', '\n')
       # run single-omics CCA
       Ws <- getRobustWeightsSingle(X1 = X[[1]], Trait = as.matrix(as.numeric(Y)), Lambda1 = BestPen, 
-                                         s1 = SubsamplingPercent, SubsamplingNum = subSampNum)
+                                   s1 = SubsamplingPercent, SubsamplingNum = subSampNum)
       # construct global network module
       Abar <- getAbar(Ws, FeatureLabel = colnames(X[[1]]))
     }
+    
     # case when there is categorical outcome
     if (method == 'PLS')
     {
@@ -536,58 +563,62 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
       if (length(summary(as.factor(Y))) > 2)
         stop('Currently not support non-binary phenotype.')
       
-      
       # define parallel computing multisession
-      future::plan(future::multisession, workers = Kfold)
+      set_future_plan(Kfold)
       CVResult <- furrr::future_map(1:Kfold, function(xx) {
         # select the kth fold
         omicsdata <- folddata[[xx]]
         TrainMetric <- rep(0, length(PenComb))
         TestMetric <- rep(0, length(PenComb))
-        for(idx in 1:length(PenComb)){
+        
+        for (idx in 1:length(PenComb)) {
           # choose the penalty term
           l1 <- PenComb[idx]
           # run single omics SmCCA with continuous outcome
-          Ws <- spls::splsda(omicsdata[[1]][[1]], omicsdata[[3]], K = ncomp_pls, eta = l1, kappa=0.5,
-                             classifier= 'logistic', scale.x=FALSE)
+          Ws <- spls::splsda(omicsdata[[1]][[1]], omicsdata[[3]], K = ncomp_pls, eta = l1, kappa = 0.5,
+                             classifier = 'logistic', scale.x = FALSE)
           
-          weight <- matrix(0,nrow = ncol(omicsdata[[1]][[1]]), ncol = ncomp_pls)
-          weight[Ws[["A"]],] <- Ws[["W"]]
+          weight <- matrix(0, nrow = ncol(omicsdata[[1]][[1]]), ncol = ncomp_pls)
+          weight[Ws[["A"]], ] <- Ws[["W"]]
           
           # create training and testing data, and fit logistic regression model
-          train_data <- data.frame(x = (omicsdata[[1]][[1]] %*% weight)[,1:ncomp_pls], y = as.factor(omicsdata[[3]]))
-          test_data <- data.frame(x = (omicsdata[[2]][[1]] %*% weight)[,1:ncomp_pls])
-          logisticFit <- stats::glm(y~., family = 'binomial',data = train_data)
+          train_data <- data.frame(x = (omicsdata[[1]][[1]] %*% weight)[, 1:ncomp_pls], y = as.factor(omicsdata[[3]]))
+          test_data  <- data.frame(x = (omicsdata[[2]][[1]] %*% weight)[, 1:ncomp_pls])
+          logisticFit <- stats::glm(y ~ ., family = 'binomial', data = train_data)
+          
           # make prediction for train/test set
           train_pred <- stats::predict(logisticFit, train_data, type = 'response')
-          test_pred <- stats::predict(logisticFit, test_data, type = 'response')
+          test_pred  <- stats::predict(logisticFit, test_data, type = 'response')
+          
           # specifying which method to use as evaluation metric
           if (EvalMethod == 'accuracy')
           {
             # binarize prediction
             train_pred <- ifelse(train_pred > 0.5, 1, 0)
-            test_pred <- ifelse(test_pred > 0.5, 1, 0)
+            test_pred  <- ifelse(test_pred > 0.5, 1, 0)
             # calculate prediction accuracy:
             acc.train <- mean(as.factor(train_pred) == as.factor(omicsdata[[3]])) 
-            acc.test <- mean(as.factor(test_pred) == as.factor(omicsdata[[4]]))
+            acc.test  <- mean(as.factor(test_pred)  == as.factor(omicsdata[[4]]))
             # store prediction metric result
             TrainMetric[idx] <- acc.train
-            TestMetric[idx] <- acc.test
+            TestMetric[idx]  <- acc.test
           }
+          
           if (EvalMethod == 'auc')
           {
             # calculate auc score
             auc.train <- pROC::auc(as.factor(omicsdata[[3]]), train_pred)
-            auc.test <- pROC::auc(as.factor(omicsdata[[4]]), test_pred)
+            auc.test  <- pROC::auc(as.factor(omicsdata[[4]]), test_pred)
             # store prediction metric result
             TrainMetric[idx] <- auc.train
-            TestMetric[idx] <- auc.test
+            TestMetric[idx]  <- auc.test
           }
+          
           if (EvalMethod == 'precision')
           {
             # binarize prediction
             train_pred <- ifelse(train_pred > 0.5, 1, 0)
-            test_pred <- ifelse(test_pred > 0.5, 1, 0)
+            test_pred  <- ifelse(test_pred > 0.5, 1, 0)
             # calculate precision
             TP_train <- sum(omicsdata[[3]] == 1 & train_pred == 1)
             FP_train <- sum(omicsdata[[3]] == 0 & train_pred == 1)
@@ -597,14 +628,15 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
             precision.test <- TP_test / (TP_test + FP_test)
             # store prediction metric result
             TrainMetric[idx] <- precision.train
-            TestMetric[idx] <- precision.test
+            TestMetric[idx]  <- precision.test
           }
+          
           if (EvalMethod == 'recall')
           {
             # binarize prediction
             train_pred <- ifelse(train_pred > 0.5, 1, 0)
-            test_pred <- ifelse(test_pred > 0.5, 1, 0)
-            # calculate precision
+            test_pred  <- ifelse(test_pred > 0.5, 1, 0)
+            # calculate recall
             TP_train <- sum(omicsdata[[3]] == 1 & train_pred == 1)
             FN_train <- sum(omicsdata[[3]] == 1 & train_pred == 0)
             recall.train <- TP_train / (TP_train + FN_train)
@@ -613,14 +645,15 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
             recall.test <- TP_test / (TP_test + FN_test)
             # store prediction metric result
             TrainMetric[idx] <- recall.train
-            TestMetric[idx] <- recall.test
+            TestMetric[idx]  <- recall.test
           }
+          
           if (EvalMethod == 'f1')
           {
             # binarize prediction
             train_pred <- ifelse(train_pred > 0.5, 1, 0)
-            test_pred <- ifelse(test_pred > 0.5, 1, 0)
-            # calculate precision
+            test_pred  <- ifelse(test_pred > 0.5, 1, 0)
+            # calculate f1
             TP_train <- sum(omicsdata[[3]] == 1 & train_pred == 1)
             TN_train <- sum(omicsdata[[3]] == 0 & train_pred == 0)
             FP_train <- sum(omicsdata[[3]] == 0 & train_pred == 1)
@@ -628,6 +661,7 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
             precision.train <- TP_train / (TP_train + FP_train)
             recall.train <- TP_train / (TP_train + FN_train)
             f1.train <- 2 * (precision.train * recall.train) / (precision.train + recall.train)
+            
             TP_test <- sum(omicsdata[[4]] == 1 & test_pred == 1)
             TN_test <- sum(omicsdata[[4]] == 0 & test_pred == 0)
             FP_test <- sum(omicsdata[[4]] == 0 & test_pred == 1)
@@ -637,39 +671,32 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
             f1.test <- 2 * (precision.test * recall.test) / (precision.test + recall.test)
             # store prediction metric result
             TrainMetric[idx] <- f1.train
-            TestMetric[idx] <- f1.test
+            TestMetric[idx]  <- f1.test
           }
-         
-          
-          
-          
         }
+        
         # combine cross-validation result
         CVResult <- as.data.frame(cbind(TrainMetric, TestMetric))
         return(CVResult)
-      },.progress = TRUE,.options = furrr::furrr_options(seed = TRUE))
+      }, .progress = TRUE, .options = furrr::furrr_options(seed = TRUE))
       
       # aggregate CV result and select the best penalty term
       AggregatedCVResult <- Reduce("+", CVResult) / length(CVResult)
       BestPen <- PenComb[which.max(AggregatedCVResult$TestMetric)]
-      cat(paste0('\n'))
+      vcat(paste0('\n'))
       for (xx in 1:length(BestPen))
       {  
-        cat(paste0('The best penalty term for ', DataType[xx], ' after ', Kfold,'-fold cross-validation is: ', BestPen[xx]), '\n')
+        vcat(paste0('The best penalty term for ', DataType[xx], ' after ', Kfold, '-fold cross-validation is: ', BestPen[xx]), '\n')
       }
-      cat(paste0('with testing ', EvalMethod,' score = ', round(AggregatedCVResult$TestMetric[which.max(AggregatedCVResult$TestMetric)],3)), '\n')
-      cat('Now running single-omics PLS with best penalty term on the complete dataset.', '\n')
+      vcat(paste0('with testing ', EvalMethod, ' score = ', round(AggregatedCVResult$TestMetric[which.max(AggregatedCVResult$TestMetric)], 3)), '\n')
+      vcat('Now running single-omics PLS with best penalty term on the complete dataset.', '\n')
       
       # run single-omics PLS
       Ws <- getRobustWeightsSingleBinary(X1 = X[[1]], Trait = as.numeric(Y) - 1, Lambda1 = BestPen, K = ncomp_pls,
                                          s1 = SubsamplingPercent, SubsamplingNum = subSampNum)
       # construct global network module
       Abar <- getAbar(Ws, FeatureLabel = colnames(X[[1]]))
-      
-      
     }
-    
-    
   }
   
   # Run SmCCNet (for multi-omics)
@@ -680,54 +707,54 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
     if (method == 'CCA')
     {
       # define parallel computing multisession
-      future::plan(future::multisession, workers = Kfold)
+      set_future_plan(Kfold)
       CVResult <- furrr::future_map(1:Kfold, function(xx) {
         # select the kth fold
         omicsdata <- folddata[[xx]]
         RhoTrain <- rep(0, length(PenComb))
         RhoTest <- rep(0, length(PenComb))
         DeltaCor <- rep(0, length(PenComb))
-        for(idx in 1:nrow(PenComb)){
+        
+        for (idx in 1:nrow(PenComb)) {
           # choose the penalty term
           l1 <- PenComb[idx, ]
-          # run single omics SmCCA with continuous outcome
+          # run multi-omics SmCCA with continuous outcome
           Ws <- getCanWeightsMulti(omicsdata[[1]], Trait = as.matrix(omicsdata[[3]]), Lambda = l1, NoTrait = FALSE, CCcoef = ScalingFactor)
-          rho.train <-  getCanCorMulti(X = omicsdata[[1]], Y = omicsdata[[3]],CCWeight =  Ws, CCcoef = ScalingFactorCC)
-          
-          rho.test <-  getCanCorMulti(X = omicsdata[[2]], Y = omicsdata[[4]],CCWeight =  Ws, CCcoef = ScalingFactorCC)
+          rho.train <- getCanCorMulti(X = omicsdata[[1]], Y = omicsdata[[3]], CCWeight = Ws, CCcoef = ScalingFactorCC)
+          rho.test  <- getCanCorMulti(X = omicsdata[[2]], Y = omicsdata[[4]], CCWeight = Ws, CCcoef = ScalingFactorCC)
           
           # store cross-validation result
           RhoTrain[idx] <- round(rho.train, digits = 5)
-          RhoTest[idx] <- round(rho.test, digits = 5)
+          RhoTest[idx]  <- round(rho.test, digits = 5)
           DeltaCor[idx] <- abs(rho.train - rho.test)
-          
-          
-          
         }
+        
         # combine cross-validation result
         CVResult <- as.data.frame(cbind(RhoTrain, RhoTest, DeltaCor))
         return(CVResult)
-      },.progress = TRUE,.options = furrr::furrr_options(seed = TRUE))
+      }, .progress = TRUE, .options = furrr::furrr_options(seed = TRUE))
+      
       # aggregate CV result and select the best penalty term
       AggregatedCVResult <- Reduce("+", CVResult) / length(CVResult)
-      EvalMetric <- apply(AggregatedCVResult, 1, function(x) {x[3]/abs(x[2])})
-      BestPen <- PenComb[which.min(EvalMetric),]
-      cat(paste0('\n'))
+      EvalMetric <- apply(AggregatedCVResult, 1, function(x) { x[3] / abs(x[2]) })
+      BestPen <- PenComb[which.min(EvalMetric), ]
+      vcat(paste0('\n'))
       for (xx in 1:length(BestPen))
       {  
-        cat(paste0('The best penalty term for ', DataType[xx], ' after ', Kfold,'-fold cross-validation is: ', BestPen[xx]), '\n')
+        vcat(paste0('The best penalty term for ', DataType[xx], ' after ', Kfold, '-fold cross-validation is: ', BestPen[xx]), '\n')
       }
-      cat(paste0('with testing canonical correlation = ', round(AggregatedCVResult$RhoTest[which.min(EvalMetric)],3), 
-                 ', and prediction error = ', round(AggregatedCVResult$DeltaCor[which.min(EvalMetric)],3)), '\n')
+      vcat(paste0('with testing canonical correlation = ', round(AggregatedCVResult$RhoTest[which.min(EvalMetric)], 3), 
+                  ', and prediction error = ', round(AggregatedCVResult$DeltaCor[which.min(EvalMetric)], 3)), '\n')
       
-      cat('Now running multi-omics CCA with best penalty term on the complete dataset.', '\n')
+      vcat('Now running multi-omics CCA with best penalty term on the complete dataset.', '\n')
       # run multi-omics CCA
-      Ws <- getRobustWeightsMulti(X, Trait = as.matrix(Y), NoTrait = FALSE,CCcoef = ScalingFactor,
-                                   Lambda = BestPen,s = SubsamplingPercent, SubsamplingNum = subSampNum)
+      Ws <- getRobustWeightsMulti(X, Trait = as.matrix(Y), NoTrait = FALSE, CCcoef = ScalingFactor,
+                                  Lambda = BestPen, s = SubsamplingPercent, SubsamplingNum = subSampNum)
       # construct global network
       featurelabel <- unlist(lapply(X, colnames))
       Abar <- getAbar(Ws, FeatureLabel = featurelabel)
     }
+    
     # case when there is categorical outcome
     if (method == 'PLS')
     {
@@ -735,52 +762,39 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
       if (length(summary(as.factor(Y))) > 2)
         stop('Currently not support non-binary outcome.')
       
-      
       # define parallel computing multisession
-      future::plan(future::multisession, workers = Kfold)
+      set_future_plan(Kfold)
       # running multisession parallel computing with multi-block PLS
       CVResult <- furrr::future_map(1:Kfold, function(xx) {
         # select the kth fold
         omicsdata <- folddata[[xx]]
         TrainMetric <- rep(0, nrow(PenComb))
         TestMetric <- rep(0, nrow(PenComb))
-        for(idx in 1:nrow(PenComb)){
+        
+        for (idx in 1:nrow(PenComb)) {
           # choose the penalty term
-          l1 <- PenComb[idx,]
-          # run multi-omics SmCCA with continuous outcome
-          # Ws <- getRobustWeightsMultiBinary(omicsdata[[1]], as.numeric(omicsdata[[3]]), SubsamplingPercent = rep(1, length(omicsdata[[1]])), Between_Discriminate_Ratio = BDRatio,
-          #                                        LambdaBetween = l1[1,1:(length(l1) - 1)], LambdaPheno = l1[1,length(l1)], SubsamplingNum = 1, CCcoef = ScalingFactor, ncomp_pls = ncomp_pls)
+          l1 <- PenComb[idx, ]
           
-          suppressMessages(projection <- getRobustWeightsMultiBinary(omicsdata[[1]], 
-                                                                   as.numeric(omicsdata[[3]]), 
-                                                                   SubsamplingPercent=rep(1, length(omicsdata[[1]])),
-                                                                   Between_Discriminate_Ratio = BDRatio,
-                                                                   LambdaBetween = l1[1,1:(length(l1) - 1)], 
-                                                                   LambdaPheno = l1[1,length(l1)], 
-                                                                   SubsamplingNum = 1, 
-                                                                   CCcoef = ScalingFactor,
-                                                                   ncomp_pls = ncomp_pls, EvalClassifier = TRUE,
-                                                                   testData = omicsdata[[2]]))
-          # determine the type of dataset each feature belongs to
-          # feature_size <- unlist(lapply(X, ncol))
-          # types <- unlist(purrr::map((1:length(feature_size)), function(x){
-          #  rep(DataType[x], feature_size[x])
-          #}))
-          # spliting the canonical weight vector by type
-          #Ws_split <- split(Ws[,1], types)
-          # project each omics dataset into the lower dimensional embedding (for both training and testing data)
-          #omics_projection_train <- purrr::map(1:length(X), function(xx){
-          #  omicsdata[[1]][[xx]] %*% Ws_split[[xx]]
-          #})
-          #omics_projection_test <- purrr::map(1:length(X), function(xx){
-          #  omicsdata[[2]][[xx]] %*% Ws_split[[xx]]
-          #})
-
+          suppressMessages(
+            projection <- getRobustWeightsMultiBinary(
+              omicsdata[[1]], 
+              as.numeric(omicsdata[[3]]), 
+              SubsamplingPercent = rep(1, length(omicsdata[[1]])),
+              Between_Discriminate_Ratio = BDRatio,
+              LambdaBetween = l1[1, 1:(length(l1) - 1)], 
+              LambdaPheno = l1[1, length(l1)], 
+              SubsamplingNum = 1, 
+              CCcoef = ScalingFactor,
+              ncomp_pls = ncomp_pls,
+              EvalClassifier = TRUE,
+              testData = omicsdata[[2]]
+            )
+          )
+          
           # create training and testing data, and fit logistic regression model
-          #train_data <- data.frame(x = do.call(cbind, omics_projection_train), y = as.factor(omicsdata[[3]]))
-          #test_data <- data.frame(x =  do.call(cbind, omics_projection_test))
           train_data <- data.frame(x = projection[[1]], y = as.factor(omicsdata[[3]]))
-          test_data <- data.frame(x =  projection[[2]])
+          test_data  <- data.frame(x = projection[[2]])
+          
           # catching error when performing the logistic regression
           has_error <- FALSE
           tryCatch({
@@ -788,32 +802,33 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
             logisticFit <- stats::glm(y ~ ., family = 'binomial', data = train_data)
             # make prediction for train/test set
             train_pred <- stats::predict(logisticFit, train_data, type = 'response')
-            test_pred <- stats::predict(logisticFit, test_data, type = 'response')
+            test_pred  <- stats::predict(logisticFit, test_data, type = 'response')
+            
             # specifying which method to use as evaluation metric
             if (EvalMethod == 'accuracy')
             {
               # binarize prediction
               train_pred <- ifelse(train_pred > 0.5, 1, 0)
-              test_pred <- ifelse(test_pred > 0.5, 1, 0)
+              test_pred  <- ifelse(test_pred > 0.5, 1, 0)
               # calculate prediction accuracy:
-              acc.train <- sum(train_pred == omicsdata[[3]])/length(train_pred)
-              acc.test <- sum(test_pred == omicsdata[[4]])/length(test_pred)
+              acc.train <- sum(train_pred == omicsdata[[3]]) / length(train_pred)
+              acc.test  <- sum(test_pred == omicsdata[[4]]) / length(test_pred)
               # store prediction metric result
               TrainMetric[idx] <- acc.train
-              TestMetric[idx] <- acc.test
-            }else if (EvalMethod == 'auc')
+              TestMetric[idx]  <- acc.test
+            } else if (EvalMethod == 'auc')
             {
               # calculate auc score
               auc.train <- pROC::auc(as.factor(omicsdata[[3]]), train_pred)
-              auc.test <- pROC::auc(as.factor(omicsdata[[4]]), test_pred)
+              auc.test  <- pROC::auc(as.factor(omicsdata[[4]]), test_pred)
               # store prediction metric result
               TrainMetric[idx] <- auc.train
-              TestMetric[idx] <- auc.test
-            }else if (EvalMethod == 'precision')
+              TestMetric[idx]  <- auc.test
+            } else if (EvalMethod == 'precision')
             {
               # binarize prediction
               train_pred <- ifelse(train_pred > 0.5, 1, 0)
-              test_pred <- ifelse(test_pred > 0.5, 1, 0)
+              test_pred  <- ifelse(test_pred > 0.5, 1, 0)
               # calculate precision
               TP_train <- sum(omicsdata[[3]] == 1 & train_pred == 1)
               FP_train <- sum(omicsdata[[3]] == 0 & train_pred == 1)
@@ -823,13 +838,13 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
               precision.test <- TP_test / (TP_test + FP_test)
               # store prediction metric result
               TrainMetric[idx] <- precision.train
-              TestMetric[idx] <- precision.test
-            }else if (EvalMethod == 'recall')
+              TestMetric[idx]  <- precision.test
+            } else if (EvalMethod == 'recall')
             {
               # binarize prediction
               train_pred <- ifelse(train_pred > 0.5, 1, 0)
-              test_pred <- ifelse(test_pred > 0.5, 1, 0)
-              # calculate precision
+              test_pred  <- ifelse(test_pred > 0.5, 1, 0)
+              # calculate recall
               TP_train <- sum(omicsdata[[3]] == 1 & train_pred == 1)
               FN_train <- sum(omicsdata[[3]] == 1 & train_pred == 0)
               recall.train <- TP_train / (TP_train + FN_train)
@@ -838,13 +853,13 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
               recall.test <- TP_test / (TP_test + FN_test)
               # store prediction metric result
               TrainMetric[idx] <- recall.train
-              TestMetric[idx] <- recall.test
-            }else if (EvalMethod == 'f1')
+              TestMetric[idx]  <- recall.test
+            } else if (EvalMethod == 'f1')
             {
               # binarize prediction
               train_pred <- ifelse(train_pred > 0.5, 1, 0)
-              test_pred <- ifelse(test_pred > 0.5, 1, 0)
-              # calculate precision
+              test_pred  <- ifelse(test_pred > 0.5, 1, 0)
+              # calculate f1
               TP_train <- sum(omicsdata[[3]] == 1 & train_pred == 1)
               TN_train <- sum(omicsdata[[3]] == 0 & train_pred == 0)
               FP_train <- sum(omicsdata[[3]] == 0 & train_pred == 1)
@@ -852,6 +867,7 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
               precision.train <- TP_train / (TP_train + FP_train)
               recall.train <- TP_train / (TP_train + FN_train)
               f1.train <- 2 * (precision.train * recall.train) / (precision.train + recall.train)
+              
               TP_test <- sum(omicsdata[[4]] == 1 & test_pred == 1)
               TN_test <- sum(omicsdata[[4]] == 0 & test_pred == 0)
               FP_test <- sum(omicsdata[[4]] == 0 & test_pred == 1)
@@ -861,113 +877,102 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
               f1.test <- 2 * (precision.test * recall.test) / (precision.test + recall.test)
               # store prediction metric result
               TrainMetric[idx] <- f1.train
-              TestMetric[idx] <- f1.test
-            }else{
-              stop('correct evaluation metric should be suuplied, selections are among 
-                 accuracy, auc, precision, recall, f1 score.')
+              TestMetric[idx]  <- f1.test
+            } else {
+              stop('correct evaluation metric should be suuplied, selections are among accuracy, auc, precision, recall, f1 score.')
             }
             
           },
           error = function(e) {
-            cat("Caught an error:", e$message, "on iteration", i, "\n")
+            vcat("Caught an error:", e$message, "on iteration", idx, "\n")
             has_error <- TRUE
           })
           
           if (has_error) {
             next  # Skip to the next iteration
           }
-          
-          
-
-          
-          
         }
+        
         # combine cross-validation result
         CVResult <- as.data.frame(cbind(TrainMetric, TestMetric))
         return(CVResult)
-      },.progress = TRUE,.options = furrr::furrr_options(seed = TRUE))
+      }, .progress = TRUE, .options = furrr::furrr_options(seed = TRUE))
       
       # aggregate CV result and select the best penalty term
       AggregatedCVResult <- Reduce("+", CVResult) / length(CVResult)
-      BestPen <- PenComb[which.max(AggregatedCVResult$TestMetric),]
-      cat('\n')
+      BestPen <- PenComb[which.max(AggregatedCVResult$TestMetric), ]
+      vcat('\n')
       for (xx in 1:length(X))
       {  
-        cat(paste0('The best penalty term for ', DataType[xx], ' after ', Kfold,'-fold cross-validation is: ', BestPen[xx]), '\n')
+        vcat(paste0('The best penalty term for ', DataType[xx], ' after ', Kfold, '-fold cross-validation is: ', BestPen[xx]), '\n')
       }
-      cat(paste0('and the best penalty term on classifier is: ', BestPen[length(X) + 1], '\n'))
-      cat(paste0('with testing ', EvalMethod,' score = ', round(AggregatedCVResult$TestMetric[which.max(AggregatedCVResult$TestMetric)],3)), '\n')
-      cat('Now running multi-omics PLS with best penalty term on the complete dataset.', '\n')
+      vcat(paste0('and the best penalty term on classifier is: ', BestPen[length(X) + 1], '\n'))
+      vcat(paste0('with testing ', EvalMethod, ' score = ', round(AggregatedCVResult$TestMetric[which.max(AggregatedCVResult$TestMetric)], 3)), '\n')
+      vcat('Now running multi-omics PLS with best penalty term on the complete dataset.', '\n')
       
-      # run single-omics PLS
+      # run multi-omics PLS
       outcome <- as.matrix(as.numeric(Y) - 1)
       Ws <- getRobustWeightsMultiBinary(X, 
                                         outcome, 
-                                        SubsamplingPercent= SubsamplingPercent,
+                                        SubsamplingPercent = SubsamplingPercent,
                                         Between_Discriminate_Ratio = BDRatio,
                                         LambdaBetween = BestPen[1:length(X)], 
-                                        LambdaPheno = BestPen[length(X)+1], 
+                                        LambdaPheno = BestPen[length(X) + 1], 
                                         SubsamplingNum = subSampNum, 
                                         CCcoef = ScalingFactor,
-                                        ncomp_pls = ncomp_pls, EvalClassifier = FALSE)
+                                        ncomp_pls = ncomp_pls,
+                                        EvalClassifier = FALSE)
       
       # construct global network module
       featurelabel <- unlist(lapply(X, colnames))
       Abar <- getAbar(Ws, FeatureLabel = featurelabel)
-      
-      
     }
-    
-    
   }
-
- 
+  
   # save the cross-validation result 
   PenComb <- as.data.frame(PenComb)
   colnames(PenComb) <- paste0('l', 1:ncol(PenComb))
   AggregatedCVResultPen <- as.data.frame(cbind(PenComb, AggregatedCVResult))
   utils::write.csv(AggregatedCVResultPen, paste0(saving_dir, '/', 'CVResult.csv'))
+  
   # save cross-validation data
   save(folddata, file = paste0(saving_dir, '/', 'CVFold.Rdata'))
+  
   # save global network result
   globalNetwork <- list(AdjacencyMatrix = Abar, Data = X, Phenotype = Y)
-  save(globalNetwork,
-       file = paste0(saving_dir, '/', 'globalNetwork.Rdata'))
+  save(globalNetwork, file = paste0(saving_dir, '/', 'globalNetwork.Rdata'))
   
+  vcat("\n")
+  vcat("--------------------------------------------------\n")
+  vcat(">> Now starting network clustering...\n")
+  vcat("--------------------------------------------------\n")
+  vcat("\n")
   
-
-  
-  cat("\n")
-  cat("--------------------------------------------------\n")
-  cat(">> Now starting network clustering...\n")
-  cat("--------------------------------------------------\n")
-  cat("\n")
-  #if (cluster == TRUE)
-  #{
-    # run hierarchical clustering algorithm
+  # run hierarchical clustering algorithm
   OmicsModule <- getOmicsModules(Abar, CutHeight = CutHeight, PlotTree = FALSE)
-  #}else{
-  #  cat(">> Cluster = FALSE, skip clustering...\n")
-  #  OmicsModule <- list(1:nrow(Abar))
-  #}  
+  
   # store feature label
   AbarLabel <- unlist(lapply(X, colnames))
+  
   # calculate correlation matrix
   bigCor2 <- stats::cor(do.call(cbind, X))
+  
   # Combined data
   combined_data <- do.call(cbind, X)
   
-  cat('Clustering completed...')
-  cat("\n")
-  cat("\n")
-  cat("--------------------------------------------------\n")
-  cat(">> Now starting network pruning and summarization score extraction...\n")
-  cat("--------------------------------------------------\n")
-  cat("\n")
+  vcat('Clustering completed...')
+  vcat("\n")
+  vcat("\n")
+  vcat("--------------------------------------------------\n")
+  vcat(">> Now starting network pruning and summarization score extraction...\n")
+  vcat("--------------------------------------------------\n")
+  vcat("\n")
+  
   # filter out network modules with insufficient number of nodes
   module_length <- unlist(lapply(OmicsModule, length))
   network_modules <- OmicsModule[module_length > min_size]
-  cat(paste0('There are ', length(network_modules), ' network modules before pruning'))
+  vcat(paste0('There are ', length(network_modules), ' network modules before pruning'))
+  
   # define data type
   feature_size <- unlist(lapply(X, ncol))
   types <- unlist(purrr::map((1:length(feature_size)), function(x){
@@ -980,63 +985,68 @@ fastAutoSmCCNet <- function(X, Y, AdjustedCovar = NULL, preprocess = FALSE, Kfol
   }
   
   # extract pruned network modules
-  for(i in 1:length(network_modules))
+  for (i in 1:length(network_modules))
   {
-    cat('\n','Now extracting subnetwork for network module ', i,'\n')
+    vcat('\n', 'Now extracting subnetwork for network module ', i, '\n')
     # define subnetwork
-    abar_sub <- Abar[network_modules[[i]],network_modules[[i]]]
-    cor_sub <- bigCor2[network_modules[[i]],network_modules[[i]]]
+    abar_sub <- Abar[network_modules[[i]], network_modules[[i]]]
+    cor_sub <- bigCor2[network_modules[[i]], network_modules[[i]]]
     # prune network module
-    cat(paste0('Network module ', i, ' Result:'))
-    networkPruning(Abar = abar_sub,CorrMatrix = cor_sub, type = types[network_modules[[i]]], data = combined_data[,network_modules[[i]]], 
-                                     Pheno = as.numeric(Y), ModuleIdx = i, min_mod_size = min_size, 
-                                     max_mod_size = min(nrow(abar_sub), max_size), method = summarization, 
-                                     saving_dir = saving_dir)
-  
+    vcat(paste0('Network module ', i, ' Result:'))
+    networkPruning(Abar = abar_sub,
+                   CorrMatrix = cor_sub,
+                   type = types[network_modules[[i]]],
+                   data = combined_data[, network_modules[[i]]], 
+                   Pheno = as.numeric(Y),
+                   ModuleIdx = i,
+                   min_mod_size = min_size, 
+                   max_mod_size = min(nrow(abar_sub), max_size),
+                   method = summarization, 
+                   saving_dir = saving_dir)
   }
- 
-  cat("\n")
-  cat("\n")
-  cat("************************************\n")
-  cat("*   Execution Finished!            *\n")
-  cat("*   Automated SmCCNet Completed!   *\n")
-  cat("************************************\n")
-  cat("\n")
   
-  cat("There are 4 files stored in the local directory: \n")
-  cat("1. CVResult.csv: cross-validation result. \n")
-  cat("2. CVFold.Rdata: omics and phenotype data splited into different folds. \n")
-  cat("3. globalNetwork.Rdata: global network adjacency matrix, omics data, phenotype. \n")
-  cat("4. size_a_net_b.Rdata: subnetworks result file after clustering and network pruning. \n")
+  vcat("\n")
+  vcat("\n")
+  vcat("************************************\n")
+  vcat("*   Execution Finished!            *\n")
+  vcat("*   Automated SmCCNet Completed!   *\n")
+  vcat("************************************\n")
+  vcat("\n")
   
+  vcat("There are 4 files stored in the local directory: \n")
+  vcat("1. CVResult.csv: cross-validation result. \n")
+  vcat("2. CVFold.Rdata: omics and phenotype data splited into different folds. \n")
+  vcat("3. globalNetwork.Rdata: global network adjacency matrix, omics data, phenotype. \n")
+  vcat("4. size_a_net_b.Rdata: subnetworks result file after clustering and network pruning. \n")
   
+  vcat("SUBNETWORK RESULT FILE CONTAINS:\n")
+  vcat("1. correlation_sub: correlation matrix for the subnetwork.\n")
+  vcat("2. M: adjacency matrix for the subnetwork.\n")
+  vcat("3. omics_corelation_data: individual molecular feature correlation with phenotype.\n")
+  vcat("4. pc_correlation: first 3 PCs correlation with phenotype.\n")
+  vcat("5. pc_loading: principal component loadings.\n")
+  vcat("6. pca_x1_score: principal component score and phenotype data.\n")
+  vcat("7. mod_size: number of molecular features in the subnetwork.\n")
+  vcat("8. sub_type: type of feature for each molecular features.\n")
+  vcat("\n")
   
-  cat("SUBNETWORK RESULT FILE CONTAINS:\n")
-  cat("1. correlation_sub: correlation matrix for the subnetwork.\n")
-  cat("2. M: adjacency matrix for the subnetwork.\n")
-  cat("3. omics_corelation_data: individual molecular feature correlation with phenotype.\n")
-  cat("4. pc_correlation: first 3 PCs correlation with phenotype.\n")
-  cat("5. pc_loading: principal component loadings.\n")
-  cat("6. pca_x1_score: principal component score and phenotype data.\n")
-  cat("7. mod_size: number of molecular features in the subnetwork.\n")
-  cat("8. sub_type: type of feature for each molecular features.\n")
-  cat("\n")
+  vcat("NOTE:\n")
+  vcat("1. The results are saved in the user-specified directory.\n")
+  vcat("   If not specified, use 'tempdir()' to find the current temporary working directory.\n")
+  vcat("\n")
+  vcat("2. The results are in 'size_a_net_b.Rdata', where:\n")
+  vcat("   'a' = network size, 'b' = module number.\n")
+  vcat("\n")
+  vcat("3. To prevent overwriting result files across projects, rename the result file after each run.\n")
+  vcat("\n")
+  vcat("4. Subnetwork visualization can be done through shinyApp or cytoscape. Please refer to the network visualization section in the multi-omics or single-omics vignette for more detail. For the Shiny app, visit: https://smccnet.shinyapps.io/smccnetnetwork/\n")
+  vcat("\n")
+  vcat("************************************\n")
   
-  cat("NOTE:\n")
-  cat("1. The results are saved in the user-specified directory.\n")
-  cat("   If not specified, use 'getwd()' to find the current working directory.\n")
-  cat("\n")
-  cat("2. The results are in 'size_a_net_b.Rdata', where:\n")
-  cat("   'a' = network size, 'b' = module number.\n")
-  cat("\n")
-  cat("3. To prevent overwriting result files across projects, rename the result file after each run.\n")
-  cat("\n")
-  cat("4. Subnetwork visualization can be done through shinyApp or cytoscape. Please refer to the network visualization section in the multi-omics or single-omics vignette for more detail. For the Shiny app, visit: https://smccnet.shinyapps.io/smccnetnetwork/\n")
-  cat("\n")
-  cat("************************************\n")
-  return(list(AdjacencyMatrix = Abar, Data = X, ClusteringModules = OmicsModule, CVResult = AggregatedCVResult))
-  
-  
-  
+  return(list(
+    AdjacencyMatrix = Abar,
+    Data = X,
+    ClusteringModules = OmicsModule,
+    CVResult = AggregatedCVResult
+  ))
 }
-

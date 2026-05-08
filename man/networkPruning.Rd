@@ -15,7 +15,8 @@ networkPruning(
   max_mod_size,
   damping = 0.9,
   method = "NetSHy",
-  saving_dir
+  saving_dir = tempdir(),
+  verbose = FALSE
 )
 }
 \arguments{
@@ -45,6 +46,8 @@ should be an integer from 1 to the largest possible size of the subnetwork, and 
 \item{method}{Selection between NetSHy' and 'PCA', specifying the network summarization method used for network pruning, default is set to NetSHy.}
 
 \item{saving_dir}{User-defined directory to store pruned subnetwork.}
+
+\item{verbose}{Logical; if TRUE, print progress messages during execution, otherwise run silently.}
 }
 \value{
 A file stored in the user-defined directory, which contains the
@@ -62,18 +65,23 @@ Prunes subnetworks with network pruning algorithm (see multi-omics vignette for 
 The final subnetwork is an .Rdata file with a name 'size_m_net_ind.Rdata', where \eqn{m} is the final pruned network size, and ind is the index of the subnetwork module after hierarchical clustering.
 }
 \examples{
-library(SmCCNet)
+
+\donttest{library(SmCCNet)
 set.seed(123)
 w <- rnorm(20)
 w <- w/sqrt(sum(w^2))
+X1 <- matrix(rnorm(1000,0,1),nrow = 50)
+Y <- matrix(rnorm(50,0,1),nrow = 50)
 labels <- paste0('feature_', 1:20)
+colnames(X1) <- labels
 abar <- getAbar(w, FeatureLabel = labels)
 modules <- getOmicsModules(abar, CutHeight = 0.1)
-x <- X1[ ,seq_len(20)]
+x <- X1
 corr <- stats::cor(x)
+type <- c(rep(1,20))
 # display only example
-# networkPruning(abar, corr, data = x, Pheno = Y,
-# ModuleIdx = 1,  min_mod_size = 3, max_mod_size = 10, method = 'NetSHy', saving_dir = 
-# )
+networkPruning(abar, corr, data = x, Pheno = Y, type = type,
+ ModuleIdx = 1,  min_mod_size = 3, max_mod_size = 10, method = 'NetSHy', saving_dir = tempdir()
+ )}
 
 }

@@ -16,7 +16,7 @@ vignette: >
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}{inputenc} 
 output: 
-  rmarkdown::pdf_document:
+  bookdown::pdf_document2:
     toc: true
     toc_depth: 2
     number_sections: true
@@ -227,8 +227,8 @@ list_cols <- as.list(as.data.frame(penSelect))
 PenExpand <- do.call(expand.grid, list_cols)
 
 # set a CV directory.
-CVDir <- "Example3foldCV/" 
-dir.create(CVDir)
+CVDir <- file.path(tempdir(),"Example3foldCV")
+dir.create(CVDir,showWarnings = FALSE)
 ```
 
 ### Create test and training data sets. 
@@ -544,17 +544,17 @@ ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) +
   theme(plot.title.position = "plot")
 ```
 
-```{r adjheatmap, echo = FALSE, warning = FALSE, message = FALSE, out.width="100%", fig.cap = "Adjacency matrix heatmap for subnetwork features."}
+```{r adjheatmap, echo = FALSE, warning = FALSE, message = FALSE, out.width="100%", fig.cap = "Similarity matrix heatmap for subnetwork features."}
 ###### Correlation heatmap
 melted_cormat <- melt(as.matrix(M))
 ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
   geom_tile() +
-   labs(title = "Adjacency Matrix Heatmap of Network Features") + 
+   labs(title = "Similarity Matrix Heatmap of Network Features") + 
   theme(plot.title.position = "plot")
 
 ```
 
-Figure \ref{fig:loadings1} is the visualization of the PC loadings that contribution of each molecular features to the first NetSHy PC. In addition, there are two network heatmaps based on (1) correlation matrix (Figure \ref{fig:corheatmap}), and (2) adjacency matrix (Figure \ref{fig:adjheatmap}). Based on the summarization table, genes 1,2,6,7, and miRNA 2 have relatively high correlation with respect to phenotype. The PC loadings also confirm that genes 6,7, and miRNA 2 and generally have higher PC contribution. From the correlation heatmap, we do not observe associations between molecular features, but for the adjacency matrix heatmap, we observe the higher connections between genes 6,7 and miRNA 2. We also recommend experimenting more PCs (up to 3) with Figure \ref{fig:loadings1} to demonstrate the contribution of molecular features to each PC.
+Figure \ref{fig:loadings1} is the visualization of the PC loadings that contribution of each molecular features to the first NetSHy PC. In addition, there are two network heatmaps based on (1) correlation matrix (Figure \ref{fig:corheatmap}), and (2) similarity matrix (Figure \ref{fig:adjheatmap}). Based on the summarization table, genes 1,2,6,7, and miRNA 2 have relatively high correlation with respect to phenotype. The PC loadings also confirm that genes 6,7, and miRNA 2 and generally have higher PC contribution. From the correlation heatmap, we do not observe associations between molecular features, but for the similarity matrix heatmap, we observe the higher connections between genes 6,7 and miRNA 2. We also recommend experimenting more PCs (up to 3) with Figure \ref{fig:loadings1} to demonstrate the contribution of molecular features to each PC.
 
 ## Step VI: Visualize network module
 
@@ -593,7 +593,7 @@ createNetworkFromIgraph(graph,"multi_omics_network")
 ```
 
 ```{r netPlot, out.width="100%", fig.cap = "Pruned module 1. The strength of the node connections is indicated by the thickness of edges. Red edges and blue edges are for negative and positive connections respectively. Red node represents genes, and blue node represent miRNAs.", echo = FALSE}
-knitr::include_graphics("../vignettes/figures/MultiOmicsNet.png")
+knitr::include_graphics("figures/MultiOmicsNet.png")
 ```
 
 
@@ -655,8 +655,8 @@ list_cols <- as.list(as.data.frame(penSelect))
 PenExpand <- do.call(expand.grid, list_cols)
 
 # set a CV directory.
-CVDir <- "Example3foldCVTune/" 
-dir.create(CVDir)
+CVDir <- file.path(tempdir(),"Example3foldCVTune")
+dir.create(CVDir,showWarnings = FALSE)
 ```
 
 Same as above, we split the original data into K different folds for evaluation: 
@@ -826,7 +826,7 @@ Scaling constants in the grid search were evaluated to identify which values yie
 \begin{eqnarray}
 \begin{split}
 \label{eq:scaling}
-& (a_{1,2}, b_1, b_2)\!  =\! \arg\max_{\tilde a_{1,2}, \tilde b_1, \tilde c_2} \frac{|trainCC - testCC|}{|testCC|}	\end{split}
+& (a_{1,2}, b_1, b_2)\!  =\! \arg\min_{\tilde a_{1,2}, \tilde b_1, \tilde b_2} \frac{|trainCC - testCC|}{|testCC|}	\end{split}
 \end{eqnarray}
 
 
@@ -979,8 +979,8 @@ list_cols <- as.list(as.data.frame(penSelect))
 PenExpand <- do.call(expand.grid, list_cols)
 
 # set a CV directory.
-CVDir <- "Example3foldCVBinary/" 
-dir.create(CVDir)
+CVDir <- file.path(tempdir(),"Example3foldCVBinary")
+dir.create(CVDir,showWarnings = FALSE)
 ```
 
 

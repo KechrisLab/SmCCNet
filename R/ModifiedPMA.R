@@ -145,7 +145,7 @@ myMultiCCA <- function(xlist, penalty=NULL, ws=NULL, niter=25,
         crit.old <- crit
         crit <- myGetCrit(xlist, ws, pair_CC, CCcoef)
         storecrits <- c(storecrits,crit)
-        if(trace) cat(curiter, fill=FALSE)
+        if(trace) message(curiter)
         curiter <- curiter+1
         for(i in seq_len(K)){
           ws[[i]] <- myUpdateW(xlist, i, K, penalty[i], ws, type[i], ws.final,
@@ -248,7 +248,7 @@ myMultiCCA <- function(xlist, penalty=NULL, ws=NULL, niter=25,
         crit.old <- crit
         crit <- myGetCrit(xlist, ws, pair_CC, CCcoef)
         storecrits <- c(storecrits,crit)
-        if(trace) cat(curiter, fill=FALSE)
+        if(trace) message(curiter)
         curiter <- curiter+1
         for(i in seq_len(K-1)){
           ws[[i]] <- myUpdateW(xlist, i, K, penalty[i], ws, type[i], ws.final,
