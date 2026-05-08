@@ -1,0 +1,57 @@
+# Evaluation of Binary Classifier with Different Evaluation Metrics
+
+Evaluate binary classifier's performance with respect to user-selected
+metric (accuracy, auc score, precision, recall, f1 score) for binary
+phenotype.
+
+## Usage
+
+``` r
+classifierEval(
+  obs,
+  pred,
+  EvalMethod = "accuracy",
+  BinarizeThreshold = 0.5,
+  print_score = TRUE
+)
+```
+
+## Arguments
+
+- obs:
+
+  Observed phenotype, vector consists of 0, 1.
+
+- pred:
+
+  Predicted probability of the phenotype, vector consists of any value
+  between 0 and 1
+
+- EvalMethod:
+
+  Binary classifier evaluation method, should be one of the following:
+  'accuracy' (default), 'auc', 'precision', 'recall', and 'f1'.
+
+- BinarizeThreshold:
+
+  Cutoff threshold to binarize the predicted probability, default is set
+  to 0.5.
+
+- print_score:
+
+  Whether to print out the evaluation score, default is set to `TRUE`.
+
+## Value
+
+An evaluation score corresponding to the selected metric.
+
+## Examples
+
+``` r
+# simulate observed binary phenotype
+obs <- rbinom(100,1,0.5)
+# simulate predicted probability
+pred <- runif(100, 0,1)
+# calculate the score
+pred_score <- classifierEval(obs, pred, EvalMethod = 'f1', print_score = FALSE)
+```
